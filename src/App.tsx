@@ -1,4 +1,5 @@
 import { DarkModeToggle } from '@/components/DarkModeToggle'
+import QuizDemo from './QuizDemo'
 
 export default function App() {
   return (
@@ -8,12 +9,10 @@ export default function App() {
         <DarkModeToggle />
       </header>
 
-      {/* Main Content - Fullscreen */}
-      <div className="min-h-screen w-screen flex items-center justify-center">
-        <h1 className="text-6xl font-bold">
-          Hello Learning
-        </h1>
-      </div>
+      {/* Main Content */}
+      <main className="pt-16">
+        <QuizDemo />
+      </main>
     </>
   )
 }
