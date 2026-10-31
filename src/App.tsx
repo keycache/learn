@@ -1,5 +1,5 @@
 import { DarkModeToggle } from '@/components/DarkModeToggle'
-import QuizDemo from './QuizDemo'
+import AppNavigator from './AppNavigator'
 
 export default function App() {
   return (
@@ -10,8 +10,8 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className="pt-16">
-        <QuizDemo />
+      <main>
+        <AppNavigator />
       </main>
     </>
   )
