@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env.local
+.vscode/
+.idea/
+package-lock.json
+yarn.lock
+*.swp
+*.swo
