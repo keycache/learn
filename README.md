@@ -20,3 +20,12 @@ npm run build
 ```bash
 npm run deploy
 ```
+
+## Design & Components
+
+**Important:** All components must support light and dark modes. See [Design Guidelines](./docs/DESIGN_GUIDELINES.md) for requirements and best practices.
+
+- Use `dark:` Tailwind prefix for all dark mode colors
+- Test components in both light and dark modes
+- Refer to existing components for color pair examples
+

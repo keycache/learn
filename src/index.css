@@ -1,1 +1,33 @@
 @import 'tailwindcss';
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply m-0 p-0;
+  }
+
+  html {
+    background-color: white;
+    color: rgb(17 24 39);
+    transition-property: color, background-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    background-color: rgb(3 7 18);
+    color: rgb(241 245 250);
+  }
+
+  h1 {
+    color: rgb(79 70 229);
+  }
+
+  html.dark h1 {
+    color: rgb(129 140 248);
+  }
+}
