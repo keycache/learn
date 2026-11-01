@@ -542,3 +542,174 @@ const log = {
 - `src/utils/frontmatterParser.ts` - Fixed regex + added JSON array parsing
 - `src/components/navigation/TopicIntro.tsx` - Removed debug logs
 - `public/data/categories/spoken-languages/french/numbers/lesson_*.md` - Moved from src/ to public/
+
+---
+
+# UI Styling & Design System - Learnings
+
+## Problem Statement
+
+After completing the core app functionality, the UI had excessive visual elements that made it feel cluttered:
+- Multiple nested Card containers with borders and shadows
+- Rounded corners on tabs creating an old-fashioned look
+- Tabs wrapping to multiple lines when content was limited
+- Green "viewed" indicator dots on lesson tabs adding visual noise
+- Quiz explanation section positioned above buttons, causing layout shift
+- Light mode colors appearing incorrect (too dark, poor contrast)
+
+**Goal:** Create a flat, modern design by removing unnecessary containers and fixing color consistency across light/dark modes.
+
+## Design Decisions & Implementation
+
+### 1. Removing Card Containers (Flat Design)
+
+**Approach:** Systematically removed shadcn/ui Card components and replaced with flat divs.
+
+**Files changed:**
+- `LessonView.tsx` - Removed 3 Card wrappers (header, objectives, content)
+- `TopicIntro.tsx` - Removed 4 Card wrappers (about this topic x2, learning tips, quiz content)
+- `LessonTabs.tsx` - Removed Card wrapper around tab content
+- `QuestionCard.tsx` - Removed entire bordered div, converted to Fragment
+
+**Result:** Cleaner visual hierarchy, reduced visual depth, modern minimal aesthetic
+
+**Key learning:** When removing Card wrappers, don't just remove the border - remove the entire component (including padding and structure). This forces you to manually adjust spacing, which often reveals that less is more.
+
+### 2. Tab Layout & Text Overflow
+
+**Problem:** Tabs were wrapping to multiple lines and text was being cut off.
+
+**Solution:** Three CSS properties working together:
+```tsx
+// Fixed tab container
+className="flex" // Changed from flex-wrap to single line
+// Fixed tab items
+className="flex-1 min-w-0 truncate" // Distribute width, allow shrinking, truncate text
+```
+
+**Key learning:** To truncate text in flexbox:
+- `flex-1` - Makes item take available space
+- `min-w-0` - **Critical!** Allows flexbox to shrink item below its content width
+- `truncate` - Applies `text-overflow: ellipsis` + `overflow: hidden` + `white-space: nowrap`
+
+Without `min-w-0`, flexbox won't shrink items below their minimum content width, and truncation won't work.
+
+### 3. Removed Viewed Indicator Dots
+
+**Decision:** The green checkmark dots on viewed lessons added visual clutter without adding value. Viewing history can be tracked server-side if needed.
+
+**Result:** Cleaner tab appearance, less visual noise
+
+### 4. Fixed Explanation Box Positioning
+
+**Problem:** Quiz explanation appeared above buttons, causing page content to jump when shown/hidden.
+
+**Solution:** Moved explanation below buttons using `mt-8` (margin-top).
+
+**Result:** Stable layout - buttons stay in place, explanation appears below
+
+### 5. Color System: CSS Variables vs. Hardcoded Colors
+
+**Initial mistake:** Used hardcoded Tailwind color classes:
+```tsx
+// ❌ This didn't work:
+className="text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800"
+```
+
+**Why it failed:**
+- Tailwind's JIT compiler scans content files for class names
+- With only a safelist of 4 classes defined, most colors weren't being generated
+- Dev server changes weren't picked up because Vite's cache wasn't invalidating properly
+- The CSS was never built for these classes
+
+**Solution:** Use the design system's CSS variables:
+```tsx
+// ✅ This works:
+className="text-muted-foreground bg-background border-border"
+```
+
+**Why this works:**
+1. CSS variables are **defined in tailwind.config.ts** and guaranteed to exist
+2. Variables automatically handle light/dark mode switching via `@media (prefers-color-scheme)`
+3. No dependency on JIT compilation or safelist
+4. More maintainable - color changes in one place (tailwind.config.ts)
+
+**Files changed:**
+- `Quiz.tsx` - Previous/Next buttons and explanation box now use CSS variables
+
+### Key Learning: CSS Variables for Theme Consistency
+
+When building theme-aware UIs:
+- ❌ Don't hardcode Tailwind color classes (gray-600, slate-700, etc.)
+- ✅ Do use design system CSS variables (muted-foreground, background, border)
+- ❌ Don't rely on Tailwind's JIT to pick up every class you might use
+- ✅ Do define and extend core colors in tailwind.config.ts
+
+**Benefit:** Changes to colors, light/dark mode switching, and theme variations all happen automatically without touching component code.
+
+## Dev Server Issues Encountered
+
+### Issue: npm Command Not Found
+
+**Problem:** After restarting the dev server, `npm` and `node` commands weren't in PATH for detached async processes.
+
+**Root cause:** Detached bash processes don't inherit the full shell environment and PATH variables.
+
+**Solution:** Use explicit full paths for node/npm:
+```bash
+/Users/akashpatki/.nvm/versions/node/v24.21.0/bin/node \
+  /Users/akashpatki/Documents/kash/code/learn/node_modules/vite/bin/vite.js
+```
+
+**Key learning:** For long-lived processes (dev servers, watchers), either:
+1. Ensure you're running in a shell with proper PATH
+2. Use explicit full paths
+3. Or use a process manager that handles environment setup
+
+### Issue: CSS Changes Not Reflecting
+
+**Problem:** Made changes to Quiz.tsx but browser still showed old colors.
+
+**Root cause:** 
+1. Initially used hardcoded Tailwind classes not in safelist
+2. Vite's JIT wasn't generating CSS for those classes
+3. Browser was caching old styles
+
+**Solution:**
+1. Switched to CSS variables that are guaranteed to exist
+2. Performed hard refresh (Cmd+Shift+R)
+3. Verified dev server was running and serving latest code
+
+## Files Modified
+
+- `src/components/learning/LessonView.tsx` - Removed Card wrappers
+- `src/components/navigation/TopicIntro.tsx` - Removed Card wrappers  
+- `src/components/learning/LessonTabs.tsx` - Fixed tab layout, removed Card
+- `src/components/learning/QuestionCard.tsx` - Removed border div
+- `src/components/learning/Quiz.tsx` - Fixed button colors and explanation styling
+
+## Takeaways
+
+1. **Flat design is powerful** - Removing unnecessary containers creates a more modern, focused interface
+2. **Flexbox truncation needs `min-w-0`** - This is a common gotcha with flex layouts
+3. **CSS variables > hardcoded colors** - Use your design system's defined colors, not arbitrary Tailwind classes
+4. **Dev server PATH issues** - Use full paths for detached processes or ensure proper environment setup
+5. **Test theme changes in browser** - Color issues are impossible to debug without seeing the actual rendered output
+
+## Before & After
+
+**Before:**
+- Multiple nested Card containers with borders
+- Dark navy buttons in light mode
+- Explanation box with dark navy background
+- Rounded tab corners
+- Wrapping tabs
+- Green viewed indicators
+
+**After:**
+- Flat, minimal design with no unnecessary containers
+- Light gray buttons matching light mode aesthetic
+- White explanation box with gray text
+- Flat tab edges matching modern design
+- Single-line tabs with text truncation
+- Clean, focused interface

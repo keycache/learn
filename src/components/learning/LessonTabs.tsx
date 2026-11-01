@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Lesson, MarkdownContent } from '../../types/learning';
-import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
+import { loadLessonContent } from '../../utils/dataLoader';
 import LessonView from './LessonView';
 
 interface LessonTab {
@@ -95,7 +95,6 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
       // Load content
       setLoadingLessonId(tabId);
       try {
-        const { loadLessonContent } = await import('../../utils/dataLoader');
         const content = await loadLessonContent(
           categoryId,
           subcategoryId,
@@ -137,7 +136,7 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
     <div className="space-y-4">
       {/* Tab Navigation */}
       <div
-        className="flex flex-wrap gap-2 border-b border-muted bg-card rounded-t-lg p-4 overflow-x-auto"
+        className="flex gap-2 border-t border-muted bg-card p-4"
         role="tablist"
       >
         {allTabs.map((tab) => {
@@ -152,7 +151,7 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
               role="tab"
               aria-selected={isActive}
               aria-controls={`${tab.id}-content`}
-              className={`relative flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all whitespace-nowrap
+              className={`relative flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all whitespace-nowrap flex-1 min-w-0
                 ${
                   isActive
                     ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-md'
@@ -160,12 +159,7 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
                 }
               `}
             >
-              <span>{tab.label}</span>
-
-              {/* Viewed indicator */}
-              {isLessonWithView && !isActive && (
-                <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-              )}
+              <span className="truncate">{tab.label}</span>
 
               {/* Loading indicator */}
               {loadingLessonId === tab.id && (
@@ -177,29 +171,27 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
       </div>
 
       {/* Tab Content */}
-      <Card className="border-t-0 rounded-t-none bg-card border-border">
-        <CardContent className="pt-6">
-          {isLessonTab && currentLesson ? (
-            <LessonView
-              lesson={currentLesson}
-              content={lessonContents.get(activeTabId) || ''}
-              categoryId={categoryId}
-              subcategoryId={subcategoryId}
-              topicId={topicId}
-              isLoading={loadingLessonId === activeTabId}
-              error={lessonErrors.get(activeTabId)}
-            />
-          ) : activeTab?.type === 'quiz' && renderQuizContent ? (
-            <div id={`${activeTabId}-content`} role="tabpanel">
-              {renderQuizContent()}
-            </div>
-          ) : (
-            <div className="text-center text-muted-foreground py-8">
-              <p>No content available</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="bg-card border-t border-border pt-6">
+        {isLessonTab && currentLesson ? (
+          <LessonView
+            lesson={currentLesson}
+            content={lessonContents.get(activeTabId) || ''}
+            categoryId={categoryId}
+            subcategoryId={subcategoryId}
+            topicId={topicId}
+            isLoading={loadingLessonId === activeTabId}
+            error={lessonErrors.get(activeTabId)}
+          />
+        ) : activeTab?.type === 'quiz' && renderQuizContent ? (
+          <div id={`${activeTabId}-content`} role="tabpanel">
+            {renderQuizContent()}
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground py-8">
+            <p>No content available</p>
+          </div>
+        )}
+      </div>
 
       {/* Progress Summary */}
       {lessons.length > 0 && (

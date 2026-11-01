@@ -170,21 +170,13 @@ export function Quiz({
         />
       </div>
 
-      {/* Explanation (shown after submission) */}
-      {submitted && currentQuestion.explanation && (
-        <div className="mb-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-200">Explanation:</p>
-          <p className="text-sm text-blue-800 dark:text-blue-300 mt-1">{currentQuestion.explanation}</p>
-        </div>
-      )}
-
       {/* Buttons */}
       <div className="flex gap-3 justify-between">
         <div className="flex gap-2">
           <button
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             Previous
@@ -193,7 +185,7 @@ export function Quiz({
           <button
             onClick={handleNext}
             disabled={currentIndex === totalQuestions - 1}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
             <ChevronRight className="w-4 h-4" />
@@ -226,6 +218,14 @@ export function Quiz({
           )}
         </div>
       </div>
+
+      {/* Explanation (shown after submission) */}
+      {submitted && currentQuestion.explanation && (
+        <div className="mt-8 p-4 bg-background border border-border rounded-lg">
+          <p className="text-sm font-medium text-foreground">Explanation:</p>
+          <p className="text-sm text-muted-foreground mt-1">{currentQuestion.explanation}</p>
+        </div>
+      )}
 
       {/* Keyboard Navigation Info */}
       <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">

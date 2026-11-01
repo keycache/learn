@@ -194,22 +194,37 @@
   - [x] Backward compatible: old topics without lessons still work ✓
   - [x] New topics with lessons show full lesson interface ✓
 
-#### Stage 7: Documentation & Polish
-- [ ] Update IMPLEMENTATION.md with new structure
-  - [ ] Add new Component Architecture diagram
-  - [ ] Update Key Types section
-  - [ ] Add lesson loader functions documentation
-- [ ] Create LESSON_GUIDE.md
+#### Stage 7: Documentation & Polish ⏸️ PAUSED
+**Status:** Paused - Feature is complete and working. Documentation deferred.
+
+**Completed in Stage 6:**
+- ✅ Example lesson files created (lesson_1.md, lesson_2.md, lesson_3.md in French/Numbers)
+- ✅ All frontmatter fields demonstrated in real lessons
+- ✅ Extended markdown syntax showcased (tables, code blocks, formatting)
+
+**Deferred for Later:**
+- [ ] Update IMPLEMENTATION.md with new component diagrams
+- [ ] Update Key Types section with lesson-related types
+- [ ] Add lesson loader functions documentation
+- [ ] Create LESSON_GUIDE.md - comprehensive lesson writing guide
   - [ ] How to write lesson markdown files
   - [ ] YAML frontmatter spec with examples
   - [ ] Markdown syntax guide (extended features)
   - [ ] Best practices for lesson structure
 - [ ] Create migration guide for existing topics
   - [ ] Step-by-step instructions to convert topics to folder structure
-- [ ] Add example lesson files
-  - [ ] Complete example: `src/data/categories/spoken-languages/french/basics/lesson_1.md`
-  - [ ] Show all frontmatter fields
-  - [ ] Demonstrate extended markdown syntax
+  - [ ] Checklist for validation
+
+**Why Paused:**
+Feature is production-ready. Documentation can be added incrementally as new lessons are created or new topics are migrated. No blocking issues for current functionality.
+
+**Resume Requirements:**
+To resume Stage 7:
+1. Feature works end-to-end: ✅ YES
+2. All components created: ✅ YES (LessonView, LessonTabs, LessonProgressTracker)
+3. Integration complete: ✅ YES (TopicIntro shows lessons)
+4. Tests passing: ✅ YES
+5. Browser testing done: ✅ YES (lessons displaying correctly)
 
 #### Architecture Decision Log
 - ✅ Multiple lessons per topic (not one-to-one)

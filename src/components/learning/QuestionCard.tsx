@@ -17,7 +17,7 @@ export function QuestionCard({
   const isMultipleChoice = question.correctAnswers.length > 1;
 
   return (
-    <div className="bg-card text-card-foreground rounded-lg border border-border p-6 shadow-sm">
+    <>
       {/* Question Text */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-card-foreground">
@@ -76,6 +76,6 @@ export function QuestionCard({
           Attempts: {progress.attempts} | Correct: {progress.attempts - progress.wrong}
         </div>
       )}
-    </div>
+    </>
   );
 }

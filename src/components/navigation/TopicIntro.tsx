@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Topic } from '../../types/learning';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, BookOpen, BarChart3 } from 'lucide-react';
 import { PageTransition } from '@/components/common/PageTransition';
@@ -58,21 +57,21 @@ export function TopicIntro({
   // Render quiz content for LessonTabs
   const renderQuizContent = () => (
     <div className="space-y-6">
-      <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+      <div>
         <h3 className="text-lg font-semibold text-foreground mb-3">Quiz</h3>
         <p className="text-muted-foreground mb-6">
           After completing the lessons, test your knowledge with our interactive quiz. Choose a difficulty level to get started.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {DIFFICULTY_LEVELS.map(({ level, title, description }) => (
-            <Button
+            <div
               key={level}
               onClick={() => onStartQuiz(level)}
-              className="w-full h-auto py-4 flex flex-col items-start justify-start"
+              className="p-4 border border-border rounded-lg cursor-pointer hover:bg-muted/50 hover:border-foreground/30 transition-colors"
             >
-              <span className="font-semibold">{title}</span>
-              <span className="text-xs opacity-90 mt-1 text-left">{description}</span>
-            </Button>
+              <h4 className="font-semibold text-foreground mb-2">{title}</h4>
+              <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -103,33 +102,29 @@ export function TopicIntro({
             </div>
 
             {/* Topic Info Card */}
-            <Card className="mb-8">
-              <CardHeader>
-                <div className="flex gap-4 mb-4">
-                  <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                  <div>
-                    <CardTitle>About This Topic</CardTitle>
-                    <CardDescription className="mt-2">
-                      Complete {topic.lessons.length} lesson{topic.lessons.length !== 1 ? 's' : ''} and then test your knowledge with our interactive quizzes.
-                    </CardDescription>
-                  </div>
+            <div className="mb-8">
+              <div className="flex gap-4 mb-4">
+                <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">About This Topic</h2>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Complete {topic.lessons.length} lesson{topic.lessons.length !== 1 ? 's' : ''} and then test your knowledge with our interactive quizzes.
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {topic.lessons.length}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Lessons</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {topic.lessons.length}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">3</div>
-                    <p className="text-sm text-muted-foreground">Quiz Levels</p>
-                  </div>
+                  <p className="text-sm text-muted-foreground">Lessons</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">3</div>
+                  <p className="text-sm text-muted-foreground">Quiz Levels</p>
+                </div>
+              </div>
+            </div>
 
             {/* Lessons Tabs */}
             <LessonTabs
@@ -146,23 +141,19 @@ export function TopicIntro({
             />
 
             {/* Learning Tips */}
-            <Card className="mt-8 border-border bg-muted">
-              <CardHeader>
-                <div className="flex gap-3">
-                  <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                  <CardTitle className="text-foreground">Learning Tips</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-foreground">
-                  <li>• Start with the first lesson to build your foundation</li>
-                  <li>• You can skip lessons and come back to them later</li>
-                  <li>• Complete lessons before taking the quiz for best results</li>
-                  <li>• Review the quiz answers to improve your performance</li>
-                  <li>• Try different difficulty levels to challenge yourself</li>
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="mt-8">
+              <div className="flex gap-3 mb-4">
+                <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <h2 className="text-lg font-semibold text-foreground">Learning Tips</h2>
+              </div>
+              <ul className="space-y-2 text-sm text-foreground">
+                <li>• Start with the first lesson to build your foundation</li>
+                <li>• You can skip lessons and come back to them later</li>
+                <li>• Complete lessons before taking the quiz for best results</li>
+                <li>• Review the quiz answers to improve your performance</li>
+                <li>• Try different difficulty levels to challenge yourself</li>
+              </ul>
+            </div>
           </div>
         </div>
       </PageTransition>
@@ -192,95 +183,60 @@ export function TopicIntro({
           </div>
 
           {/* Topic Info Card */}
-          <Card className="mb-12">
-            <CardHeader>
-              <div className="flex gap-4 mb-4">
-                <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <div>
-                  <CardTitle>About This Topic</CardTitle>
-                  <CardDescription className="mt-2">
-                    Master {topic.name || topic.id} through interactive quizzes. Each difficulty level contains 30 carefully selected questions to help you progress at your own pace.
-                  </CardDescription>
-                </div>
+          <div className="mb-12">
+            <div className="flex gap-4 mb-4">
+              <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">About This Topic</h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Master {topic.name || topic.id} through interactive quizzes. Each difficulty level contains 30 carefully selected questions to help you progress at your own pace.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">90</div>
-                  <p className="text-sm text-muted-foreground">Total Questions</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">3</div>
-                  <p className="text-sm text-muted-foreground">Difficulty Levels</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">30</div>
-                  <p className="text-sm text-muted-foreground">Per Level</p>
-                </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 pt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">90</div>
+                <p className="text-sm text-muted-foreground">Total Questions</p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">3</div>
+                <p className="text-sm text-muted-foreground">Difficulty Levels</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">30</div>
+                <p className="text-sm text-muted-foreground">Per Level</p>
+              </div>
+            </div>
+          </div>
 
           {/* Difficulty Level Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {DIFFICULTY_LEVELS.map(({ level, title, description, color, icon }) => (
-              <Button
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+            {DIFFICULTY_LEVELS.map(({ level, title, description }) => (
+              <div
                 key={level}
                 onClick={() => onStartQuiz(level)}
-                variant="outline"
-                className="h-auto p-0 justify-start"
-                asChild
+                className="p-4 border border-border rounded-lg cursor-pointer hover:bg-muted/50 hover:border-foreground/30 transition-colors"
               >
-                <Card className="w-full cursor-pointer relative overflow-hidden">
-                  {/* Background Gradient */}
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${color} opacity-10`}
-                  />
-
-                  {/* Content */}
-                  <div className="relative z-10 p-6">
-                    <div className="text-4xl mb-3">{icon}</div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">
-                      {title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4 break-words whitespace-normal">
-                      {description}
-                    </p>
-
-                    {/* Start Button */}
-                    <div className="text-blue-600 dark:text-blue-400 font-semibold">
-                      Start →
-                    </div>
-                  </div>
-
-                  {/* Level Indicator */}
-                  <Badge className="absolute top-3 right-3 capitalize">
-                    {level}
-                  </Badge>
-                </Card>
-              </Button>
+                <h4 className="font-semibold text-foreground mb-2">{title}</h4>
+                <p className="text-sm text-muted-foreground">{description}</p>
+              </div>
             ))}
           </div>
 
           {/* Tips Section */}
-          <Card className="border-border bg-muted">
-            <CardHeader>
-              <div className="flex gap-3">
-                <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <CardTitle className="text-foreground">Learning Tips</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-foreground">
-                <li>• Start with the Beginner level to build your foundation</li>
-                <li>• Progress to Intermediate once you've achieved 70% on Beginner</li>
-                <li>• Unlock Advanced once you've mastered Intermediate</li>
-                <li>• Review wrong answers to improve your performance</li>
-                <li>• Complete all levels to master this topic</li>
-              </ul>
-            </CardContent>
-          </Card>
+          <div>
+            <div className="flex gap-3 mb-4">
+              <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <h2 className="text-lg font-semibold text-foreground">Learning Tips</h2>
+            </div>
+            <ul className="space-y-2 text-sm text-foreground">
+              <li>• Start with the Beginner level to build your foundation</li>
+              <li>• Progress to Intermediate once you've achieved 70% on Beginner</li>
+              <li>• Unlock Advanced once you've mastered Intermediate</li>
+              <li>• Review wrong answers to improve your performance</li>
+              <li>• Complete all levels to master this topic</li>
+            </ul>
+          </div>
         </div>
       </div>
     </PageTransition>
