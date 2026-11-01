@@ -116,22 +116,37 @@
   - [x] Caching behavior ✓
   - [x] Cache statistics ✓
 
-#### Stage 4: Lesson UI Components
-- [ ] Create LessonTabs component
-  - [ ] Tabbed interface (all lessons + quiz as tabs)
-  - [ ] Show lesson metadata (title, summary, duration, difficulty, tags)
-  - [ ] Lazy-load tabs (render only active tab)
-  - [ ] Visual indicator for active/viewed lessons
-  - [ ] Quiz tab at the end
-- [ ] Create LessonView component
-  - [ ] Display lesson title, summary, duration
-  - [ ] Render markdown content via MarkdownRenderer
-  - [ ] Display learning objectives as checklist (optional)
-  - [ ] Show lesson metadata (difficulty, tags)
-- [ ] Create LessonProgressTracker (optional)
-  - [ ] Track which lessons have been viewed
-  - [ ] Visual progress indicator (lessons completed)
-  - [ ] No blocking - users can skip lessons
+#### Stage 4: Lesson UI Components ✅ COMPLETE
+- [x] Create LessonView component ✓
+  - [x] Display lesson title, summary, duration ✓
+  - [x] Render markdown content via MarkdownRenderer ✓
+  - [x] Display learning objectives as checklist ✓
+  - [x] Show lesson metadata (difficulty, tags) ✓
+  - [x] Error handling and display ✓
+  - [x] Responsive card layout ✓
+  - [x] Dark mode support ✓
+- [x] Create LessonTabs component ✓
+  - [x] Tabbed interface (all lessons + quiz as tabs) ✓
+  - [x] Show lesson metadata (title, summary, duration, difficulty, tags) ✓
+  - [x] Lazy-load tabs (render only active tab) ✓
+  - [x] Visual indicator for active/viewed lessons ✓
+  - [x] Quiz tab at the end ✓
+  - [x] Progress summary display ✓
+  - [x] Keyboard navigation support ✓
+- [x] Create LessonProgressTracker component ✓
+  - [x] Track which lessons have been viewed ✓
+  - [x] Visual progress indicator (lessons completed) ✓
+  - [x] No blocking - users can skip lessons ✓
+  - [x] localStorage persistence (optional) ✓
+  - [x] Detailed lesson status display ✓
+  - [x] Manual progress tracking ✓
+- [x] Comprehensive test suite (24 tests - all passing) ✓
+  - [x] LessonView rendering tests ✓
+  - [x] LessonTabs navigation and tab switching ✓
+  - [x] LessonProgressTracker progress calculation ✓
+  - [x] localStorage persistence ✓
+  - [x] Error handling ✓
+  - [x] Dark mode styling ✓
 
 #### Stage 5: Integration with TopicIntro
 - [ ] Update TopicIntro component
@@ -424,6 +439,110 @@ interface MarkdownRendererProps {
 - `prose-pre:bg-muted` - Code block styling
 - `prose-table:text-foreground` - Table text color
 - `prose-img:rounded-lg` - Responsive images
+
+### LessonView React Component (Phase 6 - Stage 4)
+
+**File**: `src/components/learning/LessonView.tsx`
+
+Displays a single lesson with full metadata, learning objectives, and markdown content.
+
+**Props**:
+```typescript
+interface LessonViewProps {
+  lesson: Lesson;               // Lesson metadata
+  content: string;              // Raw markdown content
+  categoryId: string;           // For MarkdownRenderer cache key
+  subcategoryId: string;        // For MarkdownRenderer cache key
+  topicId: string;              // For MarkdownRenderer cache key
+  isLoading?: boolean;          // Loading state indicator
+  error?: string | null;        // Error message display
+}
+```
+
+**Features**:
+- **Lesson Header Card**: Displays title, summary, duration, difficulty, tags
+- **Learning Objectives**: Optional checklist of learning objectives
+- **Markdown Content**: Renders lesson content via MarkdownRenderer
+- **Responsive Cards**: Three-part layout using shadcn/ui Card components
+- **Dark Mode**: Full dark mode support with semantic color classes
+- **Error Handling**: Displays user-friendly error messages
+- **Accessible**: Proper ARIA labels and semantic HTML
+
+**Layout**:
+1. Header card with lesson metadata and difficulty badge
+2. Learning objectives card (if objectives exist)
+3. Content card with rendered markdown
+
+### LessonTabs React Component (Phase 6 - Stage 4)
+
+**File**: `src/components/learning/LessonTabs.tsx`
+
+Tabbed interface for navigating between lessons and accessing quiz.
+
+**Props**:
+```typescript
+interface LessonTabsProps {
+  lessons: Lesson[];            // Array of lessons to display
+  categoryId: string;           // For content loading
+  subcategoryId: string;        // For content loading
+  topicId: string;              // For content loading
+  onLessonLoad?: (lessonId, content) => void;  // Callback when lesson content loads
+  showQuizTab?: boolean;        // Show/hide quiz tab (default: true)
+  quizLabel?: string;           // Label for quiz tab (default: "Quiz")
+  renderQuizContent?: () => React.ReactNode;  // Custom quiz content renderer
+  viewedLessons?: Set<string>;  // Set of lesson IDs marked as viewed
+}
+```
+
+**Features**:
+- **Tab Navigation**: Switch between lesson tabs and quiz tab
+- **Lazy Loading**: Content loads only when tab becomes active
+- **Visual Indicators**: Green dot shows which lessons have been viewed
+- **Progress Summary**: Shows "X of Y lessons completed" and completion message
+- **Keyboard Support**: Full keyboard navigation with ARIA roles
+- **Error Handling**: Catches and displays lesson load errors
+- **Quiz Integration**: Optional quiz tab at the end with custom content
+- **Responsive**: Works on all screen sizes
+
+**Behavior**:
+- First lesson tab is active by default
+- Quiz tab is optional and only shown if `renderQuizContent` is provided
+- Content is cached after loading to avoid re-rendering
+- Loading spinner shown while content loads
+- Viewed lessons indicator persists across tab switches
+
+### LessonProgressTracker React Component (Phase 6 - Stage 4)
+
+**File**: `src/components/learning/LessonProgressTracker.tsx`
+
+Progress tracking and visualization for lesson completion.
+
+**Props**:
+```typescript
+interface LessonProgressTrackerProps {
+  lessons: Lesson[];            // Array of all lessons
+  viewedLessons?: Set<string>;  // Initial viewed lesson IDs
+  onProgressChange?: (viewed: Set<string>) => void;  // Callback on progress update
+  showDetails?: boolean;        // Show detailed lesson list (default: false)
+  storageKey?: string;          // localStorage key for persistence (optional)
+}
+```
+
+**Features**:
+- **Progress Bar**: Visual bar showing completion percentage
+- **Statistics**: Shows completed and remaining lesson counts
+- **Completion Badge**: "Complete" badge when all lessons viewed
+- **Detailed View**: Optional expandable lesson list with checkboxes
+- **localStorage Persistence**: Optional automatic saving of progress
+- **Manual Control**: When showDetails=true, users can toggle lesson completion
+- **Callback System**: Optional callback for external progress tracking
+- **Dark Mode**: Full dark mode support
+
+**Use Cases**:
+- Standalone progress display at top/bottom of lesson interface
+- Detailed tracking with manual completion toggle
+- localStorage-backed persistent progress
+- Integration with external progress systems via callbacks
 
 ### Data File Structure - Phase 6
 
