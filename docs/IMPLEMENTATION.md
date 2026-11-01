@@ -85,20 +85,36 @@
   - [x] Filter out lessons where `active: false` ✓
   - [x] Expose lessons list with metadata only (content lazy-loaded) ✓
 
-#### Stage 3: Markdown Rendering
-- [ ] Install markdown rendering dependencies
-  - [ ] `remark` for parsing
-  - [ ] `rehype` for HTML generation
-  - [ ] Plugins for extended syntax (callouts, alerts, tables, code blocks, strikethrough)
-- [ ] Create MarkdownRenderer component
-  - [ ] Support GitHub-flavored markdown
-  - [ ] Support extended syntax (blockquotes, callouts, alerts)
-  - [ ] Add syntax highlighting for code blocks
-  - [ ] Sanitize HTML output (prevent XSS)
-  - [ ] Responsive styling for tables and media
-- [ ] Implement lazy HTML rendering
-  - [ ] Render markdown to HTML only when lesson tab is active
-  - [ ] Cache rendered HTML in component state
+#### Stage 3: Markdown Rendering ✅ COMPLETE
+- [x] Install markdown rendering dependencies ✓
+  - [x] `remark` for parsing ✓
+  - [x] `remark-gfm` for GitHub-flavored markdown ✓
+  - [x] `remark-html` for HTML generation ✓
+  - [x] `rehype-sanitize` for XSS prevention ✓
+- [x] Create MarkdownRenderer utility ✓
+  - [x] renderMarkdownToHtml() - core markdown parsing ✓
+  - [x] renderMarkdownWithCache() - cached rendering ✓
+  - [x] clearMarkdownCache() - cache management ✓
+  - [x] sanitizeHtml() - XSS prevention (removes scripts, event handlers) ✓
+- [x] Create MarkdownRenderer React component ✓
+  - [x] Support GitHub-flavored markdown ✓
+  - [x] Support extended syntax (tables, strikethrough, blockquotes) ✓
+  - [x] Sanitize HTML output (prevent XSS) ✓
+  - [x] Responsive styling with Tailwind prose classes ✓
+  - [x] Loading skeleton state ✓
+  - [x] Error handling and display ✓
+- [x] Implement lazy HTML rendering ✓
+  - [x] Render markdown only when component mounts ✓
+  - [x] Cache rendered HTML in memory ✓
+  - [x] Loading states with skeleton UI ✓
+  - [x] Error boundaries for rendering failures ✓
+- [x] Comprehensive test suite (19 tests - all passing) ✓
+  - [x] Basic markdown rendering ✓
+  - [x] GFM features (tables, strikethrough, links) ✓
+  - [x] Code blocks and inline code ✓
+  - [x] XSS prevention ✓
+  - [x] Caching behavior ✓
+  - [x] Cache statistics ✓
 
 #### Stage 4: Lesson UI Components
 - [ ] Create LessonTabs component
@@ -327,6 +343,87 @@ Extracts the lesson ID from a lesson filename.
 - **Input**: Filename (e.g., `"lesson_5.md"`)
 - **Output**: Lesson ID string (e.g., `"lesson_5"`)
 - **Validation**: Throws error if filename doesn't match `lesson_N.md` pattern
+
+### Markdown Renderer Functions (Phase 6 - Stage 3)
+
+#### `renderMarkdownToHtml(content: string): Promise<string>`
+Converts markdown to sanitized HTML with GitHub-flavored markdown support.
+- **Input**: Raw markdown text (supports headings, lists, code, tables, etc.)
+- **Process**:
+  - Parses markdown using remark
+  - Applies GFM extensions (tables, strikethrough, links)
+  - Converts to HTML using remark-html
+  - Sanitizes output (removes scripts, event handlers, XSS attacks)
+- **Output**: Safe HTML string ready for rendering
+- **Supported Features**:
+  - Headings (h1-h6)
+  - Bold, italic, strikethrough, inline code
+  - Lists (ordered, unordered, nested)
+  - Code blocks with language support
+  - Tables (GFM)
+  - Links and images
+  - Blockquotes
+  - Horizontal rules
+- **Security**: Strips `<script>` tags, `on*` event handlers, `javascript:` protocols
+
+#### `renderMarkdownWithCache(content, categoryId, subcategoryId, topicId, lessonId): Promise<string>`
+Renders markdown with memory caching to avoid re-rendering same lesson.
+- **Input**: Markdown content + full lesson path (for cache key)
+- **Process**:
+  - Checks if lesson HTML is already cached
+  - If cached, returns immediately
+  - If not cached, calls `renderMarkdownToHtml()` and stores result
+- **Output**: Rendered HTML (either from cache or freshly rendered)
+- **Caching**: Uses Map<string, string> with key format: `category/subcat/topic/lessonId`
+- **Performance**: Eliminates redundant rendering when switching between lesson tabs
+
+#### `clearMarkdownCache(): void`
+Clears the entire markdown rendering cache.
+- **Use case**: Testing, or when markdown needs to be reloaded from source
+- **Side effects**: Forces next `renderMarkdownWithCache()` to re-render
+
+#### `getMarkdownCacheStats(): { size: number; keys: string[] }`
+Returns statistics about cached markdown for debugging.
+- **Output**: Object with cache size and list of cached lesson keys
+- **Use case**: Monitoring memory usage, debugging cache issues
+
+### MarkdownRenderer React Component (Phase 6 - Stage 3)
+
+**File**: `src/components/learning/MarkdownRenderer.tsx`
+
+Renders markdown content with lazy-loading and responsive styling.
+
+**Props**:
+```typescript
+interface MarkdownRendererProps {
+  content: string;              // Raw markdown content
+  categoryId: string;           // For cache key
+  subcategoryId: string;        // For cache key
+  topicId: string;              // For cache key
+  lessonId: string;             // For cache key
+  className?: string;           // Additional CSS classes
+}
+```
+
+**Features**:
+- **Lazy Rendering**: Only renders when component mounts
+- **HTML Caching**: Caches rendered HTML to avoid re-rendering
+- **Loading State**: Shows skeleton loader while rendering
+- **Error Handling**: Displays error message if rendering fails
+- **Responsive Styling**: Tailwind prose classes for responsive layout
+  - Responsive text sizes
+  - Dark mode support
+  - Proper spacing for all elements
+  - Styled tables with proper borders
+  - Syntax highlighting classes for code blocks
+
+**Styling Classes** (Tailwind prose):
+- `prose-headings:text-foreground` - Consistent heading colors
+- `prose-a:text-blue-600 dark:prose-a:text-blue-400` - Styled links
+- `prose-code:bg-muted` - Inline code styling
+- `prose-pre:bg-muted` - Code block styling
+- `prose-table:text-foreground` - Table text color
+- `prose-img:rounded-lg` - Responsive images
 
 ### Data File Structure - Phase 6
 
