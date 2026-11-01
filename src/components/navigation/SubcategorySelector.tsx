@@ -4,6 +4,7 @@ import { loadSubcategories } from '../../utils/dataLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { PageTransition } from '@/components/common/PageTransition';
 
 interface SubcategorySelectorProps {
   categoryId: string;
@@ -33,22 +34,23 @@ export function SubcategorySelector({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600 dark:text-slate-400">Loading subcategories...</p>
+      <div className="flex items-center justify-center min-h-screen bg-themed">
+        <p className="text-muted-foreground animate-pulse-gentle">Loading subcategories...</p>
       </div>
     );
   }
 
   if (subcategories.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600 dark:text-slate-400">No subcategories available</p>
+      <div className="flex items-center justify-center min-h-screen bg-themed">
+        <p className="text-muted-foreground">No subcategories available</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
+    <PageTransition animationType="slideUp">
+    <div className="min-h-screen bg-themed p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header with Back Button */}
         <div className="mb-12">
@@ -59,10 +61,10 @@ export function SubcategorySelector({
               </Button>
             )}
             <div>
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-50">
+              <h1 className="text-4xl font-bold text-foreground">
                 {categoryName}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Select a subcategory to explore
               </p>
             </div>
@@ -83,7 +85,7 @@ export function SubcategorySelector({
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <CardTitle>{subcategory.name}</CardTitle>
-                    <ChevronRight className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+                    <ChevronRight className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <CardDescription>
                     {subcategory.description || 'No description available'}
@@ -99,6 +101,7 @@ export function SubcategorySelector({
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </PageTransition>
   );
 }

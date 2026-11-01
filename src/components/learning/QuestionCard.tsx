@@ -17,14 +17,14 @@ export function QuestionCard({
   const isMultipleChoice = question.correctAnswers.length > 1;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+    <div className="bg-card text-card-foreground rounded-lg border border-border p-6 shadow-sm">
       {/* Question Text */}
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+        <h2 className="text-lg font-semibold text-card-foreground">
           {question.text}
         </h2>
         {isMultipleChoice && (
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             (Select all that apply)
           </p>
         )}
@@ -39,7 +39,7 @@ export function QuestionCard({
           return (
             <label
               key={option.id}
-              className="flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted"
             >
               {isMultipleChoice ? (
                 /* Checkbox for multiple choice */
@@ -47,7 +47,7 @@ export function QuestionCard({
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => onSelectAnswer(option.id, true)}
-                  className="mt-1 w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-blue-600 dark:text-blue-500 cursor-pointer accent-blue-600 dark:accent-blue-500"
+                  className="mt-1 w-5 h-5 rounded border-input text-blue-600 dark:text-blue-500 cursor-pointer accent-blue-600 dark:accent-blue-500"
                 />
               ) : (
                 /* Radio button for single choice */
@@ -59,7 +59,7 @@ export function QuestionCard({
                   className="mt-1 w-5 h-5 cursor-pointer accent-blue-600 dark:accent-blue-500"
                 />
               )}
-              <span className="text-sm font-medium text-slate-900 dark:text-slate-50">
+              <span className="text-sm font-medium text-card-foreground">
                 {option.text}
               </span>
               {isSelected && (
@@ -72,7 +72,7 @@ export function QuestionCard({
 
       {/* Progress Info */}
       {progress && (
-        <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-3">
+        <div className="text-xs text-muted-foreground border-t border-border pt-3">
           Attempts: {progress.attempts} | Correct: {progress.attempts - progress.wrong}
         </div>
       )}

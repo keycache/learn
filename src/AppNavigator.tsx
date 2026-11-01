@@ -114,7 +114,7 @@ export default function AppNavigator() {
   // Loading screen
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="flex items-center justify-center min-h-screen bg-themed">
         <div className="text-center">
           <p className="text-slate-600 dark:text-slate-400 text-lg">Loading...</p>
         </div>
@@ -183,7 +183,7 @@ export default function AppNavigator() {
         );
       }
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
+        <div className="min-h-screen bg-themed p-6">
           <Quiz
             category={selectedCategory}
             subcategory={selectedSubcategory}

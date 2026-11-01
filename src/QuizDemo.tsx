@@ -67,7 +67,7 @@ export default function QuizDemo() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
+    <div className="min-h-screen bg-themed p-6">
       <Quiz
         category="spoken-languages"
         subcategory="french"

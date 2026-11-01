@@ -40,14 +40,14 @@ export function ResultsScreen({
   const wrongQuestions = allQuestions.filter((q) => wrongQuestionIds.includes(q.id));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
+    <div className="min-h-screen bg-themed p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {topic.charAt(0).toUpperCase() + topic.slice(1)} - {level.charAt(0).toUpperCase() + level.slice(1)}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">Quiz Complete!</p>
+          <p className="text-muted-foreground">Quiz Complete!</p>
         </div>
 
         {/* Score Card */}
@@ -63,7 +63,7 @@ export function ResultsScreen({
               {performance.label}
             </p>
 
-            <p className="text-lg text-slate-600 dark:text-slate-400">
+            <p className="text-lg text-muted-foreground">
               {score} out of {total} correct
             </p>
           </div>
@@ -72,15 +72,15 @@ export function ResultsScreen({
           <div className="grid grid-cols-3 gap-4 py-6 border-t border-b border-slate-200 dark:border-slate-700">
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600 dark:text-green-400">{score}</div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Correct</p>
+              <p className="text-sm text-muted-foreground">Correct</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-red-600 dark:text-red-400">{wrongCount}</div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Incorrect</p>
+              <p className="text-sm text-muted-foreground">Incorrect</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-slate-600 dark:text-slate-400">{total}</div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total</p>
+              <div className="text-3xl font-bold text-muted-foreground">{total}</div>
+              <p className="text-sm text-muted-foreground">Total</p>
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@ export function ResultsScreen({
         {/* Wrong Questions */}
         {wrongQuestions.length > 0 && (
           <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 mb-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <X className="w-5 h-5 text-red-600 dark:text-red-400" />
               Questions to Review ({wrongQuestions.length})
             </h2>
@@ -99,7 +99,7 @@ export function ResultsScreen({
                   key={question.id}
                   className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
                 >
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-50 mb-2">
+                  <p className="text-sm font-medium text-foreground mb-2">
                     {question.text}
                   </p>
                   {question.explanation && (

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, Lock, CheckCircle, PlayCircle } from 'lucide-react';
+import { PageTransition } from '@/components/common/PageTransition';
 
 interface TopicGridProps {
   categoryId: string;
@@ -39,22 +40,23 @@ export function TopicGrid({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600 dark:text-slate-400">Loading topics...</p>
+      <div className="flex items-center justify-center min-h-screen bg-themed">
+        <p className="text-muted-foreground animate-pulse-gentle">Loading topics...</p>
       </div>
     );
   }
 
   if (topics.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600 dark:text-slate-400">No topics available</p>
+      <div className="flex items-center justify-center min-h-screen bg-themed">
+        <p className="text-muted-foreground">No topics available</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
+    <PageTransition animationType="slideUp">
+    <div className="min-h-screen bg-themed p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header with Breadcrumb */}
         <div className="mb-12">
@@ -65,13 +67,13 @@ export function TopicGrid({
               </Button>
             )}
             <div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+              <div className="text-sm text-muted-foreground mb-2">
                 {categoryName} › {subcategoryName}
               </div>
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-50">
+              <h1 className="text-4xl font-bold text-foreground">
                 Topics
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Choose a topic to start learning
               </p>
             </div>
@@ -91,7 +93,8 @@ export function TopicGrid({
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </PageTransition>
   );
 }
 
@@ -119,14 +122,14 @@ function TopicCard({ topic, categoryId, subcategoryId, onSelect }: TopicCardProp
     progress: { correctCount: number; totalQuestions: number; percentage: number }
   ) => {
     if (status === 'locked') {
-      return <Lock className="w-4 h-4 text-slate-400 dark:text-slate-600" />;
+      return <Lock className="w-4 h-4 text-muted-foreground" />;
     }
     if (status === 'completed') {
       return <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />;
     }
     if (progress.totalQuestions > 0) {
       return (
-        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded h-1.5 overflow-hidden">
+        <div className="w-full bg-muted rounded h-1.5 overflow-hidden">
           <div
             className="bg-blue-600 dark:bg-blue-500 h-full"
             style={{ width: `${progress.percentage}%` }}
@@ -158,7 +161,7 @@ function TopicCard({ topic, categoryId, subcategoryId, onSelect }: TopicCardProp
               { level: 'Hard', status: hardStatus, progress: hardProgress },
             ].map(({ level, status, progress }) => (
               <div key={level} className="flex items-center gap-2 text-xs">
-                <span className="w-14 text-slate-600 dark:text-slate-400">{level}</span>
+                <span className="w-14 text-muted-foreground">{level}</span>
                 <div className="flex-1">{renderLevelBadge(status, progress)}</div>
                 {status === 'completed' && (
                   <span className="text-green-600 dark:text-green-400 font-medium">✓</span>

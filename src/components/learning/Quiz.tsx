@@ -134,10 +134,10 @@ export function Quiz({
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+            <h1 className="text-2xl font-bold text-foreground">
               {topic.charAt(0).toUpperCase() + topic.slice(1)}
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 capitalize">
+            <p className="text-sm text-muted-foreground capitalize">
               Level: {level} • Question {currentIndex + 1} of {totalQuestions}
             </p>
           </div>
@@ -146,7 +146,7 @@ export function Quiz({
               onClick={onBack}
               className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
             </button>
           )}
         </div>

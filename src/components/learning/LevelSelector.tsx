@@ -36,11 +36,11 @@ export function LevelSelector({
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 capitalize">
+          <h3 className="text-lg font-semibold text-foreground capitalize">
             {level}
           </h3>
           {isLocked ? (
-            <Lock className="w-5 h-5 text-slate-400 dark:text-slate-600" />
+            <Lock className="w-5 h-5 text-muted-foreground" />
           ) : isCompleted ? (
             <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
           ) : (
@@ -49,7 +49,7 @@ export function LevelSelector({
         </div>
 
         {/* Status */}
-        <p className="text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">
+        <p className="text-sm font-medium mb-2 text-muted-foreground">
           {isLocked && 'Locked'}
           {!isLocked && isCompleted && 'Completed'}
           {!isLocked && !isCompleted && 'Available'}
@@ -64,7 +64,7 @@ export function LevelSelector({
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-muted-foreground">
               {progress.correctCount} / {progress.totalQuestions} correct
             </p>
           </>

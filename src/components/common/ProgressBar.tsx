@@ -13,7 +13,7 @@ export function ProgressBar({ current, total, label, className = '' }: ProgressB
       {label && (
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
-          <span className="text-sm text-slate-600 dark:text-slate-400">
+          <span className="text-sm text-muted-foreground">
             {current} / {total}
           </span>
         </div>

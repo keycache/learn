@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
 
 describe('DarkModeToggle', () => {
@@ -20,7 +20,7 @@ describe('DarkModeToggle', () => {
     expect(button).toBeInTheDocument()
   })
 
-  it('should add dark class to html when toggled to dark', () => {
+  it('should add dark class to html when toggled to dark', async () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false)
     
     render(<DarkModeToggle />)
@@ -28,34 +28,46 @@ describe('DarkModeToggle', () => {
     
     fireEvent.click(button)
     
-    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    await waitFor(() => {
+      expect(document.documentElement.classList.contains('dark')).toBe(true)
+    })
   })
 
-  it('should remove dark class from html when toggled to light', () => {
-    document.documentElement.classList.add('dark')
+  it('should remove dark class from html when toggled to light', async () => {
+    localStorage.setItem('theme', 'dark')
     
+    render(<DarkModeToggle />)
+    
+    await waitFor(() => {
+      expect(document.documentElement.classList.contains('dark')).toBe(true)
+    })
+    
+    const button = screen.getByLabelText(/toggle dark mode/i)
+    fireEvent.click(button)
+    
+    await waitFor(() => {
+      expect(document.documentElement.classList.contains('dark')).toBe(false)
+    })
+  })
+
+  it('should persist dark mode preference to localStorage', async () => {
     render(<DarkModeToggle />)
     const button = screen.getByLabelText(/toggle dark mode/i)
     
     fireEvent.click(button)
     
-    expect(document.documentElement.classList.contains('dark')).toBe(false)
-  })
-
-  it('should persist dark mode preference to localStorage', () => {
-    render(<DarkModeToggle />)
-    const button = screen.getByLabelText(/toggle dark mode/i)
+    await waitFor(() => {
+      expect(localStorage.getItem('theme')).toBe('dark')
+    })
     
     fireEvent.click(button)
     
-    expect(localStorage.getItem('theme')).toBe('dark')
-    
-    fireEvent.click(button)
-    
-    expect(localStorage.getItem('theme')).toBe('light')
+    await waitFor(() => {
+      expect(localStorage.getItem('theme')).toBe('light')
+    })
   })
 
-  it('should toggle the dark class on html element', () => {
+  it('should toggle the dark class on html element', async () => {
     const { container } = render(<DarkModeToggle />)
     const button = screen.getByLabelText(/toggle dark mode/i)
     const html = container.ownerDocument.documentElement
@@ -65,13 +77,19 @@ describe('DarkModeToggle', () => {
     
     // Click to add dark
     fireEvent.click(button)
-    expect(html.classList.contains('dark')).toBe(true)
+    await waitFor(() => {
+      expect(html.classList.contains('dark')).toBe(true)
+    })
     
     // Click to remove dark
     fireEvent.click(button)
-    expect(html.classList.contains('dark')).toBe(false)
+    await waitFor(() => {
+      expect(html.classList.contains('dark')).toBe(false)
+    })
   })
 })
+
+
 
 
 

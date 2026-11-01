@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, BookOpen, BarChart3 } from 'lucide-react';
+import { PageTransition } from '@/components/common/PageTransition';
 
 interface TopicIntroProps {
   categoryId: string;
@@ -43,20 +44,21 @@ export function TopicIntro({
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header with Back Button */}
-        <div className="mb-8 flex items-start gap-4">
-          {onBack && (
-            <Button onClick={onBack} variant="ghost" size="icon" className="flex-shrink-0 mt-1">
-              <ChevronLeft className="w-6 h-6" />
-            </Button>
-          )}
+    <PageTransition animationType="slideUp">
+      <div className="min-h-screen bg-themed p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header with Back Button */}
+          <div className="mb-8 flex items-start gap-4">
+            {onBack && (
+              <Button onClick={onBack} variant="ghost" size="icon" className="flex-shrink-0 mt-1">
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
+            )}
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-50 capitalize mb-2">
+            <h1 className="text-4xl font-bold text-foreground capitalize mb-2">
               {topic.name || topic.id}
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
+            <p className="text-lg text-muted-foreground">
               Choose your difficulty level to begin learning
             </p>
           </div>
@@ -79,15 +81,15 @@ export function TopicIntro({
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">90</div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Total Questions</p>
+                <p className="text-sm text-muted-foreground">Total Questions</p>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">3</div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Difficulty Levels</p>
+                <p className="text-sm text-muted-foreground">Difficulty Levels</p>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">30</div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Per Level</p>
+                <p className="text-sm text-muted-foreground">Per Level</p>
               </div>
             </div>
           </CardContent>
@@ -112,10 +114,10 @@ export function TopicIntro({
                 {/* Content */}
                 <div className="relative z-10 p-6">
                   <div className="text-4xl mb-3">{icon}</div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+                  <h3 className="text-xl font-bold text-foreground mb-2">
                     {title}
                   </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  <p className="text-sm text-muted-foreground mb-4 break-words whitespace-normal">
                     {description}
                   </p>
 
@@ -135,15 +137,15 @@ export function TopicIntro({
         </div>
 
         {/* Tips Section */}
-        <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+        <Card className="border-border bg-muted">
           <CardHeader>
             <div className="flex gap-3">
               <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <CardTitle className="text-blue-900 dark:text-blue-200">Learning Tips</CardTitle>
+              <CardTitle className="text-foreground">Learning Tips</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+            <ul className="space-y-2 text-sm text-foreground">
               <li>• Start with the Beginner level to build your foundation</li>
               <li>• Progress to Intermediate once you've achieved 70% on Beginner</li>
               <li>• Unlock Advanced once you've mastered Intermediate</li>
@@ -153,6 +155,7 @@ export function TopicIntro({
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </PageTransition>
   );
 }
