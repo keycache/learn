@@ -6,7 +6,8 @@ import { LessonMetadata, MarkdownContent } from '../types/learning';
  * Returns metadata and remaining markdown content
  */
 export function parseFrontmatter(content: string): MarkdownContent {
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+  // Make regex more flexible - allow optional carriage returns and whitespace after closing ---
+  const frontmatterRegex = /^---\r?\n([\s\S]*?)\n---\r?\n([\s\S]*)$/;
   const match = content.match(frontmatterRegex);
 
   if (!match) {
@@ -73,12 +74,21 @@ function parseFrontmatterYAML(yamlStr: string): LessonMetadata {
 }
 
 /**
- * Parse YAML value types (strings, numbers, booleans)
+ * Parse YAML value types (strings, numbers, booleans, arrays)
  */
 function parseYAMLValue(value: string): unknown {
   if (value === 'true') return true;
   if (value === 'false') return false;
   if (!isNaN(Number(value)) && value !== '') return Number(value);
+
+  // Handle JSON-style arrays: ["item1", "item2"]
+  if (value.startsWith('[') && value.endsWith(']')) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      throw new Error(`Invalid JSON array: ${value}`);
+    }
+  }
 
   // Remove quotes if present
   if ((value.startsWith('"') && value.endsWith('"')) ||
