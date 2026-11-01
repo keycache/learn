@@ -148,17 +148,25 @@
   - [x] Error handling ✓
   - [x] Dark mode styling ✓
 
-#### Stage 5: Integration with TopicIntro
-- [ ] Update TopicIntro component
-  - [ ] Show lesson tabs instead of level cards if lessons exist
-  - [ ] Display first lesson on load
-  - [ ] Move quiz to tab at end
-  - [ ] Keep level selector visible/accessible
-- [ ] Update navigation flow
-  - [ ] Show lessons before quiz
-  - [ ] Allow users to jump between lessons
-  - [ ] No prerequisites (users can skip lessons)
-  - [ ] Users can access quiz from any tab
+#### Stage 5: Integration with TopicIntro ✅ COMPLETE
+- [x] Update TopicIntro component ✓
+  - [x] Show lesson tabs instead of level cards if lessons exist ✓
+  - [x] Display first lesson on load ✓
+  - [x] Move quiz to tab at end ✓
+  - [x] Keep level selector visible/accessible ✓
+- [x] Update navigation flow ✓
+  - [x] Show lessons before quiz ✓
+  - [x] Allow users to jump between lessons ✓
+  - [x] No prerequisites (users can skip lessons) ✓
+  - [x] Users can access quiz from any tab ✓
+- [x] Track viewed lessons in state ✓
+  - [x] ViewedLessons Set tracks which lessons user has opened ✓
+  - [x] Pass viewed lessons to LessonTabs component ✓
+  - [x] Update state when lesson content loads ✓
+- [x] Render quiz content in LessonTabs ✓
+  - [x] Quiz tab shows difficulty level selector ✓
+  - [x] Quiz selection triggers existing onStartQuiz handler ✓
+  - [x] Seamless navigation from lessons to quiz ✓
 
 #### Stage 6: Migration & Testing
 - [ ] Create example lessons for existing topics
@@ -543,6 +551,88 @@ interface LessonProgressTrackerProps {
 - Detailed tracking with manual completion toggle
 - localStorage-backed persistent progress
 - Integration with external progress systems via callbacks
+
+### TopicIntro Integration (Phase 6 - Stage 5)
+
+**File**: `src/components/navigation/TopicIntro.tsx`
+
+Updated TopicIntro component to support both lessons and legacy level-based quizzes.
+
+**Detection Logic**:
+```typescript
+const hasLessons = topic.lessons && topic.lessons.length > 0;
+```
+
+**Behavior**:
+1. **When lessons exist**: Display LessonTabs with lessons and quiz tab
+2. **When no lessons**: Display original difficulty level selector (backward compatible)
+
+**Features When Lessons Exist**:
+- **Topic Header**: Shows "Learn and master this topic through lessons and practice quizzes"
+- **Topic Info Card**: Displays lesson count and quiz level count
+- **LessonTabs Component**: Full tabbed interface with:
+  - All lessons as tabs (first lesson active by default)
+  - Quiz tab at end with difficulty selector
+  - Lazy-loaded content
+  - Viewed lesson tracking
+- **Lesson Flow**: Users navigate through lessons, then select quiz difficulty
+- **Progress Tracking**: Set of viewed lesson IDs tracked in component state
+- **Learning Tips**: Updated to guide lesson-based learning
+
+**Features When No Lessons (Backward Compatible)**:
+- **Original UI**: Displays all three difficulty level cards
+- **Topic Info Card**: Shows 90 total questions, 3 levels, 30 per level
+- **Direct Quiz Access**: Users select difficulty and start quiz immediately
+- **Learning Tips**: Original progression tips for level-based system
+
+**Props**:
+```typescript
+interface TopicIntroProps {
+  categoryId: string;        // For lesson content loading
+  subcategoryId: string;     // For lesson content loading
+  topicId: string;           // For lesson content loading
+  topic: Topic;              // Topic data with optional lessons array
+  onStartQuiz: (level) => void;  // Handler for quiz start (both modes)
+  onBack?: () => void;       // Back navigation handler
+}
+```
+
+**State Management**:
+- `viewedLessons: Set<string>` - Tracks which lesson IDs user has viewed
+- Updated when lesson content loads via onLessonLoad callback
+
+**Quiz Integration**:
+```typescript
+const renderQuizContent = () => (
+  // Shows difficulty level buttons inside LessonTabs quiz tab
+  // Calls onStartQuiz(level) on button click
+  // Seamless navigation from lessons to quiz selection
+);
+```
+
+**Navigation Flow with Lessons**:
+```
+Category → Subcategory → Topic → TopicIntro
+                                  ↓
+                              LessonTabs
+                              ↓   ↓   ↓  ↓
+                         Lesson1 Lesson2 ... Quiz
+                                      ↓
+                               Quiz Level Select
+                                      ↓
+                                   Quiz Screen
+```
+
+**Navigation Flow without Lessons (Legacy)**:
+```
+Category → Subcategory → Topic → TopicIntro
+                                  ↓
+                         Difficulty Selector
+                          ↓   ↓   ↓
+                      Easy  Med  Hard
+                              ↓
+                           Quiz Screen
+```
 
 ### Data File Structure - Phase 6
 

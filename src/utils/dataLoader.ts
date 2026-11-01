@@ -105,6 +105,7 @@ export async function loadTopics(
 
 /**
  * Load a complete topic with all its levels and questions
+ * Also attempts to discover lessons if topic folder structure exists
  * Example: loadTopic('spoken-languages', 'french', 'numbers')
  */
 export async function loadTopic(
@@ -116,6 +117,10 @@ export async function loadTopic(
     const topicData = await import(
       `../data/categories/${categoryId}/${subcategoryId}/${topicId}.json`
     );
+    
+    // Attempt to discover lessons for this topic
+    const lessons = await discoverLessons(categoryId, subcategoryId, topicId);
+    
     return {
       id: topicData.id,
       name: topicData.name,
@@ -127,6 +132,7 @@ export async function loadTopic(
         medium: topicData.levels.medium,
         hard: topicData.levels.hard,
       },
+      ...(lessons && lessons.length > 0 && { lessons }),
     };
   } catch (error) {
     console.error(
