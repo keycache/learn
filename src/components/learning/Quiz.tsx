@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Question } from '../../types/learning';
 import { QuestionCard } from './QuestionCard';
 import { updateQuestionProgress, getQuestionProgress } from '../../utils/progressTracker';
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { QuizResultsContext } from '@/contexts/QuizResultsContext';
 
 interface QuizProps {
   category: string;
@@ -33,6 +34,7 @@ export function Quiz({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Map<string, string[]>>(new Map());
   const [submitted, setSubmitted] = useState(false);
+  const quizResultsContext = useContext(QuizResultsContext);
 
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
@@ -99,7 +101,7 @@ export function Quiz({
   const handleFinishQuiz = () => {
     // Calculate results
     let correct = 0;
-    const wrongQuestions: string[] = [];
+    const wrongQuestionIds: string[] = [];
 
     questions.forEach((question: Question) => {
       const userAnswer = userAnswers.get(question.id) || [];
@@ -111,7 +113,7 @@ export function Quiz({
       if (isCorrect) {
         correct++;
       } else {
-        wrongQuestions.push(question.id);
+        wrongQuestionIds.push(question.id);
       }
     });
 
@@ -119,8 +121,21 @@ export function Quiz({
       score: correct,
       total: questions.length,
       percentage: (correct / questions.length) * 100,
-      wrongQuestions,
+      wrongQuestions: [], // Will be populated with full WrongQuestion[] by ResultsScreen
     };
+
+    // Save results to context for results page
+    if (quizResultsContext) {
+      quizResultsContext.setResults({
+        score: correct,
+        total: questions.length,
+        percentage: (correct / questions.length) * 100,
+        wrongQuestions: [],
+        level,
+        allQuestions: questions,
+        wrongQuestionIds,
+      });
+    }
 
     onComplete?.(results);
   };

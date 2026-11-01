@@ -1,21 +1,16 @@
-import { DarkModeToggle } from '@/components/DarkModeToggle'
-import { SkipToContentLink } from '@/components/common/SkipToContentLink'
-import AppNavigator from './AppNavigator'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { QuizResultsProvider } from './contexts/QuizResultsContext';
+import { routes } from './routes/index';
+
+// Create router with routes configuration
+const router = createBrowserRouter(routes, {
+  basename: '/learn',
+});
 
 export default function App() {
   return (
-    <>
-      <SkipToContentLink />
-
-      {/* Header with Dark Mode Toggle */}
-      <header className="absolute top-0 right-0 p-4 z-50 pointer-events-auto">
-        <DarkModeToggle />
-      </header>
-
-      {/* Main Content */}
-      <main id="main-content">
-        <AppNavigator />
-      </main>
-    </>
-  )
+    <QuizResultsProvider>
+      <RouterProvider router={router} />
+    </QuizResultsProvider>
+  );
 }

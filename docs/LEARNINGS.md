@@ -713,3 +713,226 @@ When building theme-aware UIs:
 - Flat tab edges matching modern design
 - Single-line tabs with text truncation
 - Clean, focused interface
+
+---
+
+## UI Styling & Design System - Learnings
+
+### Problem
+Light mode button colors were inconsistent with the design system. Previous/Next buttons appeared too dark (navy) instead of light gray, and the explanation box had the wrong background color.
+
+### Root Cause
+1. **Hardcoded Tailwind colors** - Using arbitrary classes like `text-gray-600`, `bg-white` that weren't in the Tailwind safelist
+2. **Missing safelist** - Only 4 classes in safelist in tailwind.config.ts
+3. **Dev server cache** - CSS changes not reflected without full restart
+
+### Solution
+1. **Use design system CSS variables** - Switch to `text-muted-foreground`, `bg-background`, `border-border` 
+2. **CSS variables handle light/dark** - Automatically switch colors based on `.dark` class
+3. **Clear dev cache** - Use `rm -rf node_modules/.vite` when changes don't appear
+
+### Key Learnings
+- **Always use design system colors**, never hardcoded Tailwind classes
+- **CSS variables** are guaranteed to exist and auto-switch themes
+- **Dev server cache** can hide CSS changes - full restart sometimes needed
+- Flexbox truncation needs `flex-1`, `min-w-0`, and `truncate` together
+
+---
+
+## Phase 7: URL-Based Routing - Architecture & Patterns
+
+### Problem
+App was using callback-based navigation with useState, making URLs non-shareable and preventing browser back/forward. State was scattered across components, making it impossible to deep link or share quiz progress.
+
+### Architecture Decision: React Router v6 + Context
+
+**Why React Router v6?**
+- Industry standard for React SPAs
+- Built-in param extraction, query params, lazy loading
+- Native browser back/forward support
+- Deep linking and URL sharing "just works"
+
+**Why Context for Quiz State?**
+- Quiz results need to survive navigation (user completes quiz, click "view results" → navigate → show results)
+- localStorage persists across page reloads (overkill for single-session flow)
+- Context is perfect for session-scoped state
+- simpler than Redux for this use case
+
+### URL Structure Pattern
+
+```
+/learn/                                     → Categories (root)
+/learn/:category                            → Subcategories (category param extracted)
+/learn/:category/:subcategory               → Topics (both params extracted)
+/learn/:category/:subcategory/:topic        → Topic Intro (all params extracted)
+/learn/:category/:subcategory/:topic/quiz   → Quiz (+ ?level=easy|medium|hard query param)
+/learn/:category/:subcategory/:topic/results → Results (reads from context)
+/learn/:category/:subcategory/:topic/lesson/:id → Individual Lesson (future)
+```
+
+**Pattern:** Each segment adds one level of hierarchy, params are extracted at each level for validation.
+
+### Custom Hooks for Code Deduplication
+
+Created three hooks to eliminate repetitive param/validation code:
+
+```tsx
+// Before: 50+ lines of useEffect, useState, useNavigate in each route component
+// After: One-line hook call
+
+const { category, loading } = useCategory();
+const { subcategory, categoryName, loading } = useSubcategory();
+const { topic, loading } = useTopic();
+```
+
+**Benefits:**
+- Consistent validation logic across all routes
+- Automatic 404 redirect for invalid params
+- Unified loading states
+- ~40 lines of code saved per route component
+
+### Lazy Loading with Suspense
+
+```tsx
+// All route components are lazy-loaded for code splitting
+const QuizRoute = lazy(() => import('./quiz').then(m => ({ default: m.QuizRoute })));
+
+// Wrapped in Suspense with loading fallback
+<Suspense fallback={<RouteLoader />}>
+  <QuizRoute />
+</Suspense>
+```
+
+**Benefits:**
+- Main bundle reduced (root component loads immediately)
+- Quiz/Results chunks only load when needed
+- Perceived performance improvement (faster initial page load)
+- Loading fallback shown while chunks download
+
+### Query Parameters for Settings
+
+Quiz difficulty is passed via query param:
+```
+/quiz?level=easy
+/quiz?level=medium
+/quiz?level=hard
+```
+
+Accessed via `useSearchParams()`:
+```tsx
+const [searchParams] = useSearchParams();
+const level = searchParams.get('level') as 'easy' | 'medium' | 'hard';
+```
+
+**Why not route params?**
+- Route params are for required hierarchical segments
+- Query params are for optional, modifying settings
+- This pattern makes shareable URLs: `/quiz?level=medium` vs `/quiz/medium` (less intuitive)
+
+### State Persistence: QuizResultsContext
+
+```tsx
+// Quiz component saves results before navigation
+quizResultsContext.setResults({ score, level, allQuestions, wrongQuestionIds });
+
+// Results page reads from context (survives navigation)
+const results = useQuizResults();
+
+// Reset context when leaving results (optional, in Phase 8)
+```
+
+**Key insight:** Context persists through route navigation but is lost on page reload. This is intentional:
+- Session-scoped (user's current quiz session)
+- Doesn't require backend or localStorage
+- Simple and predictable
+
+### Scroll Restoration
+
+```tsx
+// In RootLayout, scroll to top on route change
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, [location.pathname]);
+```
+
+**Why not useScrollRestoration?**
+- React Router doesn't expose browser's scroll restoration API
+- Manual scroll-to-top is simpler and more predictable
+- Could extend in Phase 8 to remember scroll position per page
+
+### Error Handling: 404 Pages
+
+Every route component checks params and redirects to 404:
+```tsx
+useEffect(() => {
+  if (!categoryId) navigate('/');
+  const category = categoriesMap[categoryId];
+  if (!category) navigate('/not-found');
+}, [categoryId, navigate]);
+```
+
+**Benefits:**
+- Invalid URLs automatically handled
+- User gets helpful error page with navigation buttons
+- No "blank page" edge case
+
+### Refactoring Lessons
+
+1. **Don't remove old navigation system immediately** - Keep AppNavigator.tsx until all routes are wired
+2. **Test deep linking early** - Paste URLs directly in browser address bar
+3. **Custom hooks reduce duplication** - Worth creating if >2 routes need same logic
+4. **Lazy loading complexity is low** - React.lazy() and Suspense handle it automatically
+5. **Context simplicity wins** - For session state, Context > Redux for this scale
+
+### Common Pitfalls Avoided
+
+1. ❌ Using `/learn/:category` instead of `/:category` with `basename="/learn"`
+   - ✅ Fixed by understanding `basename` makes all paths relative
+
+2. ❌ Forgetting route param validation
+   - ✅ Created custom hooks to enforce validation everywhere
+
+3. ❌ Not handling loading states
+   - ✅ Every route component has loading spinner
+
+4. ❌ Quiz state disappearing on navigation
+   - ✅ QuizResultsContext solves this elegantly
+
+5. ❌ No fallback for invalid routes
+   - ✅ 404 page catches all edge cases
+
+### Files Created for Phase 7
+
+**Custom Hooks (Code Deduplication):**
+- `/src/hooks/useCategory.ts`
+- `/src/hooks/useSubcategory.ts`
+- `/src/hooks/useTopic.ts`
+- `/src/hooks/useQuizResults.ts` (new, for context access)
+
+**State Management:**
+- `/src/contexts/QuizResultsContext.tsx`
+
+**Route Components:**
+- `/src/routes/index.tsx` (with lazy loading + Suspense)
+- `/src/routes/RootLayout.tsx` (header + scroll restoration)
+- `/src/routes/categories.tsx`, `subcategories.tsx`, `topics.tsx`, etc.
+
+**Tests:**
+- `/tests/routing-phase-7-6.test.ts` (integration tests for Phase 7.6)
+
+### Build Output (Phase 7.6)
+
+- Bundle now code-split by route component
+- Main bundle: 355 KB (gzipped: 113 KB)
+- Lazy chunks: ~2-6 KB each
+- No performance regressions, improved initial load
+
+### Recommendations for Future
+
+1. **Add breadcrumb navigation** - Show path: `Categories > French > Numbers > Quiz`
+2. **Lesson routing** - Implement in Phase 8 with similar pattern
+3. **Analytics tracking** - Log which routes users visit
+4. **URL-based search** - `?search=` param to filter topics
+5. **Remember scroll position** - Per-route scroll restoration with sessionStorage
+
+---
