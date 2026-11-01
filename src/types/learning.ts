@@ -20,12 +20,47 @@ export interface TopicInfo {
   name: string
 }
 
+/**
+ * YAML frontmatter metadata for lessons
+ * Extracted from markdown files and used for lesson metadata
+ */
+export interface LessonMetadata {
+  title: string
+  summary: string
+  duration: string // e.g., "5-10 minutes"
+  active: boolean
+  difficulty: "beginner" | "intermediate" | "advanced"
+  learningObjectives: string[]
+  tags: string[]
+}
+
+/**
+ * Lesson with metadata (content loaded lazily)
+ * Used for displaying lesson tabs and progress
+ */
+export interface Lesson extends LessonMetadata {
+  id: string // e.g., "lesson_1" (derived from filename)
+  order: number // numeric order (derived from filename, 1-indexed)
+  content?: string // raw markdown content (lazy-loaded, not included by default)
+  htmlContent?: string // cached rendered HTML (lazy-loaded, computed on demand)
+}
+
+/**
+ * Lazy-loaded markdown content with parsed metadata
+ * Used when loading lesson content for display
+ */
+export interface MarkdownContent {
+  metadata: LessonMetadata
+  content: string // raw markdown without frontmatter
+}
+
 export interface Topic {
   id: string // e.g., "numbers"
   name: string
   description: string
   category: string
   subcategory: string
+  lessons?: Lesson[] // optional lessons (auto-discovered from topic folder)
   levels: {
     easy: Level
     medium: Level
