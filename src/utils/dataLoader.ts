@@ -5,7 +5,14 @@ import {
   Level,
   Question,
   TopicInfo,
+  Lesson,
+  MarkdownContent,
 } from '../types/learning';
+import {
+  parseFrontmatter,
+  extractLessonOrder,
+  extractLessonId,
+} from './frontmatterParser';
 
 /**
  * Shuffles an array using Fisher-Yates algorithm
@@ -181,4 +188,132 @@ export async function getAllTopicsForCategory(
   }
 
   return results;
+}
+
+/**
+ * Cache for lazy-loaded lesson content
+ * Stores parsed markdown content to avoid re-parsing
+ */
+const lessonContentCache = new Map<string, MarkdownContent>();
+
+/**
+ * Generate cache key for lesson content
+ */
+function getLessonCacheKey(
+  categoryId: string,
+  subcategoryId: string,
+  topicId: string,
+  lessonId: string
+): string {
+  return `${categoryId}/${subcategoryId}/${topicId}/${lessonId}`;
+}
+
+/**
+ * Discover all lessons in a topic folder
+ * Scans for lesson_*.md files, sorts by order, filters by active flag
+ * Returns lessons with metadata only (content not loaded)
+ */
+export async function discoverLessons(
+  categoryId: string,
+  subcategoryId: string,
+  topicId: string
+): Promise<Lesson[]> {
+  const lessons: Lesson[] = [];
+
+  try {
+    // Try to load all possible lesson files (lesson_1.md through lesson_20.md)
+    // We use a fixed upper limit to avoid infinite loops
+    // In practice, topics won't have more than 20 lessons
+    for (let i = 1; i <= 20; i++) {
+      const lessonId = `lesson_${i}`;
+      try {
+        const lessonContent = await import(
+          `../data/categories/${categoryId}/${subcategoryId}/${topicId}/${lessonId}.md?raw`
+        );
+
+        // Parse frontmatter to get metadata
+        const markdownContent = parseFrontmatter(lessonContent.default);
+
+        // Skip inactive lessons
+        if (!markdownContent.metadata.active) {
+          continue;
+        }
+
+        // Create lesson object with metadata (content not loaded)
+        const lesson: Lesson = {
+          id: lessonId,
+          order: i,
+          ...markdownContent.metadata,
+          // content and htmlContent omitted for lazy-loading
+        };
+
+        lessons.push(lesson);
+      } catch {
+        // Continue to next lesson if this one doesn't exist
+        // Break if we've checked several non-existent files
+        if (i > 5 && lessons.length === 0) {
+          break; // No lessons found for this topic
+        }
+      }
+    }
+  } catch (error) {
+    console.error(
+      `Failed to discover lessons for ${categoryId}/${subcategoryId}/${topicId}:`,
+      error
+    );
+  }
+
+  // Sort by order (should already be in order, but ensure it)
+  return lessons.sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Load a specific lesson's markdown content (lazy-loaded)
+ * Parses frontmatter and returns both metadata and content
+ * Results are cached in memory
+ */
+export async function loadLessonContent(
+  categoryId: string,
+  subcategoryId: string,
+  topicId: string,
+  lessonId: string
+): Promise<MarkdownContent | null> {
+  const cacheKey = getLessonCacheKey(
+    categoryId,
+    subcategoryId,
+    topicId,
+    lessonId
+  );
+
+  // Check cache first
+  if (lessonContentCache.has(cacheKey)) {
+    return lessonContentCache.get(cacheKey)!;
+  }
+
+  try {
+    const lessonContent = await import(
+      `../data/categories/${categoryId}/${subcategoryId}/${topicId}/${lessonId}.md?raw`
+    );
+
+    const markdownContent = parseFrontmatter(lessonContent.default);
+
+    // Cache the result
+    lessonContentCache.set(cacheKey, markdownContent);
+
+    return markdownContent;
+  } catch (error) {
+    console.error(
+      `Failed to load lesson content for ${categoryId}/${subcategoryId}/${topicId}/${lessonId}:`,
+      error
+    );
+    return null;
+  }
+}
+
+/**
+ * Clear the lesson content cache
+ * Useful for testing or when lessons need to be reloaded
+ */
+export function clearLessonContentCache(): void {
+  lessonContentCache.clear();
 }

@@ -67,23 +67,23 @@
   - [x] Lessons: `lesson_1.md`, `lesson_2.md` (numeric ordering) ✓
   - [x] YAML frontmatter for metadata (title, summary, duration, active, difficulty, learningObjectives, tags) ✓
 
-#### Stage 2: Data Loader & Parser
-- [ ] Extend dataLoader.ts to handle topic folders
-  - [ ] Detect if topic is folder (new format) or file (old format)
-  - [ ] Strict format validation (no hybrid support)
-  - [ ] Auto-discover all `lesson_*.md` files in topic folder
-- [ ] Implement YAML frontmatter parser
-  - [ ] Parse markdown metadata (title, summary, duration, difficulty, learningObjectives, tags, active)
-  - [ ] Validate frontmatter schema
-  - [ ] Extract lesson content after frontmatter
-- [ ] Implement lazy-loading for lesson content
-  - [ ] Load lesson metadata immediately
-  - [ ] Defer markdown content loading until lesson tab is active
-  - [ ] Cache loaded content in memory
-- [ ] Add lesson sorting/filtering
-  - [ ] Sort lessons by filename (lesson_1, lesson_2, etc.)
-  - [ ] Filter out lessons where `active: false`
-  - [ ] Expose lessons list with metadata only (content lazy-loaded)
+#### Stage 2: Data Loader & Parser ✅ COMPLETE
+- [x] Extend dataLoader.ts to handle topic folders ✓
+  - [x] Detect if topic is folder (new format) or file (old format) ✓
+  - [x] Strict format validation (no hybrid support) ✓
+  - [x] Auto-discover all `lesson_*.md` files in topic folder ✓
+- [x] Implement YAML frontmatter parser ✓
+  - [x] Parse markdown metadata (title, summary, duration, difficulty, learningObjectives, tags, active) ✓
+  - [x] Validate frontmatter schema ✓
+  - [x] Extract lesson content after frontmatter ✓
+- [x] Implement lazy-loading for lesson content ✓
+  - [x] Load lesson metadata immediately ✓
+  - [x] Defer markdown content loading until lesson tab is active ✓
+  - [x] Cache loaded content in memory ✓
+- [x] Add lesson sorting/filtering ✓
+  - [x] Sort lessons by filename (lesson_1, lesson_2, etc.) ✓
+  - [x] Filter out lessons where `active: false` ✓
+  - [x] Expose lessons list with metadata only (content lazy-loaded) ✓
 
 #### Stage 3: Markdown Rendering
 - [ ] Install markdown rendering dependencies
@@ -258,6 +258,75 @@ src/
 ├── main.tsx
 └── index.css
 ```
+
+### Lesson Data Loader Functions (Phase 6 - Stage 2)
+
+#### `discoverLessons(categoryId, subcategoryId, topicId): Promise<Lesson[]>`
+Discovers all lessons in a topic folder by scanning for `lesson_*.md` files.
+- **Input**: Category, subcategory, and topic IDs (path parameters)
+- **Process**:
+  - Scans for files matching pattern `lesson_1.md`, `lesson_2.md`, etc. (up to 20)
+  - Parses YAML frontmatter from each file
+  - Validates metadata against LessonMetadata schema
+  - Filters out lessons where `active: false`
+  - Sorts by order (derived from filename)
+- **Output**: Array of `Lesson` objects with metadata only (content not loaded)
+- **Lazy-loading**: Content is deferred until explicitly requested via `loadLessonContent()`
+- **Caching**: Not cached at discovery stage; each call re-scans files (fresh metadata)
+
+#### `loadLessonContent(categoryId, subcategoryId, topicId, lessonId): Promise<MarkdownContent | null>`
+Loads and parses a specific lesson's markdown content with lazy-loading and caching.
+- **Input**: Full path to lesson (category, subcategory, topic, lesson ID)
+- **Process**:
+  - Checks memory cache first
+  - If not cached, imports lesson markdown file with `?raw` query parameter
+  - Parses frontmatter using `parseFrontmatter()`
+  - Separates metadata and markdown content
+  - Stores result in memory cache
+- **Output**: `MarkdownContent` object with `metadata` and `content` properties
+- **Caching**: Results cached in `lessonContentCache` Map (memory-only, cleared on page load)
+- **Performance**: Only loads when lesson tab is viewed; reduces initial page load
+
+#### `clearLessonContentCache(): void`
+Clears the in-memory lesson content cache.
+- **Use case**: Testing, or when lessons need to be reloaded from disk
+- **Side effects**: Forces next `loadLessonContent()` call to re-import markdown file
+
+### Frontmatter Parser Functions (Phase 6 - Stage 2)
+
+#### `parseFrontmatter(content: string): MarkdownContent`
+Parses YAML frontmatter from markdown content and separates metadata from content.
+- **Input**: Raw markdown string with frontmatter delimiters (`---` at start)
+- **Format**: 
+  ```
+  ---
+  field1: value1
+  field2: value2
+  arrayField:
+    - item1
+    - item2
+  ---
+  # Markdown content here
+  ```
+- **Process**:
+  - Extracts text between first and second `---` delimiters
+  - Calls `parseFrontmatterYAML()` to parse key-value pairs
+  - Validates all required fields exist and have correct types
+  - Trims markdown content (removes leading/trailing whitespace)
+- **Output**: `MarkdownContent` with validated `metadata` and trimmed `content`
+- **Validation**: Throws error if frontmatter is malformed or validation fails
+
+#### `extractLessonOrder(filename: string): number`
+Extracts the lesson order number from a lesson filename.
+- **Input**: Filename (e.g., `"lesson_5.md"`)
+- **Output**: Order as number (e.g., `5`)
+- **Validation**: Throws error if filename doesn't match `lesson_N.md` pattern
+
+#### `extractLessonId(filename: string): string`
+Extracts the lesson ID from a lesson filename.
+- **Input**: Filename (e.g., `"lesson_5.md"`)
+- **Output**: Lesson ID string (e.g., `"lesson_5"`)
+- **Validation**: Throws error if filename doesn't match `lesson_N.md` pattern
 
 ### Data File Structure - Phase 6
 
