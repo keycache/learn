@@ -21,7 +21,7 @@ export interface GenerateLessonParams {
 }
 
 export function useGenerateLessonMutation() {
-  const { setLoading, setError, setResult, setValidationErrors } = useGeneration();
+  const { setLoading, setError, setResult, setValidationErrors, setRawResponse } = useGeneration();
   const { settings } = useLLMSettings();
 
   const generateLesson = useCallback(
@@ -64,9 +64,13 @@ export function useGenerateLessonMutation() {
         });
 
         // Call LLMService to generate lesson
+        // Use higher token limit for comprehensive lessons (64k tokens)
         const response = await llmService.generateLesson({
           systemPrompt,
           userPrompt,
+          options: {
+            maxTokens: 64000,
+          },
         });
 
         if (!response.success) {
@@ -77,6 +81,7 @@ export function useGenerateLessonMutation() {
             : [];
           
           setValidationErrors(validationErrors);
+          setRawResponse(response.rawResponse);
           setError(response.error || 'Failed to generate lesson');
           return;
         }
@@ -90,7 +95,7 @@ export function useGenerateLessonMutation() {
         setError(errorMessage);
       }
     },
-    [settings, setLoading, setError, setResult, setValidationErrors]
+    [settings, setLoading, setError, setResult, setValidationErrors, setRawResponse]
   );
 
   return { generateLesson };

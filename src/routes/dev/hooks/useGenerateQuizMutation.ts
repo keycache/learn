@@ -23,7 +23,7 @@ export interface GenerateQuizParams {
 }
 
 export function useGenerateQuizMutation() {
-  const { setLoading, setError, setResult, setValidationErrors } = useGeneration();
+  const { setLoading, setError, setResult, setValidationErrors, setRawResponse } = useGeneration();
   const { settings } = useLLMSettings();
 
   const generateQuiz = useCallback(
@@ -75,9 +75,13 @@ export function useGenerateQuizMutation() {
         });
 
         // Call LLMService to generate quiz
+        // Use higher token limit for comprehensive quizzes (64k tokens)
         const response = await llmService.generateQuiz({
           systemPrompt,
           userPrompt,
+          options: {
+            maxTokens: 64000,
+          },
         });
 
         if (!response.success) {
@@ -88,6 +92,7 @@ export function useGenerateQuizMutation() {
             : [];
           
           setValidationErrors(validationErrors);
+          setRawResponse(response.rawResponse);
           setError(response.error || 'Failed to generate quiz');
           return;
         }
@@ -101,7 +106,7 @@ export function useGenerateQuizMutation() {
         setError(errorMessage);
       }
     },
-    [settings, setLoading, setError, setResult, setValidationErrors]
+    [settings, setLoading, setError, setResult, setValidationErrors, setRawResponse]
   );
 
   return { generateQuiz };

@@ -7,6 +7,7 @@ export interface Generation {
   error: string | null;
   result: GeneratedLesson | GeneratedQuiz | null;
   validationErrors: string[];
+  rawResponse?: string;
 }
 
 interface GenerationContextType {
@@ -15,6 +16,7 @@ interface GenerationContextType {
   setError: (error: string | null) => void;
   setResult: (result: GeneratedLesson | GeneratedQuiz | null) => void;
   setValidationErrors: (errors: string[]) => void;
+  setRawResponse: (response: string | undefined) => void;
   clearGeneration: () => void;
 }
 
@@ -25,6 +27,7 @@ const DEFAULT_GENERATION: Generation = {
   error: null,
   result: null,
   validationErrors: [],
+  rawResponse: undefined,
 };
 
 export function GenerationProvider({ children }: { children: React.ReactNode }) {
@@ -63,6 +66,13 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
     }));
   }, []);
 
+  const setRawResponse = useCallback((response: string | undefined) => {
+    setGeneration((prev) => ({
+      ...prev,
+      rawResponse: response,
+    }));
+  }, []);
+
   const clearGeneration = useCallback(() => {
     setGeneration(DEFAULT_GENERATION);
   }, []);
@@ -75,6 +85,7 @@ export function GenerationProvider({ children }: { children: React.ReactNode }) 
         setError,
         setResult,
         setValidationErrors,
+        setRawResponse,
         clearGeneration,
       }}
     >

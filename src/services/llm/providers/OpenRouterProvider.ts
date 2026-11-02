@@ -147,7 +147,7 @@ export class OpenRouterProvider implements ILLMProvider {
           model: this.currentModel,
           messages,
           temperature: options?.temperature ?? 0.7,
-          max_tokens: options?.maxTokens ?? 2000,
+          max_tokens: options?.maxTokens ?? 64000,
           top_p: options?.topP ?? 1.0,
           frequency_penalty: options?.frequencyPenalty ?? 0,
           presence_penalty: options?.presencePenalty ?? 0,

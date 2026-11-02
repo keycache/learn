@@ -18,6 +18,104 @@ export interface ParseResult<T> {
 }
 
 /**
+ * Fix common JSON issues from LLM responses
+ * - Replace literal newlines/tabs with escaped versions
+ * - Handle control characters in string values
+ */
+function fixJsonString(jsonStr: string): string {
+  let result = ''
+  let inString = false
+  let escaped = false
+
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i]
+    const prevChar = i > 0 ? jsonStr[i - 1] : ''
+
+    if (escaped) {
+      result += char
+      escaped = false
+      continue
+    }
+
+    if (char === '\\') {
+      result += char
+      escaped = true
+      continue
+    }
+
+    if (char === '"' && prevChar !== '\\') {
+      inString = !inString
+      result += char
+      continue
+    }
+
+    // Inside string: replace unescaped control characters
+    if (inString) {
+      if (char === '\n') {
+        result += '\\n'
+      } else if (char === '\r') {
+        result += '\\r'
+      } else if (char === '\t') {
+        result += '\\t'
+      } else if (char.charCodeAt(0) < 32) {
+        // Other control characters
+        result += `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
+      } else {
+        result += char
+      }
+    } else {
+      result += char
+    }
+  }
+
+  // If we ended while inside a string, try to close it
+  if (inString) {
+    result += '"'
+  }
+
+  // Try to close unclosed object/array structures
+  let openBraces = 0
+  let openBrackets = 0
+  let inStr = false
+  let isEscaped = false
+
+  for (const ch of result) {
+    if (isEscaped) {
+      isEscaped = false
+      continue
+    }
+    if (ch === '\\') {
+      isEscaped = true
+      continue
+    }
+    if (ch === '"') {
+      inStr = !inStr
+      continue
+    }
+    if (!inStr) {
+      if (ch === '{') openBraces++
+      else if (ch === '}') openBraces--
+      else if (ch === '[') openBrackets++
+      else if (ch === ']') openBrackets--
+    }
+  }
+
+  // Close any unclosed arrays
+  while (openBrackets > 0) {
+    result += ']'
+    openBrackets--
+  }
+
+  // Close any unclosed objects
+  while (openBraces > 0) {
+    result += '}'
+    openBraces--
+  }
+
+  return result
+}
+
+/**
  * Parse and validate lesson response from LLM
  */
 export function parseLessonResponse(response: string): ParseResult<GeneratedLesson> {
@@ -27,11 +125,13 @@ export function parseLessonResponse(response: string): ParseResult<GeneratedLess
 
     // Try to extract JSON if response contains extra text
     const jsonMatch = response.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      jsonData = JSON.parse(jsonMatch[0])
-    } else {
-      jsonData = JSON.parse(response)
-    }
+    let jsonStr = jsonMatch ? jsonMatch[0] : response
+
+    // Fix common issues with LLM-generated JSON
+    // Replace unescaped newlines and tabs in string values
+    jsonStr = fixJsonString(jsonStr)
+
+    jsonData = JSON.parse(jsonStr)
 
     // Validate against Zod schema
     const result = GeneratedLessonSchema.safeParse(jsonData)
@@ -45,6 +145,18 @@ export function parseLessonResponse(response: string): ParseResult<GeneratedLess
         },
         rawResponse: response,
       }
+    }
+
+    // Debug: Check if content has proper newlines (not escaped)
+    if (typeof window !== 'undefined' && result.data.content) {
+      const hasEscapedNewlines = result.data.content.includes('\\n')
+      const hasRealNewlines = result.data.content.includes('\n')
+      console.log('[DEBUG] Lesson content after parsing:', {
+        hasEscapedNewlines,
+        hasRealNewlines,
+        contentLength: result.data.content.length,
+        first300chars: result.data.content.substring(0, 300),
+      })
     }
 
     return {
@@ -73,11 +185,12 @@ export function parseQuizResponse(response: string): ParseResult<GeneratedQuiz> 
 
     // Try to extract JSON if response contains extra text
     const jsonMatch = response.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      jsonData = JSON.parse(jsonMatch[0])
-    } else {
-      jsonData = JSON.parse(response)
-    }
+    let jsonStr = jsonMatch ? jsonMatch[0] : response
+
+    // Fix common issues with LLM-generated JSON
+    jsonStr = fixJsonString(jsonStr)
+
+    jsonData = JSON.parse(jsonStr)
 
     // Validate against Zod schema
     const result = GeneratedQuizSchema.safeParse(jsonData)

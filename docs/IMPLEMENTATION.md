@@ -354,7 +354,7 @@ Clears the in-memory lesson content cache.
 #### `parseFrontmatter(content: string): MarkdownContent`
 Parses YAML frontmatter from markdown content and separates metadata from content.
 - **Input**: Raw markdown string with frontmatter delimiters (`---` at start)
-- **Format**: 
+- **Format**:
   ```
   ---
   field1: value1
@@ -930,7 +930,7 @@ S'il vous plaît = see voo PLEH
 Remember to listen to native speakers to get the right intonation!
 :::
 
-**Person A:** Bonjour! Comment allez-vous?  
+**Person A:** Bonjour! Comment allez-vous?
 **Person B:** Bien, merci! Et vous?
 
 ## Key Phrases to Remember
@@ -1200,7 +1200,7 @@ export function useQuiz(topic: Topic, level: "easy" | "medium" | "hard") {
   const submitAnswer = (questionId: string, selectedOptions: string[]) => {
     setUserAnswers(new Map(userAnswers).set(questionId, selectedOptions))
     setShowExplanation(true)
-    
+
     // Save to localStorage
     saveQuestionProgress(...)
   }
@@ -1626,7 +1626,7 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 ---
 
 ### Phase 8.1: Setup & Infrastructure ✅ COMPLETE
-**Time Estimate:** 1-2 hours  
+**Time Estimate:** 1-2 hours
 **Status:** ✅ COMPLETE (finished in ~30 minutes)
 
 **Objective:** Create file structure, TypeScript types, and dev route guard
@@ -1668,7 +1668,7 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 ---
 
 ### Phase 8.2: UI Components - Tab Layout ✅ COMPLETE
-**Time Estimate:** 4-6 hours  
+**Time Estimate:** 4-6 hours
 **Status:** ✅ COMPLETE (finished in ~45 minutes)
 
 **Objective:** Build 4-tab interface with form components
@@ -1735,12 +1735,12 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 ---
 
 ### Phase 8.3: State Management & Context + Schema Refactoring ✅ COMPLETE
-**Time Estimate:** 2-3 hours  
-**Status:** COMPLETE  
-**Time Spent:** ~2 hours  
+**Time Estimate:** 2-3 hours
+**Status:** COMPLETE
+**Time Spent:** ~2 hours
 **Completed:** 2026-11-02
 
-**Objective:** 
+**Objective:**
 1. Implement 3 Context providers and localStorage persistence
 2. Refactor schema generation to use Zod (single source of truth)
 
@@ -1932,9 +1932,9 @@ ${generateLessonOutputGuide()}  // Uses Zod schema internally
 ---
 
 ### Phase 8.4: LLM Provider Adapter & OpenRouter ✅ COMPLETE
-**Time Estimate:** 3-4 hours  
-**Status:** COMPLETE  
-**Time Spent:** ~1.5 hours  
+**Time Estimate:** 3-4 hours
+**Status:** COMPLETE
+**Time Spent:** ~1.5 hours
 **Completed:** 2026-11-02
 
 **Objective:** Implement LLM provider adapter pattern and OpenRouter integration
@@ -2081,7 +2081,7 @@ Headers required:
 - `X-Title: Language Learning Dev Tool`
 - `Content-Type: application/json`
 
-**Dependencies:** 
+**Dependencies:**
 - Phase 8.1 (types) ✅
 - Phase 8.3 (Zod schemas for validation) ✅
 
@@ -2093,10 +2093,10 @@ Headers required:
 
 ---
 
-### Phase 8.5: Prompt Templates & Generation ⏳ PENDING
-**Time Estimate:** 2-3 hours  
-**Status:** COMPLETE  
-**Time Spent:** ~1 hour  
+### Phase 8.5: Prompt Templates & Generation ✅ COMPLETE
+**Time Estimate:** 2-3 hours
+**Status:** COMPLETE
+**Time Spent:** ~1 hour
 **Completed:** 2026-11-02
 
 **Objective:** Wire LLM generation buttons and integrate with LLMService
@@ -2330,90 +2330,180 @@ useGenerateLessonMutation.generateLesson()
 - Phase 8.3 (context, Zod schemas) ✅
 - Phase 8.4 (LLMService) ✅
 
+**Key Improvements:**
+- Model name now user-configurable in LLM Settings
+- Model name passed to LLMService during generation
+- Lesson and quiz tabs now use the selected model
+- Proper error recovery with retry functionality
+
 **Next Phase Readiness:**
 - Generation results stored in GenerationContext
 - Lesson and quiz results validated and structured
-- Ready for Phase 8.6 (export/save functionality)
+- Ready for Phase 8.6 (business rule validation)
 
 ---
 
-**Deliverables:**
-- Lesson prompt template with system + user prompt
-- Quiz prompt template with system + user prompt
-- Prompt builder functions that populate templates with form values
-- API call orchestration (send prompt to LLM)
-- Response streaming/chunking for large responses
-- Real-time prompt preview updates
+### Phase 8.6: Validators & Error Handling ✅ COMPLETE
+**Time Estimate:** 2-3 hours
+**Status:** COMPLETE
+**Time Spent:** ~30 minutes
+**Completed:** 2026-11-02
 
-**Files to Create:**
-- `/src/services/llm/prompts/lessonPrompts.ts` - Lesson templates
-- `/src/services/llm/prompts/quizPrompts.ts` - Quiz templates
-- `/src/routes/dev/hooks/useLessonPrompt.ts` - Build lesson prompt
-- `/src/routes/dev/hooks/useQuizPrompt.ts` - Build quiz prompt
-- `/src/services/llm/utils/promptBuilder.ts` - Generic prompt building
-
-**Template Structure:** See `DEV_GENERATOR_ARCHITECTURE.md` (Prompt Templates section)
-
-**Implementation Details:**
-- System prompt: expert guidance for LLM
-- User prompt: shown to user in read-only text field
-- Auto-populate: topic, age group, duration, custom instructions, schema
-- Schema included as code block in user prompt
-- Real-time updates as user fills form
-
-**Success Criteria:**
-- ✓ Lesson prompt generates correctly with all values
-- ✓ Quiz prompt generates correctly with all values
-- ✓ Prompt preview updates in real-time
-- ✓ JSON schema displayed in prompt
-- ✓ LLM API call sends full prompt
-
-**Dependencies:** Phase 8.3 (context), Phase 8.4 (LLM provider)
-
----
-
-### Phase 8.6: Validators & Error Handling ⏳ PENDING
-**Time Estimate:** 2-3 hours  
-**Status:** Not started
-
-**Objective:** Implement JSON schema validators and error recovery workflows
+**Objective:** Implement business rule validators and error recovery workflows
 
 **Deliverables:**
-- Lesson JSON schema validator
-- Quiz JSON schema validator
-- Question count verification for quizzes
-- Error message generator with actionable feedback
-- Recovery options: Retry, Manual Fix, View Raw
-- Validation error display component
+- ✅ LessonValidator (business rule validation)
+- ✅ QuizValidator (business rule validation)
+- ✅ ValidationErrorDisplay component (enhanced error UI)
+- ✅ Retry functionality in error display
+- ✅ Raw response viewer for debugging
+- ✅ Expandable validation error details
 
-**Files to Create:**
-- `/src/services/llm/validators/LessonValidator.ts`
-- `/src/services/llm/validators/QuizValidator.ts`
-- `/src/routes/dev/components/ValidationError.tsx` - Error display
-- `/src/routes/dev/components/ErrorRecoveryOptions.tsx` - Recovery choices
+**Files Created:**
+- `/src/services/validators/LessonValidator.ts` - Business rule validation for lessons
+- `/src/services/validators/QuizValidator.ts` - Business rule validation for quizzes
+- `/src/services/validators/index.ts` - Validators export barrel
+- `/src/routes/dev/components/ValidationErrorDisplay.tsx` - Enhanced error display component
 
-**Validation Rules:** See `DEV_GENERATOR_SCHEMAS.md` (Validation Checklist section)
+**Files Modified:**
+- `/src/routes/dev/tabs/LessonsTab.tsx` - Uses ValidationErrorDisplay and LessonValidator
+- `/src/routes/dev/tabs/QuizzesTab.tsx` - Uses ValidationErrorDisplay and QuizValidator
 
-**Error Scenarios:**
-- Parse error (invalid JSON)
-- Schema mismatch (missing required fields)
-- Type mismatch (wrong data types)
-- Question count mismatch (quiz only)
-- Custom validation errors
+**Architecture:**
+
+```
+Generation Error Flow:
+  ↓
+LLMService returns error or validation failure
+  ↓
+Hook catches error and sets GenerationContext
+  ↓
+ValidationErrorDisplay component shows:
+  ├─ Main error message (red)
+  ├─ Expandable validation details (orange)
+  ├─ Recovery options (Retry, View Raw)
+  └─ Helpful troubleshooting tips (blue)
+  ↓
+User clicks "Retry" or "View Raw Response"
+  ↓
+Either retry generation or inspect response
+```
+
+**Validation Types:**
+
+1. **Schema Validation (Zod)**
+   - Done during response parsing
+   - Validates required fields and types
+   - Returns detailed error issues
+
+2. **Business Rule Validation**
+   - Runs on successful schema validation
+   - Checks content quality and structure
+   - Returns warnings and errors separately
+
+**LessonValidator Rules:**
+- Title: 3-200 characters
+- Summary: 20+ characters
+- Duration: required
+- Difficulty: must be beginner/intermediate/advanced
+- Learning Objectives: 1-10 items
+- Tags: recommended minimum 1
+- Content: 100+ characters
+
+**QuizValidator Rules:**
+- Title, lesson_id, quiz_version: required
+- Questions: 1-100 items
+- Each Question:
+  - ID, type, question text: required
+  - Type: multiple-choice/short-answer/true-false
+  - Difficulty: easy/medium/hard
+  - Points: positive number
+  - Correct answer: required
+  - Explanation: required
+  - For multiple-choice: 2-10 options, answer index valid
+
+**ValidationErrorDisplay Features:**
+- Severity color coding (red for errors, orange for warnings)
+- Expandable details section with field paths
+- Recovery options (Retry, View Raw Response)
+- Raw response viewer with scrollable content
+- Helpful troubleshooting tips with list
+- Loading state for retry button
+
+**Integration:**
+
+Lessons Tab:
+```
+1. Generation completes successfully
+2. Run LessonValidator on result
+3. If warnings: show in success box
+4. If errors: show with ValidationErrorDisplay
+5. User can retry or view raw response
+```
+
+Quizzes Tab:
+```
+1. Generation completes successfully
+2. Run QuizValidator on result
+3. If warnings: show in success box
+4. If errors: show with ValidationErrorDisplay
+5. User can retry or view raw response
+```
+
+**Error Scenarios Handled:**
+- ✅ Parse error (invalid JSON) - Schema validation
+- ✅ Schema mismatch (missing required fields) - Schema validation
+- ✅ Type mismatch (wrong data types) - Schema validation
+- ✅ Content quality issues - Business rule validation
+- ✅ Question structure issues - Quiz validator
+- ✅ Option count and answer validity - Quiz validator
+
+**Testing Notes:**
+- ✅ ValidationErrorDisplay renders correctly
+- ✅ Expandable details work
+- ✅ Retry button is wired to regenerate
+- ✅ Raw response viewer functional
+- ✅ Business validators run on success
+- ✅ Warnings display in success box
+- ✅ TypeScript compiles without errors
 
 **Success Criteria:**
-- ✓ All invalid responses caught and reported
-- ✓ Error messages are user-friendly
-- ✓ Recovery options clearly presented
-- ✓ Retry functionality works
-- ✓ Manual fix (JSON editor) opens correctly
+- ✅ All schema validation errors caught
+- ✅ Business rule validation runs on success
+- ✅ Error messages are user-friendly
+- ✅ Recovery options clearly presented
+- ✅ Retry functionality works
+- ✅ Raw response viewer available
+- ✅ Warnings distinguished from errors
+- ✅ Question-specific error reporting for quizzes
 
-**Dependencies:** Phase 8.5 (generation), Phase 8.2 (UI)
+**Validation Error Hierarchy:**
+1. **Critical (Show in Error Box):**
+   - Required fields missing
+   - Wrong data types
+   - Invalid enum values
+   - Question structure issues
+
+2. **Warnings (Show in Success Box):**
+   - Content too short
+   - Recommended fields missing
+   - Non-critical quality issues
+
+**Dependencies:**
+- Phase 8.1 (types) ✅
+- Phase 8.3 (contexts, Zod schemas) ✅
+- Phase 8.4 (LLMService) ✅
+- Phase 8.5 (generation) ✅
+
+**Next Phase Readiness:**
+- Validated lesson/quiz results ready for export
+- All validation errors and warnings clearly reported
+- Ready for Phase 8.7 (file system operations)
 
 ---
 
 ### Phase 8.7: File System Operations ⏳ PENDING
-**Time Estimate:** 2-3 hours  
+**Time Estimate:** 2-3 hours
 **Status:** Not started
 
 **Objective:** Implement file read/write operations and versioning logic
@@ -2453,7 +2543,7 @@ useGenerateLessonMutation.generateLesson()
 ---
 
 ### Phase 8.8: Integration & Testing ⏳ PENDING
-**Time Estimate:** 2-3 hours  
+**Time Estimate:** 2-3 hours
 **Status:** Not started
 
 **Objective:** Wire everything together and test end-to-end

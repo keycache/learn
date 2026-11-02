@@ -1,14 +1,18 @@
 /**
  * Lessons Tab Component
  * Allows user to generate lessons with customizable parameters
- * Phase 8.5 - Wired to LLMService
+ * Phase 8.6 - Enhanced with validation error display and recovery
  */
 
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { LESSON_PROMPTS, interpolateLessonPrompt } from '../prompts/lessonPrompts'
 import { useSelection } from '../hooks/useSelection'
 import { useGeneration } from '../hooks/useGeneration'
 import { useGenerateLessonMutation } from '../hooks/useGenerateLessonMutation'
+import { ValidationErrorDisplay } from '../components/ValidationErrorDisplay'
+import { LessonValidator } from '@/services/validators'
 
 export interface LessonFormState {
   topic: string
@@ -207,29 +211,78 @@ export function LessonsTab(props: LessonsTabProps) {
         </p>
       )}
 
-      {/* Generation Error */}
+      {/* Generation Error - Enhanced Display */}
       {generation.error && (
-        <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md">
-          <p className="text-sm text-red-800 dark:text-red-100 font-medium">Error</p>
-          <p className="text-sm text-red-700 dark:text-red-200 mt-1">{generation.error}</p>
-          {generation.validationErrors.length > 0 && (
-            <ul className="text-xs text-red-600 dark:text-red-300 mt-2 list-disc list-inside">
-              {generation.validationErrors.map((error, idx) => (
-                <li key={idx}>{error}</li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <ValidationErrorDisplay
+          errorMessage={generation.error}
+          validationErrors={generation.validationErrors}
+          rawResponse={generation.rawResponse}
+          onRetry={handleGenerate}
+          isLoading={generation.isLoading}
+        />
       )}
 
       {/* Generation Success */}
       {generation.result && 'content' in generation.result && (
-        <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
-          <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Lesson Generated Successfully</p>
-          <div className="text-sm text-green-700 dark:text-green-200 mt-2">
-            <p><strong>Title:</strong> {(generation.result as any).title}</p>
-            <p><strong>Duration:</strong> {(generation.result as any).duration}</p>
-            <p><strong>Difficulty:</strong> {(generation.result as any).difficulty}</p>
+        <div className="space-y-3">
+          <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
+            <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Lesson Generated Successfully</p>
+            <div className="text-sm text-green-700 dark:text-green-200 mt-2">
+              <p><strong>Title:</strong> {(generation.result as any).title}</p>
+              <p><strong>Duration:</strong> {(generation.result as any).duration}</p>
+              <p><strong>Difficulty:</strong> {(generation.result as any).difficulty}</p>
+              
+              {/* Business Rule Validation */}
+              {(() => {
+                const validationErrors = LessonValidator.validate(generation.result as any)
+                if (validationErrors.length > 0) {
+                  return (
+                    <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-200">Validation Warnings:</p>
+                      <ul className="text-xs mt-1 space-y-1 text-green-600 dark:text-green-300">
+                        {validationErrors.map((err, idx) => (
+                          <li key={idx}>• {err.message}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                }
+                return null
+              })()}
+            </div>
+          </div>
+
+          {/* Full Lesson Content Display */}
+          <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Lesson Content</h3>
+            <div className="max-h-96 overflow-y-auto p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+              <div className="prose prose-sm dark:prose-invert max-w-none text-sm text-slate-700 dark:text-slate-300">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: (props) => <h1 className="text-xl font-bold mt-4 mb-2 text-slate-900 dark:text-slate-100" {...props} />,
+                    h2: (props) => <h2 className="text-lg font-bold mt-3 mb-2 text-slate-800 dark:text-slate-200" {...props} />,
+                    h3: (props) => <h3 className="text-base font-semibold mt-2 mb-1 text-slate-800 dark:text-slate-200" {...props} />,
+                    p: (props) => <p className="text-sm text-slate-700 dark:text-slate-300 mb-2" {...props} />,
+                    ul: (props) => <ul className="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 mb-2 space-y-1" {...props} />,
+                    ol: (props) => <ol className="list-decimal list-inside text-sm text-slate-700 dark:text-slate-300 mb-2 space-y-1" {...props} />,
+                    li: (props) => <li className="text-sm text-slate-700 dark:text-slate-300" {...props} />,
+                    table: (props) => <table className="w-full border-collapse border border-slate-300 dark:border-slate-600 text-xs mb-2" {...props} />,
+                    thead: (props) => <thead className="bg-slate-100 dark:bg-slate-800" {...props} />,
+                    tbody: (props) => <tbody {...props} />,
+                    tr: (props) => <tr className="border-b border-slate-300 dark:border-slate-600" {...props} />,
+                    th: (props) => <th className="border border-slate-300 dark:border-slate-600 px-2 py-1 bg-slate-200 dark:bg-slate-700 font-semibold text-slate-900 dark:text-slate-100 text-left" {...props} />,
+                    td: (props) => <td className="border border-slate-300 dark:border-slate-600 px-2 py-1 text-slate-700 dark:text-slate-300" {...props} />,
+                    strong: (props) => <strong className="font-bold text-slate-900 dark:text-slate-100" {...props} />,
+                    em: (props) => <em className="italic text-slate-700 dark:text-slate-300" {...props} />,
+                    code: (props) => <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs font-mono text-slate-900 dark:text-slate-100" {...props} />,
+                    blockquote: (props) => <blockquote className="border-l-4 border-slate-400 dark:border-slate-600 pl-3 italic text-slate-600 dark:text-slate-400 my-2" {...props} />,
+                  }}
+                >
+                  {(generation.result as any).content}
+                </ReactMarkdown>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -244,3 +297,4 @@ export function LessonsTab(props: LessonsTabProps) {
     </div>
   )
 }
+

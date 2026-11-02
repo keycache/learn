@@ -1,7 +1,7 @@
 /**
  * Quizzes Tab Component
  * Allows user to generate quizzes with customizable question counts
- * Phase 8.5 - Wired to LLMService
+ * Phase 8.6 - Enhanced with validation error display and recovery
  */
 
 import { useState } from 'react'
@@ -9,6 +9,8 @@ import { QUIZ_PROMPTS, interpolateQuizPrompt } from '../prompts/quizPrompts'
 import { useSelection } from '../hooks/useSelection'
 import { useGeneration } from '../hooks/useGeneration'
 import { useGenerateQuizMutation } from '../hooks/useGenerateQuizMutation'
+import { ValidationErrorDisplay } from '../components/ValidationErrorDisplay'
+import { QuizValidator } from '@/services/validators'
 
 export interface QuizFormState {
   topic: string
@@ -296,31 +298,90 @@ export function QuizzesTab(props: QuizzesTabProps) {
         </p>
       )}
 
-      {/* Generation Error */}
+      {/* Generation Error - Enhanced Display */}
       {generation.error && (
-        <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md">
-          <p className="text-sm text-red-800 dark:text-red-100 font-medium">Error</p>
-          <p className="text-sm text-red-700 dark:text-red-200 mt-1">{generation.error}</p>
-          {generation.validationErrors.length > 0 && (
-            <ul className="text-xs text-red-600 dark:text-red-300 mt-2 list-disc list-inside">
-              {generation.validationErrors.map((error, idx) => (
-                <li key={idx}>{error}</li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <ValidationErrorDisplay
+          errorMessage={generation.error}
+          validationErrors={generation.validationErrors}
+          rawResponse={generation.rawResponse}
+          onRetry={handleGenerate}
+          isLoading={generation.isLoading}
+        />
       )}
 
       {/* Generation Success */}
       {generation.result && 'questions' in generation.result && (
-        <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
-          <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Quiz Generated Successfully</p>
-          <div className="text-sm text-green-700 dark:text-green-200 mt-2">
-            <p><strong>Total Questions:</strong> {generation.result.questions.length}</p>
-            <p><strong>Quiz Version:</strong> {generation.result.quiz_version}</p>
-            {generation.result.questions && (
-              <p><strong>Topics Covered:</strong> {Array.from(new Set(generation.result.questions.map(q => q.type))).join(', ')}</p>
-            )}
+        <div className="space-y-3">
+          <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
+            <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Quiz Generated Successfully</p>
+            <div className="text-sm text-green-700 dark:text-green-200 mt-2">
+              <p><strong>Total Questions:</strong> {generation.result.questions.length}</p>
+              <p><strong>Quiz Version:</strong> {generation.result.quiz_version}</p>
+              {generation.result.questions && (
+                <p><strong>Topics Covered:</strong> {Array.from(new Set(generation.result.questions.map(q => q.type))).join(', ')}</p>
+              )}
+
+              {/* Business Rule Validation */}
+              {(() => {
+                const validationErrors = QuizValidator.validate(generation.result as any)
+                if (validationErrors.length > 0) {
+                  return (
+                    <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-200">Validation Warnings:</p>
+                      <ul className="text-xs mt-1 space-y-1 text-green-600 dark:text-green-300">
+                        {QuizValidator.getErrorMessages(validationErrors).map((msg, idx) => (
+                          <li key={idx}>• {msg}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                }
+                return null
+              })()}
+            </div>
+          </div>
+
+          {/* Quiz Questions Display */}
+          <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Questions Preview</h3>
+            <div className="max-h-96 overflow-y-auto space-y-3">
+              {generation.result.questions.map((question, idx) => (
+                <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+                  <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-2">
+                    Q{idx + 1}: {question.question}
+                  </p>
+                  <div className="ml-3 space-y-1">
+                    {question.options && question.options.map((option, optIdx) => {
+                      const isCorrect = typeof question.correctAnswer === 'number' 
+                        ? optIdx === question.correctAnswer 
+                        : option === question.correctAnswer;
+                      return (
+                        <div 
+                          key={optIdx} 
+                          className={`text-xs p-1.5 rounded ${
+                            isCorrect
+                              ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 font-medium'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <span className="font-medium">{String.fromCharCode(65 + optIdx)}:</span> {option}
+                          {isCorrect && ' ✓'}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {question.explanation && (
+                    <p className="text-xs italic text-slate-600 dark:text-slate-400 mt-2">
+                      <strong>Explanation:</strong> {question.explanation}
+                    </p>
+                  )}
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    <span>Difficulty: <span className="font-medium">{question.difficulty}</span></span>
+                    {question.points && <span className="ml-3">Points: <span className="font-medium">{question.points}</span></span>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

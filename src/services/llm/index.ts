@@ -27,6 +27,7 @@ export interface GenerationResult<T> {
   data?: T
   error?: string
   validationErrors?: unknown
+  rawResponse?: string
 }
 
 /**
@@ -91,12 +92,14 @@ export class LLMService {
           success: false,
           error: parseResult.error?.message || 'Failed to parse lesson response',
           validationErrors: parseResult.error?.details,
+          rawResponse: parseResult.rawResponse,
         }
       }
 
       return {
         success: true,
         data: parseResult.data,
+        rawResponse: parseResult.rawResponse,
       }
     } catch (error) {
       return {
@@ -141,12 +144,14 @@ export class LLMService {
           success: false,
           error: parseResult.error?.message || 'Failed to parse quiz response',
           validationErrors: parseResult.error?.details,
+          rawResponse: parseResult.rawResponse,
         }
       }
 
       return {
         success: true,
         data: parseResult.data,
+        rawResponse: parseResult.rawResponse,
       }
     } catch (error) {
       return {
