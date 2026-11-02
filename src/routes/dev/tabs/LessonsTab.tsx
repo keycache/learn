@@ -1,13 +1,14 @@
 /**
  * Lessons Tab Component
  * Allows user to generate lessons with customizable parameters
- * Phase 8.3 - Integrated with Context
+ * Phase 8.5 - Wired to LLMService
  */
 
 import { useState } from 'react'
 import { LESSON_PROMPTS, interpolateLessonPrompt } from '../prompts/lessonPrompts'
 import { useSelection } from '../hooks/useSelection'
 import { useGeneration } from '../hooks/useGeneration'
+import { useGenerateLessonMutation } from '../hooks/useGenerateLessonMutation'
 
 export interface LessonFormState {
   topic: string
@@ -23,6 +24,7 @@ interface LessonsTabProps {
 export function LessonsTab(props: LessonsTabProps) {
   const { selection } = useSelection()
   const { generation } = useGeneration()
+  const { generateLesson } = useGenerateLessonMutation()
   const [ageGroup, setAgeGroup] = useState<string>('9-12 years')
   const [promptTemplate, setPromptTemplate] = useState<'standard' | 'conversation' | 'grammar'>('standard')
   const [customInstructions, setCustomInstructions] = useState<string>('')
@@ -37,18 +39,20 @@ export function LessonsTab(props: LessonsTabProps) {
 
   const isComplete = selection.topic && ageGroup && customInstructions.trim()
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!isComplete) {
       return
     }
 
-    if (props.onGenerate) {
-      props.onGenerate({
-        topic: selection.topic || '',
-        ageGroup,
-        customInstructions,
-      })
-    }
+    await generateLesson({
+      category: selection.category || 'Language',
+      subcategory: selection.subcategory || 'General',
+      topic: selection.topic || '',
+      ageGroup,
+      difficulty: 'beginner',
+      customInstructions,
+      promptTemplate,
+    })
   }
 
   // Get the selected prompt template
@@ -186,21 +190,48 @@ export function LessonsTab(props: LessonsTabProps) {
       <div className="flex justify-end pt-2">
         <button
           onClick={handleGenerate}
-          disabled={!isComplete}
+          disabled={!isComplete || generation.isLoading}
           style={{
             backgroundColor: 'hsl(238 92% 66%)',
             color: 'hsl(0 0% 100%)',
           }}
           className="px-6 py-2 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
         >
-          Generate Lesson
+          {generation.isLoading ? 'Generating...' : 'Generate Lesson'}
         </button>
       </div>
 
-      {!isComplete && (
+      {!isComplete && !generation.isLoading && (
         <p className="text-xs text-muted-foreground text-center">
           Fill in all required fields to generate
         </p>
+      )}
+
+      {/* Generation Error */}
+      {generation.error && (
+        <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md">
+          <p className="text-sm text-red-800 dark:text-red-100 font-medium">Error</p>
+          <p className="text-sm text-red-700 dark:text-red-200 mt-1">{generation.error}</p>
+          {generation.validationErrors.length > 0 && (
+            <ul className="text-xs text-red-600 dark:text-red-300 mt-2 list-disc list-inside">
+              {generation.validationErrors.map((error, idx) => (
+                <li key={idx}>{error}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Generation Success */}
+      {generation.result && 'content' in generation.result && (
+        <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
+          <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Lesson Generated Successfully</p>
+          <div className="text-sm text-green-700 dark:text-green-200 mt-2">
+            <p><strong>Title:</strong> {(generation.result as any).title}</p>
+            <p><strong>Duration:</strong> {(generation.result as any).duration}</p>
+            <p><strong>Difficulty:</strong> {(generation.result as any).difficulty}</p>
+          </div>
+        </div>
       )}
 
       {/* Info Box */}

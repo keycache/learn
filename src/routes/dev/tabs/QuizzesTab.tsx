@@ -1,13 +1,14 @@
 /**
  * Quizzes Tab Component
  * Allows user to generate quizzes with customizable question counts
- * Phase 8.3 - Integrated with Context
+ * Phase 8.5 - Wired to LLMService
  */
 
 import { useState } from 'react'
 import { QUIZ_PROMPTS, interpolateQuizPrompt } from '../prompts/quizPrompts'
 import { useSelection } from '../hooks/useSelection'
 import { useGeneration } from '../hooks/useGeneration'
+import { useGenerateQuizMutation } from '../hooks/useGenerateQuizMutation'
 
 export interface QuizFormState {
   topic: string
@@ -26,6 +27,7 @@ interface QuizzesTabProps {
 export function QuizzesTab(props: QuizzesTabProps) {
   const { selection } = useSelection()
   const { generation } = useGeneration()
+  const { generateQuiz } = useGenerateQuizMutation()
   const [lessonId, setLessonId] = useState<string>('')
   const [easyCount, setEasyCount] = useState<number>(30)
   const [mediumCount, setMediumCount] = useState<number>(30)
@@ -51,21 +53,22 @@ export function QuizzesTab(props: QuizzesTabProps) {
 
   const isComplete = selection.topic && lessonId && customInstructions.trim()
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!isComplete) {
       return
     }
 
-    if (props.onGenerate) {
-      props.onGenerate({
-        topic: selection.topic || '',
-        lessonId,
-        easyCount,
-        mediumCount,
-        hardCount,
-        customInstructions,
-      })
-    }
+    await generateQuiz({
+      category: selection.category || 'Language',
+      subcategory: selection.subcategory || 'General',
+      topic: selection.topic || '',
+      lessonTitle: mockLessons.find(l => l.id === lessonId)?.name || 'Untitled Lesson',
+      easyCount,
+      mediumCount,
+      hardCount,
+      customInstructions,
+      promptTemplate,
+    })
   }
 
   // Get the selected prompt template
@@ -276,21 +279,50 @@ export function QuizzesTab(props: QuizzesTabProps) {
       <div className="flex justify-end pt-2">
         <button
           onClick={handleGenerate}
-          disabled={!isComplete}
+          disabled={!isComplete || generation.isLoading}
           style={{
             backgroundColor: 'hsl(238 92% 66%)',
             color: 'hsl(0 0% 100%)',
           }}
           className="px-6 py-2 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
         >
-          Generate Quiz
+          {generation.isLoading ? 'Generating...' : 'Generate Quiz'}
         </button>
       </div>
 
-      {!isComplete && (
+      {!isComplete && !generation.isLoading && (
         <p className="text-xs text-muted-foreground text-center">
           Fill in all required fields to generate
         </p>
+      )}
+
+      {/* Generation Error */}
+      {generation.error && (
+        <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md">
+          <p className="text-sm text-red-800 dark:text-red-100 font-medium">Error</p>
+          <p className="text-sm text-red-700 dark:text-red-200 mt-1">{generation.error}</p>
+          {generation.validationErrors.length > 0 && (
+            <ul className="text-xs text-red-600 dark:text-red-300 mt-2 list-disc list-inside">
+              {generation.validationErrors.map((error, idx) => (
+                <li key={idx}>{error}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Generation Success */}
+      {generation.result && 'questions' in generation.result && (
+        <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
+          <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Quiz Generated Successfully</p>
+          <div className="text-sm text-green-700 dark:text-green-200 mt-2">
+            <p><strong>Total Questions:</strong> {generation.result.questions.length}</p>
+            <p><strong>Quiz Version:</strong> {generation.result.quiz_version}</p>
+            {generation.result.questions && (
+              <p><strong>Topics Covered:</strong> {Array.from(new Set(generation.result.questions.map(q => q.type))).join(', ')}</p>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Info Box */}

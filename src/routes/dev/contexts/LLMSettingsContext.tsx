@@ -3,6 +3,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react';
 export interface LLMSettings {
   provider: string;
   apiKey: string;
+  modelName: string;
   isConnected: boolean;
   lastTestedAt: string | null;
 }
@@ -11,6 +12,7 @@ interface LLMSettingsContextType {
   settings: LLMSettings;
   updateApiKey: (apiKey: string) => void;
   updateProvider: (provider: string) => void;
+  updateModelName: (modelName: string) => void;
   setConnected: (isConnected: boolean, testedAt?: string) => void;
   clearSettings: () => void;
 }
@@ -23,6 +25,7 @@ const API_KEY_STORAGE_KEY = 'dev_llm_apikeys';
 const DEFAULT_SETTINGS: LLMSettings = {
   provider: 'openrouter',
   apiKey: '',
+  modelName: 'meta-llama/llama-2-70b-chat',
   isConnected: false,
   lastTestedAt: null,
 };
@@ -95,6 +98,10 @@ export function LLMSettingsProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
+  const updateModelName = useCallback((modelName: string) => {
+    setSettings((prev) => ({ ...prev, modelName }));
+  }, []);
+
   const setConnected = useCallback((isConnected: boolean, testedAt?: string) => {
     setSettings((prev) => ({
       ...prev,
@@ -115,6 +122,7 @@ export function LLMSettingsProvider({ children }: { children: React.ReactNode })
         settings,
         updateApiKey,
         updateProvider,
+        updateModelName,
         setConnected,
         clearSettings,
       }}
