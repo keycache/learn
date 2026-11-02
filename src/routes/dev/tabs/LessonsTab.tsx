@@ -1,11 +1,13 @@
 /**
  * Lessons Tab Component
  * Allows user to generate lessons with customizable parameters
- * Phase 8.2
+ * Phase 8.3 - Integrated with Context
  */
 
 import { useState } from 'react'
 import { LESSON_PROMPTS, interpolateLessonPrompt } from '../prompts/lessonPrompts'
+import { useSelection } from '../hooks/useSelection'
+import { useGeneration } from '../hooks/useGeneration'
 
 export interface LessonFormState {
   topic: string
@@ -19,7 +21,8 @@ interface LessonsTabProps {
 }
 
 export function LessonsTab(props: LessonsTabProps) {
-  const [topic, setTopic] = useState<string>(props.selectedTopic || '')
+  const { selection } = useSelection()
+  const { generation } = useGeneration()
   const [ageGroup, setAgeGroup] = useState<string>('9-12 years')
   const [promptTemplate, setPromptTemplate] = useState<'standard' | 'conversation' | 'grammar'>('standard')
   const [customInstructions, setCustomInstructions] = useState<string>('')
@@ -32,46 +35,46 @@ export function LessonsTab(props: LessonsTabProps) {
     { id: 'grammar' as const, label: 'Grammar-Focused' },
   ]
 
+  const isComplete = selection.topic && ageGroup && customInstructions.trim()
+
   const handleGenerate = () => {
-    if (!topic.trim() || !customInstructions.trim()) {
+    if (!isComplete) {
       return
     }
 
     if (props.onGenerate) {
       props.onGenerate({
-        topic,
+        topic: selection.topic || '',
         ageGroup,
         customInstructions,
       })
     }
   }
 
-  const isComplete = topic && ageGroup && customInstructions.trim()
-
   // Get the selected prompt template
   const selectedPrompt = LESSON_PROMPTS[promptTemplate]
-  
+
   // Interpolate the prompt with current values
   const interpolatedPrompt = interpolateLessonPrompt(
     selectedPrompt.userPrompt,
     {
-      category: 'Spanish', // TODO: Phase 8.3 - Get from context
-      subcategory: 'Beginner', // TODO: Phase 8.3 - Get from context
-      topic,
+      category: selection.category || 'Language',
+      subcategory: selection.subcategory || 'General',
+      topic: selection.topic || '',
       ageGroup,
-      difficulty: 'beginner', // TODO: Phase 8.3 - Get from context
+      difficulty: 'beginner',
       customInstructions,
     }
   )
 
   return (
     <div className="space-y-6">
-      <div>
         <h3 className="text-lg font-semibold mb-4">Generate Lesson</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Configure lesson parameters and provide custom instructions
         </p>
-      </div>
+      {/* <div>
+      </div> */}
 
       {/* Topic Display */}
       <div className="space-y-2">
@@ -81,13 +84,13 @@ export function LessonsTab(props: LessonsTabProps) {
         <input
           id="topic"
           type="text"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="Enter or select topic from Selection tab"
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
+          value={selection.topic || ''}
+          readOnly
+          placeholder="Select topic from Selection tab"
+          className="w-full px-3 py-2 border border-border rounded-md bg-muted text-foreground text-sm placeholder-muted-foreground"
         />
         <p className="text-xs text-muted-foreground">
-          Typically populated from Selection tab
+          Automatically populated from Selection tab
         </p>
       </div>
 
@@ -156,19 +159,23 @@ export function LessonsTab(props: LessonsTabProps) {
         </button>
 
         {showPromptPreview && (
-          <div className="mt-3 p-4 bg-muted rounded-md border border-border">
+          <div>
             <div className="space-y-3">
               <div>
                 <h4 className="text-xs font-semibold mb-1">System Prompt:</h4>
-                <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
-                  {selectedPrompt.systemPrompt.substring(0, 500)}...
-                </pre>
+                <div className="max-h-64 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                    {selectedPrompt.systemPrompt}
+                  </pre>
+                </div>
               </div>
               <div>
                 <h4 className="text-xs font-semibold mb-1">Interpolated User Prompt:</h4>
-                <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
-                  {interpolatedPrompt}
-                </pre>
+                <div className="max-h-64 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                    {interpolatedPrompt}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>
@@ -199,7 +206,7 @@ export function LessonsTab(props: LessonsTabProps) {
       {/* Info Box */}
       <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>What happens next:</strong> After you click Generate, the LLM will create a lesson 
+          <strong>What happens next:</strong> After you click Generate, the LLM will create a lesson
           following the template shown above. You'll see a preview and have the option to save or retry.
         </p>
       </div>

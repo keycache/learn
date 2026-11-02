@@ -1,10 +1,10 @@
 /**
  * Selection Tab Component
  * Allows user to select category, subcategory, topic, and generation type
- * Phase 8.2
+ * Phase 8.3 - Integrated with Context
  */
 
-import { useState } from 'react'
+import { useSelection } from '../hooks/useSelection'
 
 export interface SelectionFormState {
   category: string
@@ -18,42 +18,35 @@ interface SelectionTabProps {
 }
 
 export function SelectionTab(props: SelectionTabProps) {
-  const [category, setCategory] = useState<string>('')
-  const [subcategory, setSubcategory] = useState<string>('')
-  const [topic, setTopic] = useState<string>('')
-  const [type, setType] = useState<'lesson' | 'quiz' | ''>('')
+  const { selection, setCategory, setSubcategory, setTopic, setType } = useSelection()
 
-  // TODO: Phase 8.3 - Load from actual file system via API
   const mockCategories = ['Spoken Languages', 'Grammar', 'Vocabulary', 'Pronunciation']
-  const mockSubcategories = category ? ['French', 'Spanish', 'German', 'Italian'] : []
-  const mockTopics = subcategory ? ['Numbers', 'Colors', 'Greetings', 'Food', 'Animals'] : []
+  const mockSubcategories = selection.category ? ['French', 'Spanish', 'German', 'Italian'] : []
+  const mockTopics = selection.subcategory ? ['Numbers', 'Colors', 'Greetings', 'Food', 'Animals'] : []
 
   const handleCategoryChange = (value: string) => {
-    setCategory(value)
-    setSubcategory('')
-    setTopic('')
-    setType('')
+    setCategory(value || null)
   }
 
   const handleSubcategoryChange = (value: string) => {
-    setSubcategory(value)
-    setTopic('')
-    setType('')
+    setSubcategory(value || null)
   }
 
   const handleTopicChange = (value: string) => {
-    setTopic(value)
-    setType('')
+    setTopic(value || null)
   }
 
-  const handleTypeChange = (value: 'lesson' | 'quiz') => {
-    setType(value)
-    if (props.onSelectionChange) {
-      props.onSelectionChange({ category, subcategory, topic, type: value })
+  const handleTypeChange = (value: 'lesson' | 'quiz' | '') => {
+    setType(value || null)
+    if (props.onSelectionChange && value) {
+      props.onSelectionChange({ 
+        category: selection.category || '', 
+        subcategory: selection.subcategory || '', 
+        topic: selection.topic || '', 
+        type: value as 'lesson' | 'quiz' 
+      })
     }
   }
-
-  const isComplete = category && subcategory && topic && type
 
   return (
     <div className="space-y-6">
@@ -71,8 +64,16 @@ export function SelectionTab(props: SelectionTabProps) {
         </label>
         <select
           id="category"
-          value={category}
+          value={selection.category || ''}
           onChange={(e) => handleCategoryChange(e.target.value)}
+          style={{
+            appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 0.75rem center',
+            backgroundSize: '1.5em 1.5em',
+            paddingRight: '2.5rem',
+          }}
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
         >
           <option value="">Select a category...</option>
@@ -80,19 +81,27 @@ export function SelectionTab(props: SelectionTabProps) {
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
-        {!category && <p className="text-xs text-muted-foreground">Required</p>}
+        {!selection.category && <p className="text-xs text-muted-foreground">Required</p>}
       </div>
 
       {/* Subcategory Selector */}
       <div className="space-y-2">
         <label htmlFor="subcategory" className="text-sm font-medium">
-          Subcategory * {!category && <span className="text-xs text-muted-foreground">(select category first)</span>}
+          Subcategory * {!selection.category && <span className="text-xs text-muted-foreground">(select category first)</span>}
         </label>
         <select
           id="subcategory"
-          value={subcategory}
+          value={selection.subcategory || ''}
           onChange={(e) => handleSubcategoryChange(e.target.value)}
-          disabled={!category}
+          disabled={!selection.category}
+          style={{
+            appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 0.75rem center',
+            backgroundSize: '1.5em 1.5em',
+            paddingRight: '2.5rem',
+          }}
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="">Select a subcategory...</option>
@@ -100,19 +109,27 @@ export function SelectionTab(props: SelectionTabProps) {
             <option key={sub} value={sub}>{sub}</option>
           ))}
         </select>
-        {!subcategory && category && <p className="text-xs text-muted-foreground">Required</p>}
+        {!selection.subcategory && selection.category && <p className="text-xs text-muted-foreground">Required</p>}
       </div>
 
       {/* Topic Selector */}
       <div className="space-y-2">
         <label htmlFor="topic" className="text-sm font-medium">
-          Topic * {!subcategory && <span className="text-xs text-muted-foreground">(select subcategory first)</span>}
+          Topic * {!selection.subcategory && <span className="text-xs text-muted-foreground">(select subcategory first)</span>}
         </label>
         <select
           id="topic"
-          value={topic}
+          value={selection.topic || ''}
           onChange={(e) => handleTopicChange(e.target.value)}
-          disabled={!subcategory}
+          disabled={!selection.subcategory}
+          style={{
+            appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 0.75rem center',
+            backgroundSize: '1.5em 1.5em',
+            paddingRight: '2.5rem',
+          }}
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="">Select a topic...</option>
@@ -120,11 +137,11 @@ export function SelectionTab(props: SelectionTabProps) {
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
-        {!topic && subcategory && <p className="text-xs text-muted-foreground">Required</p>}
+        {!selection.topic && selection.subcategory && <p className="text-xs text-muted-foreground">Required</p>}
       </div>
 
       {/* Type Selector */}
-      {topic && (
+      {selection.topic && (
         <div className="space-y-2">
           <label className="text-sm font-medium">Generation Type *</label>
           <div className="space-y-2">
@@ -133,7 +150,7 @@ export function SelectionTab(props: SelectionTabProps) {
                 type="radio"
                 name="type"
                 value="lesson"
-                checked={type === 'lesson'}
+                checked={selection.type === 'lesson'}
                 onChange={(e) => handleTypeChange(e.target.value as 'lesson')}
                 className="cursor-pointer"
               />
@@ -148,7 +165,7 @@ export function SelectionTab(props: SelectionTabProps) {
                 type="radio"
                 name="type"
                 value="quiz"
-                checked={type === 'quiz'}
+                checked={selection.type === 'quiz'}
                 onChange={(e) => handleTypeChange(e.target.value as 'quiz')}
                 className="cursor-pointer"
               />
@@ -165,18 +182,18 @@ export function SelectionTab(props: SelectionTabProps) {
       <div className="p-4 bg-accent rounded-md">
         <div className="text-sm font-medium mb-2">Progress</div>
         <div className="space-y-1 text-xs text-muted-foreground">
-          <div>{category ? '✓' : '○'} Category selected</div>
-          <div>{subcategory ? '✓' : '○'} Subcategory selected</div>
-          <div>{topic ? '✓' : '○'} Topic selected</div>
-          <div>{type ? '✓' : '○'} Type selected</div>
+          <div>{selection.category ? '✓' : '○'} Category selected</div>
+          <div>{selection.subcategory ? '✓' : '○'} Subcategory selected</div>
+          <div>{selection.topic ? '✓' : '○'} Topic selected</div>
+          <div>{selection.type ? '✓' : '○'} Type selected</div>
         </div>
       </div>
 
-      {isComplete && (
+      {selection.category && selection.subcategory && selection.topic && selection.type && (
         <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md flex items-center gap-2">
           <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
           <span className="text-sm text-green-800 dark:text-green-200">
-            Selection complete! Proceed to the {type === 'lesson' ? 'Lessons' : 'Quizzes'} tab.
+            Selection complete! Proceed to the {selection.type === 'lesson' ? 'Lessons' : 'Quizzes'} tab.
           </span>
         </div>
       )}

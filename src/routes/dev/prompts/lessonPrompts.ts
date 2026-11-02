@@ -1,18 +1,23 @@
 /**
  * Lesson Generation Prompt Templates
- * 
+ *
  * These templates are used to guide the LLM in generating lessons.
  * Each template contains:
  * - systemPrompt: Instructions for the LLM's behavior and output format
  * - userPrompt: The specific request, with placeholders for user inputs
- * 
+ *
  * Placeholders in templates:
  * - {{category}}: Language/subject category
  * - {{subcategory}}: Subcategory (e.g., Beginner)
  * - {{topic}}: Specific topic (e.g., Greetings)
  * - {{ageGroup}}: Target age group (e.g., "9-12 years")
  * - {{customInstructions}}: User-provided custom instructions
+ *
+ * NOTE: systemPrompt is generated dynamically using schemaUtils to ensure
+ * it always matches the current GeneratedLesson interface definition.
  */
+
+import { generateLessonOutputGuide } from '../../../schemas/schemaUtils';
 
 export const LESSON_PROMPTS = {
   /**
@@ -30,42 +35,7 @@ Your task is to generate a complete lesson in Markdown format with YAML frontmat
 
 IMPORTANT: Return ONLY valid JSON with no additional text before or after.
 
-Output Format:
-{
-  "title": "Lesson title",
-  "summary": "Brief 1-2 sentence summary of what students will learn",
-  "duration": "Estimated time (e.g., '30-45 minutes')",
-  "active": true,
-  "difficulty": "beginner|intermediate|advanced",
-  "learningObjectives": [
-    "Specific, measurable objective 1",
-    "Specific, measurable objective 2",
-    "Specific, measurable objective 3"
-  ],
-  "tags": ["relevant", "keywords", "for", "searchability"],
-  "content": "# Full markdown content here...\n\n## Sections with headings...\n\n| Tables | can | be | used |\n..."
-}
-
-Guidelines for Markdown content:
-- Use descriptive headings (H1 for title, H2 for sections, H3 for subsections)
-- Include practical examples and contextual usage
-- Use tables to compare concepts or show patterns
-- Use code blocks (triple backticks) for language examples, dialogues, or vocabulary
-- Use lists for step-by-step instructions or key points
-- Use blockquotes for tips, notes, or pronunciation guides
-- Include interactive elements like practice drills or reflection questions
-- NO images - use text descriptions instead
-- Structure lessons to build progressively from simple to complex concepts
-
-Learning Objectives should be:
-- Specific and measurable (use action verbs like "recognize", "identify", "pronounce", "construct")
-- Aligned with the difficulty level
-- Achievable within the lesson duration
-
-Tags should include:
-- The difficulty level
-- The topic name
-- 2-3 relevant keywords for searchability`,
+${generateLessonOutputGuide()}`,
 
     userPrompt: `Create a {{difficulty}} {{category}} lesson about {{topic}} for {{ageGroup}} learners.
 
@@ -101,19 +71,9 @@ Your task is to generate a complete conversation lesson in Markdown format with 
 
 IMPORTANT: Return ONLY valid JSON with no additional text before or after.
 
-Output Format (same as standard):
-{
-  "title": "...",
-  "summary": "...",
-  "duration": "...",
-  "active": true,
-  "difficulty": "beginner|intermediate|advanced",
-  "learningObjectives": [...],
-  "tags": [...],
-  "content": "# Full markdown content with dialogues..."
-}
+${generateLessonOutputGuide()}
 
-Guidelines for Conversation Lessons:
+CONVERSATION-SPECIFIC GUIDELINES:
 - Include realistic dialogues between 2+ characters
 - Use code blocks with formatted dialogue:
   \`\`\`
@@ -159,19 +119,9 @@ Your task is to generate a complete grammar lesson in Markdown format with YAML 
 
 IMPORTANT: Return ONLY valid JSON with no additional text before or after.
 
-Output Format (same as standard):
-{
-  "title": "...",
-  "summary": "...",
-  "duration": "...",
-  "active": true,
-  "difficulty": "beginner|intermediate|advanced",
-  "learningObjectives": [...],
-  "tags": [...],
-  "content": "# Full markdown content with grammar explanations..."
-}
+${generateLessonOutputGuide()}
 
-Guidelines for Grammar Lessons:
+GRAMMAR-SPECIFIC GUIDELINES:
 - Explain the rule clearly with simple language
 - Use tables to show patterns and conjugations
 - Include multiple examples showing the rule in context

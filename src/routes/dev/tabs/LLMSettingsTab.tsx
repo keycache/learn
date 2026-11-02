@@ -1,10 +1,11 @@
 /**
  * LLM Settings Tab Component
  * Allows user to configure LLM provider and API key
- * Phase 8.2
+ * Phase 8.3 - Integrated with Context
  */
 
 import { useState } from 'react'
+import { useLLMSettings } from '../hooks/useLLMSettings'
 
 export interface LLMSettingsFormState {
   provider: string
@@ -16,8 +17,7 @@ interface LLMSettingsTabProps {
 }
 
 export function LLMSettingsTab(props: LLMSettingsTabProps) {
-  const [provider, setProvider] = useState<string>('openrouter')
-  const [apiKey, setApiKey] = useState<string>('')
+  const { settings, updateApiKey, updateProvider, setConnected } = useLLMSettings()
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'connected' | 'failed'>('idle')
   const [connectionError, setConnectionError] = useState<string>('')
 
@@ -28,7 +28,7 @@ export function LLMSettingsTab(props: LLMSettingsTabProps) {
   ]
 
   const handleTestConnection = async () => {
-    if (!apiKey.trim()) {
+    if (!settings.apiKey.trim()) {
       setConnectionError('API key is required')
       setConnectionStatus('failed')
       return
@@ -43,12 +43,14 @@ export function LLMSettingsTab(props: LLMSettingsTabProps) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       setConnectionStatus('connected')
       setConnectionError('')
+      setConnected(true)
       if (props.onSettingsChange) {
-        props.onSettingsChange({ provider, apiKey })
+        props.onSettingsChange({ provider: settings.provider, apiKey: settings.apiKey })
       }
     } catch (error) {
       setConnectionStatus('failed')
       setConnectionError(error instanceof Error ? error.message : 'Connection failed')
+      setConnected(false)
     }
   }
 
@@ -68,8 +70,16 @@ export function LLMSettingsTab(props: LLMSettingsTabProps) {
         </label>
         <select
           id="provider"
-          value={provider}
-          onChange={(e) => setProvider(e.target.value)}
+          value={settings.provider}
+          onChange={(e) => updateProvider(e.target.value)}
+          style={{
+            appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 0.75rem center',
+            backgroundSize: '1.5em 1.5em',
+            paddingRight: '2.5rem',
+          }}
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
         >
           {providers.map((p) => (
@@ -79,7 +89,7 @@ export function LLMSettingsTab(props: LLMSettingsTabProps) {
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
-          {providers.find(p => p.id === provider)?.description}
+          {providers.find(p => p.id === settings.provider)?.description}
         </p>
       </div>
 
@@ -92,8 +102,8 @@ export function LLMSettingsTab(props: LLMSettingsTabProps) {
           id="apiKey"
           type="password"
           placeholder="Enter your API key"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
+          value={settings.apiKey}
+          onChange={(e) => updateApiKey(e.target.value)}
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
         />
         <p className="text-xs text-muted-foreground">
@@ -102,30 +112,32 @@ export function LLMSettingsTab(props: LLMSettingsTabProps) {
       </div>
 
       {/* Connection Test */}
-      <div className="flex justify-end pt-2">
-        <button
-          onClick={handleTestConnection}
-          disabled={connectionStatus === 'testing' || !apiKey.trim()}
-          style={{
-            backgroundColor: 'hsl(238 92% 66%)',
-            color: 'hsl(0 0% 100%)',
-          }}
-          className="px-6 py-2 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
-        >
-          {connectionStatus === 'testing' ? (
-            <span className="flex items-center gap-2">
-              <span className="inline-block animate-spin">⟳</span>
-              Testing...
-            </span>
-          ) : (
-            'Test Connection'
-          )}
-        </button>
+      <div className="space-y-2">
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleTestConnection}
+            disabled={connectionStatus === 'testing' || !settings.apiKey.trim()}
+            style={{
+              backgroundColor: 'hsl(238 92% 66%)',
+              color: 'hsl(0 0% 100%)',
+            }}
+            className="px-6 py-2 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+          >
+            {connectionStatus === 'testing' ? (
+              <span className="flex items-center gap-2">
+                <span className="inline-block animate-spin">⟳</span>
+                Testing...
+              </span>
+            ) : (
+              'Test Connection'
+            )}
+          </button>
+        </div>
 
         {connectionStatus === 'connected' && (
-          <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md flex items-center gap-2">
-            <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-            <span className="text-sm text-green-800 dark:text-green-200">
+          <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md flex items-center gap-2">
+            <span className="text-green-700 dark:text-green-300 text-lg">✓</span>
+            <span className="text-sm text-green-900 dark:text-green-100">
               Connection successful! Settings saved to local storage.
             </span>
           </div>

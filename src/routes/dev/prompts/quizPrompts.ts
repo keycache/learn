@@ -13,7 +13,12 @@
  * - {{mediumCount}}: Number of medium questions to generate
  * - {{hardCount}}: Number of hard questions to generate
  * - {{customInstructions}}: User-provided custom instructions
+ * 
+ * NOTE: systemPrompt is generated dynamically using schemaUtils to ensure
+ * it always matches the current GeneratedQuiz interface definition.
  */
+
+import { generateQuizOutputGuide } from '../../../schemas/schemaUtils';
 
 export const QUIZ_PROMPTS = {
   /**
@@ -27,57 +32,18 @@ export const QUIZ_PROMPTS = {
     version: '1.0',
     systemPrompt: `You are an expert language education specialist creating assessment quizzes.
 
-Your task is to generate a complete quiz in JSON format conforming to this schema:
-{
-  "title": "Quiz title",
-  "description": "Brief description of what this quiz covers",
-  "difficulty": "beginner|intermediate|advanced",
-  "topic": "Topic name",
-  "questions": [
-    {
-      "id": "q1",
-      "type": "multiple_choice",
-      "question": "The question text",
-      "options": [
-        { "id": "a", "text": "Option A" },
-        { "id": "b", "text": "Option B" },
-        { "id": "c", "text": "Option C" },
-        { "id": "d", "text": "Option D" }
-      ],
-      "correctAnswer": "a",
-      "difficulty": "easy",
-      "explanation": "Explanation of why this is correct",
-      "hint": "A helpful hint for the learner"
-    },
-    {
-      "id": "q2",
-      "type": "multiple_choice",
-      "question": "...",
-      "options": [...],
-      "correctAnswer": "...",
-      "difficulty": "medium|hard",
-      "explanation": "...",
-      "hint": "..."
-    }
-  ]
-}
+Your task is to generate a complete quiz in JSON format.
 
-IMPORTANT Guidelines:
-1. Return ONLY valid JSON with no additional text
-2. Question IDs must be unique (q1, q2, q3, etc.)
-3. Correct answer must match one of the option IDs (a, b, c, or d)
-4. Difficulty distribution:
-   - Easy: Basic vocabulary and simple concepts
-   - Medium: Practical usage and context
-   - Hard: Complex nuances, exceptions, or real-world application
-5. Each question should have 4 options (a, b, c, d)
-6. Explanations should be educational and reinforce learning
-7. Hints should guide without giving away the answer
-8. Questions should align with the lesson content
-9. Vary question types to maintain engagement
+IMPORTANT: Return ONLY valid JSON with no additional text before or after.
 
-Question Types Supported:
-- "multiple_choice": Standard 4-option questions (currently the only supported type)
+${generateQuizOutputGuide()}
+
+ADDITIONAL GUIDELINES:
+- Question types: 'multiple-choice' (4 options), 'true-false', 'short-answer'
+- Ensure even distribution across the requested difficulty levels
+- Multiple-choice should have 4 plausible distractors
+- All questions should test comprehension, not just recall
+- Questions should align with the lesson content provided
 
 Best Practices:
 - Common mistakes should be represented in wrong answers

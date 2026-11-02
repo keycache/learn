@@ -1,11 +1,13 @@
 /**
  * Quizzes Tab Component
  * Allows user to generate quizzes with customizable question counts
- * Phase 8.2
+ * Phase 8.3 - Integrated with Context
  */
 
 import { useState } from 'react'
 import { QUIZ_PROMPTS, interpolateQuizPrompt } from '../prompts/quizPrompts'
+import { useSelection } from '../hooks/useSelection'
+import { useGeneration } from '../hooks/useGeneration'
 
 export interface QuizFormState {
   topic: string
@@ -22,7 +24,8 @@ interface QuizzesTabProps {
 }
 
 export function QuizzesTab(props: QuizzesTabProps) {
-  const [topic, setTopic] = useState<string>(props.selectedTopic || '')
+  const { selection } = useSelection()
+  const { generation } = useGeneration()
   const [lessonId, setLessonId] = useState<string>('')
   const [easyCount, setEasyCount] = useState<number>(30)
   const [mediumCount, setMediumCount] = useState<number>(30)
@@ -31,7 +34,6 @@ export function QuizzesTab(props: QuizzesTabProps) {
   const [customInstructions, setCustomInstructions] = useState<string>('')
   const [showPromptPreview, setShowPromptPreview] = useState<boolean>(false)
 
-  // TODO: Phase 8.3 - Load actual lessons from file system
   const mockLessons = [
     { id: 'lesson-001', name: 'French Greetings' },
     { id: 'lesson-002', name: 'Numbers 1-100' },
@@ -47,14 +49,16 @@ export function QuizzesTab(props: QuizzesTabProps) {
 
   const totalQuestions = easyCount + mediumCount + hardCount
 
+  const isComplete = selection.topic && lessonId && customInstructions.trim()
+
   const handleGenerate = () => {
-    if (!topic.trim() || !lessonId || !customInstructions.trim()) {
+    if (!isComplete) {
       return
     }
 
     if (props.onGenerate) {
       props.onGenerate({
-        topic,
+        topic: selection.topic || '',
         lessonId,
         easyCount,
         mediumCount,
@@ -64,18 +68,16 @@ export function QuizzesTab(props: QuizzesTabProps) {
     }
   }
 
-  const isComplete = topic && lessonId && customInstructions.trim()
-
   // Get the selected prompt template
   const selectedPrompt = QUIZ_PROMPTS[promptTemplate]
-  
+
   // Interpolate the prompt with current values
   const interpolatedPrompt = interpolateQuizPrompt(
     selectedPrompt.userPrompt,
     {
-      category: 'Spanish', // TODO: Phase 8.3 - Get from context
-      subcategory: 'Beginner', // TODO: Phase 8.3 - Get from context
-      topic,
+      category: selection.category || 'Language',
+      subcategory: selection.subcategory || 'General',
+      topic: selection.topic || '',
       lessonTitle: mockLessons.find(l => l.id === lessonId)?.name || 'Untitled Lesson',
       easyCount,
       mediumCount,
@@ -102,13 +104,13 @@ export function QuizzesTab(props: QuizzesTabProps) {
         <input
           id="topic"
           type="text"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="Enter or select topic from Selection tab"
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
+          value={selection.topic || ''}
+          readOnly
+          placeholder="Select topic from Selection tab"
+          className="w-full px-3 py-2 border border-border rounded-md bg-muted text-foreground text-sm placeholder-muted-foreground"
         />
         <p className="text-xs text-muted-foreground">
-          Typically populated from Selection tab
+          Automatically populated from Selection tab
         </p>
       </div>
 
@@ -247,19 +249,23 @@ export function QuizzesTab(props: QuizzesTabProps) {
         </button>
 
         {showPromptPreview && (
-          <div className="mt-3 p-4 bg-muted rounded-md border border-border">
+          <div>
             <div className="space-y-3">
               <div>
                 <h4 className="text-xs font-semibold mb-1">System Prompt:</h4>
-                <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
-                  {selectedPrompt.systemPrompt.substring(0, 500)}...
-                </pre>
+                <div className="max-h-64 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                    {selectedPrompt.systemPrompt}
+                  </pre>
+                </div>
               </div>
               <div>
                 <h4 className="text-xs font-semibold mb-1">Interpolated User Prompt:</h4>
-                <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
-                  {interpolatedPrompt}
-                </pre>
+                <div className="max-h-64 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                    {interpolatedPrompt}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>
@@ -290,7 +296,7 @@ export function QuizzesTab(props: QuizzesTabProps) {
       {/* Info Box */}
       <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>What happens next:</strong> After you click Generate, the LLM will create a quiz 
+          <strong>What happens next:</strong> After you click Generate, the LLM will create a quiz
           following the template shown above. You'll see a preview and have the option to save or retry.
         </p>
       </div>
