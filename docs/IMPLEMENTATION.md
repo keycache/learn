@@ -1598,8 +1598,341 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 
 ---
 
-## Phase 8: Future Enhancements 💡 BACKLOG
+---
 
+## Phase 8: Dev-Only Lesson & Quiz Generator 🚀 IN PROGRESS
+
+**Objective:** Build a development-only UI for generating lessons and quizzes using LLM providers (starting with OpenRouter)
+
+**Key Features:**
+- Dev-only code completely excluded from production build via tree-shaking
+- 4-tab interface: LLM Settings | Selection | Lessons | Quizzes
+- Cascading category/subcategory/topic selection with create-new options
+- LLM provider adapter pattern (extensible to Claude, GPT-4, etc.)
+- API key management in localStorage with connection testing
+- Live user prompt preview with auto-populated values and JSON schema
+- Markdown support for lessons, structured JSON for quizzes
+- JSON schema validation with error recovery options
+- File system storage at `/data/categories/[category]/[subcategory]/[topic]/`
+
+**Related Documentation:**
+- See `docs/DEV_GENERATOR_INDEX.md` for complete architecture guide
+- See `docs/DEV_GENERATOR_ARCHITECTURE.md` for technical specifications
+- See `docs/DEV_GENERATOR_FLOWS.md` for workflow diagrams
+- See `docs/DEV_GENERATOR_SCHEMAS.md` for data format details
+- See `docs/DEV_GENERATOR_COMPONENTS.md` for component structure
+- See `docs/DEV_GENERATOR_QUICK_REFERENCE.md` for quick reference
+
+---
+
+### Phase 8.1: Setup & Infrastructure ⏳ PENDING
+**Time Estimate:** 1-2 hours  
+**Status:** Not started
+
+**Objective:** Create file structure, TypeScript types, and dev route guard
+
+**Deliverables:**
+- File structure for dev generator components and services
+- TypeScript type definitions (Lesson, Quiz, LessonSection, etc.)
+- Dev route guard using `import.meta.env.DEV`
+- Basic route entry point at `/learn/dev/generator`
+- Context provider setup (skeleton)
+- localStorage configuration
+
+**Files to Create:**
+- `/src/routes/dev/index.tsx` - Route entry point with DEV guard
+- `/src/routes/dev/DeveloperGenerator.tsx` - Root component with Context providers (skeleton)
+- `/src/routes/dev/types/lesson.ts` - Lesson type definitions
+- `/src/routes/dev/types/quiz.ts` - Quiz type definitions
+- `/src/services/llm/types.ts` - LLM-related types
+- `/src/services/llm/providers/LLMProvider.interface.ts` - LLM adapter interface
+
+**Success Criteria:**
+- ✓ Dev route only loads when `import.meta.env.DEV === true`
+- ✓ TypeScript types match DEV_GENERATOR_SCHEMAS.md
+- ✓ Route accessible at `/learn/dev/generator` (dev mode only)
+- ✓ Build passes with zero errors
+- ✓ No dev code in production build (verify tree-shaking)
+
+**Dependencies:** None (first phase)
+
+---
+
+### Phase 8.2: UI Components - Tab Layout ⏳ PENDING
+**Time Estimate:** 4-6 hours  
+**Status:** Not started
+
+**Objective:** Build 4-tab interface with form components
+
+**Deliverables:**
+- DeveloperGenerator root component with tab navigation
+- LLMSettings tab component with form
+- Selection tab component with cascading dropdowns
+- Lessons tab component with form
+- Quizzes tab component with form
+- Reusable form components (dropdown, textarea, input, etc.)
+
+**Files to Create:**
+- `/src/routes/dev/tabs/LLMSettings.tsx` - Provider selector, API key input
+- `/src/routes/dev/tabs/Selection.tsx` - Cascading dropdowns
+- `/src/routes/dev/tabs/Lessons.tsx` - Lesson generation form
+- `/src/routes/dev/tabs/Quizzes.tsx` - Quiz generation form
+- `/src/routes/dev/components/PromptPreview.tsx` - Read-only prompt display
+- `/src/routes/dev/components/PreviewPane.tsx` - Markdown/JSON preview
+
+**Implementation Details:** See `DEV_GENERATOR_COMPONENTS.md`
+
+**Success Criteria:**
+- ✓ All 4 tabs render without errors
+- ✓ Forms capture all required fields
+- ✓ Cascading dropdowns work (cascading behavior in selection)
+- ✓ Prompt preview updates in real-time
+- ✓ No API calls made yet (UI structure only)
+
+**Dependencies:** Phase 8.1 (types and route)
+
+---
+
+### Phase 8.3: State Management & Context ⏳ PENDING
+**Time Estimate:** 2-3 hours  
+**Status:** Not started
+
+**Objective:** Implement 3 Context providers and localStorage persistence
+
+**Deliverables:**
+- LLMSettingsContext (provider, apiKey, isConnected, lastTestedAt)
+- SelectionContext (category, subcategory, topic, type)
+- GenerationContext (isLoading, error, result, validationErrors)
+- localStorage persistence for LLM settings and API keys
+- Custom hooks for context access and manipulation
+
+**Files to Create:**
+- `/src/routes/dev/contexts/LLMSettingsContext.tsx`
+- `/src/routes/dev/contexts/SelectionContext.tsx`
+- `/src/routes/dev/contexts/GenerationContext.tsx`
+- `/src/routes/dev/hooks/useLLMSettings.ts`
+- `/src/routes/dev/hooks/useSelection.ts`
+- `/src/routes/dev/hooks/useGeneration.ts`
+
+**Implementation Details:** See `DEV_GENERATOR_ARCHITECTURE.md` (State Management section)
+
+**Success Criteria:**
+- ✓ All Context providers initialize correctly
+- ✓ localStorage keys persist across page reloads
+- ✓ API key retrieved from localStorage when app loads
+- ✓ Contexts accessible from all tab components
+- ✓ No console errors
+
+**Dependencies:** Phase 8.2 (UI components need context)
+
+---
+
+### Phase 8.4: LLM Provider Adapter & OpenRouter ⏳ PENDING
+**Time Estimate:** 3-4 hours  
+**Status:** Not started
+
+**Objective:** Implement LLM provider adapter pattern and OpenRouter integration
+
+**Deliverables:**
+- LLMProvider interface (abstract adapter)
+- OpenRouterProvider implementation
+- Provider registry for easy extensibility
+- Connection testing logic with error feedback
+- API request/response handling
+
+**Files to Create:**
+- `/src/services/llm/providers/LLMProvider.interface.ts` - Base interface
+- `/src/services/llm/providers/OpenRouterProvider.ts` - OpenRouter implementation
+- `/src/services/llm/providers/index.ts` - Provider registry
+- `/src/services/llm/utils/apiClient.ts` - HTTP client wrapper
+- `/src/services/llm/utils/responseParser.ts` - LLM response parsing
+
+**Implementation Details:**
+- Adapter pattern allows adding Claude, GPT-4, etc. later
+- OpenRouter uses text-based API (extensible for image support)
+- Connection test: simple API call to validate API key
+- Error handling with user-friendly messages
+
+**Success Criteria:**
+- ✓ LLMProvider interface fully defined
+- ✓ OpenRouterProvider passes all tests
+- ✓ Connection test API call works
+- ✓ Error messages clear and actionable
+- ✓ Provider registry pattern established
+
+**Dependencies:** Phase 8.1 (types)
+
+---
+
+### Phase 8.5: Prompt Templates & Generation ⏳ PENDING
+**Time Estimate:** 2-3 hours  
+**Status:** Not started
+
+**Objective:** Create predefined prompt templates and wire LLM generation
+
+**Deliverables:**
+- Lesson prompt template with system + user prompt
+- Quiz prompt template with system + user prompt
+- Prompt builder functions that populate templates with form values
+- API call orchestration (send prompt to LLM)
+- Response streaming/chunking for large responses
+- Real-time prompt preview updates
+
+**Files to Create:**
+- `/src/services/llm/prompts/lessonPrompts.ts` - Lesson templates
+- `/src/services/llm/prompts/quizPrompts.ts` - Quiz templates
+- `/src/routes/dev/hooks/useLessonPrompt.ts` - Build lesson prompt
+- `/src/routes/dev/hooks/useQuizPrompt.ts` - Build quiz prompt
+- `/src/services/llm/utils/promptBuilder.ts` - Generic prompt building
+
+**Template Structure:** See `DEV_GENERATOR_ARCHITECTURE.md` (Prompt Templates section)
+
+**Implementation Details:**
+- System prompt: expert guidance for LLM
+- User prompt: shown to user in read-only text field
+- Auto-populate: topic, age group, duration, custom instructions, schema
+- Schema included as code block in user prompt
+- Real-time updates as user fills form
+
+**Success Criteria:**
+- ✓ Lesson prompt generates correctly with all values
+- ✓ Quiz prompt generates correctly with all values
+- ✓ Prompt preview updates in real-time
+- ✓ JSON schema displayed in prompt
+- ✓ LLM API call sends full prompt
+
+**Dependencies:** Phase 8.3 (context), Phase 8.4 (LLM provider)
+
+---
+
+### Phase 8.6: Validators & Error Handling ⏳ PENDING
+**Time Estimate:** 2-3 hours  
+**Status:** Not started
+
+**Objective:** Implement JSON schema validators and error recovery workflows
+
+**Deliverables:**
+- Lesson JSON schema validator
+- Quiz JSON schema validator
+- Question count verification for quizzes
+- Error message generator with actionable feedback
+- Recovery options: Retry, Manual Fix, View Raw
+- Validation error display component
+
+**Files to Create:**
+- `/src/services/llm/validators/LessonValidator.ts`
+- `/src/services/llm/validators/QuizValidator.ts`
+- `/src/routes/dev/components/ValidationError.tsx` - Error display
+- `/src/routes/dev/components/ErrorRecoveryOptions.tsx` - Recovery choices
+
+**Validation Rules:** See `DEV_GENERATOR_SCHEMAS.md` (Validation Checklist section)
+
+**Error Scenarios:**
+- Parse error (invalid JSON)
+- Schema mismatch (missing required fields)
+- Type mismatch (wrong data types)
+- Question count mismatch (quiz only)
+- Custom validation errors
+
+**Success Criteria:**
+- ✓ All invalid responses caught and reported
+- ✓ Error messages are user-friendly
+- ✓ Recovery options clearly presented
+- ✓ Retry functionality works
+- ✓ Manual fix (JSON editor) opens correctly
+
+**Dependencies:** Phase 8.5 (generation), Phase 8.2 (UI)
+
+---
+
+### Phase 8.7: File System Operations ⏳ PENDING
+**Time Estimate:** 2-3 hours  
+**Status:** Not started
+
+**Objective:** Implement file read/write operations and versioning logic
+
+**Deliverables:**
+- API endpoint: GET `/api/dev/filesystem` (read file system)
+- API endpoint: POST `/api/dev/save-lesson` (write lesson to file)
+- API endpoint: POST `/api/dev/save-quiz` (write quiz to file)
+- Versioning logic (auto-increment: v1, v2, v3...)
+- File path generation
+- Error handling for file operations
+
+**Files to Create:**
+- `/src/routes/dev/hooks/useFileSystem.ts` - File operation functions
+- `/src/routes/dev/services/fileOperations.ts` - File utilities
+- `vite.config.ts` updates - Dev-only API endpoints
+
+**Implementation Details:**
+- GET `/api/dev/filesystem?type=categories|subcategories|topics`
+- Query params: `?category=X&subcategory=Y` (for subcategories/topics)
+- Response: Array of available options
+- Lessons: Auto-increment version (v1, v2, v3...)
+- Quizzes: Auto-increment per lesson version
+- Store at: `/data/categories/[cat]/[subcat]/[topic]/`
+
+**Success Criteria:**
+- ✓ File system reading works correctly
+- ✓ Cascading dropdowns populate from file system
+- ✓ Create-new creates folder structure
+- ✓ Lesson files saved with correct naming
+- ✓ Quiz files saved with correct naming
+- ✓ Versioning auto-increments
+- ✓ All files written to correct paths
+
+**Dependencies:** Phase 8.3 (context), Phase 8.6 (validation)
+
+---
+
+### Phase 8.8: Integration & Testing ⏳ PENDING
+**Time Estimate:** 2-3 hours  
+**Status:** Not started
+
+**Objective:** Wire everything together and test end-to-end
+
+**Deliverables:**
+- All components connected via Context
+- End-to-end lesson generation workflow
+- End-to-end quiz generation workflow
+- Unit tests for validators
+- Integration tests for full workflows
+- Production build validation (tree-shaking check)
+
+**Files to Create:**
+- `/tests/dev-generator-lesson-flow.test.ts`
+- `/tests/dev-generator-quiz-flow.test.ts`
+- `/tests/dev-generator-validators.test.ts`
+- `/tests/dev-generator-integration.test.ts`
+
+**Test Scenarios:**
+- LLM settings: Enter key → Test connection → Save to localStorage
+- Lesson generation: Select category → Fill form → Generate → Validate → Preview → Save
+- Quiz generation: Select lesson → Fill form → Generate → Validate → Preview → Save
+- Error scenarios: Invalid response → Show error → Retry
+- File operations: Create category → Create subcategory → Create topic
+- Production build: Verify dev code not in dist/
+
+**Success Criteria:**
+- ✓ All workflows end-to-end working
+- ✓ All tests passing (20+ tests)
+- ✓ No console errors or warnings
+- ✓ Production build has no dev code
+- ✓ Tree-shaking verified (no DEV_GENERATOR files in dist/)
+- ✓ Dev API endpoints only in dev mode
+
+**Dependencies:** Phase 8.1 through 8.7 (all previous phases)
+
+---
+
+## Phase 9: Future Enhancements 💡 BACKLOG
+
+- [ ] Additional LLM providers (Claude, GPT-4)
+- [ ] Batch generation (multiple lessons/quizzes at once)
+- [ ] Template customization (user-defined prompt prefixes)
+- [ ] Version comparison (diff between lesson versions)
+- [ ] Quiz preview & test run
+- [ ] Lesson import/export
 - [ ] User authentication & progress sync (server-side)
 - [ ] Quiz session persistence (localStorage or backend)
 - [ ] Social sharing of quiz results

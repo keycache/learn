@@ -21,9 +21,87 @@ const trailingSlashPlugin = {
   },
 };
 
+// Dev-only API endpoint plugin
+const devApiPlugin = {
+  name: 'dev-api-endpoints',
+  apply: 'serve',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      // Dev-only: Generate lesson plan and quiz using LLM
+      if (req.url === '/api/dev/generate-lesson' && req.method === 'POST') {
+        let body = '';
+
+        req.on('data', chunk => {
+          body += chunk.toString();
+        });
+
+        req.on('end', async () => {
+          try {
+            const data = JSON.parse(body);
+            const { topic, difficulty } = data;
+
+            if (!topic) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: 'Topic is required' }));
+              return;
+            }
+
+            // TODO: Replace with actual LLM call
+            // For now, return a mock response structure
+            const mockResponse = {
+              topic,
+              difficulty,
+              metadata: {
+                generatedAt: new Date().toISOString(),
+                generator: 'dev-mode-mock',
+              },
+              lessons: [
+                {
+                  id: `lesson-${Math.random().toString(36).substr(2, 9)}`,
+                  title: `${topic} - Lesson 1`,
+                  description: 'First lesson on the topic',
+                  content: '# Lesson Content\n\nThis is a mock lesson generated in dev mode.',
+                  duration: '15 minutes',
+                },
+              ],
+              quiz: {
+                id: `quiz-${Math.random().toString(36).substr(2, 9)}`,
+                title: `${topic} - Quiz`,
+                questions: [
+                  {
+                    id: 'q1',
+                    type: 'multiple-choice',
+                    question: 'Sample question about ' + topic,
+                    options: ['Option A', 'Option B', 'Option C'],
+                    correctAnswer: 0,
+                  },
+                ],
+              },
+              instructions: 'This is mock data. Replace with actual LLM integration.',
+            };
+
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(mockResponse, null, 2));
+          } catch (error) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Internal server error' }));
+          }
+        });
+
+        return;
+      }
+
+      next();
+    });
+  },
+};
+
 export default defineConfig({
   base: '/learn/',
-  plugins: [trailingSlashPlugin, react(), tailwindcss()],
+  plugins: [trailingSlashPlugin, devApiPlugin, react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

@@ -49,6 +49,9 @@ function withSuspense(Component: React.LazyExoticComponent<() => ReactNode>): Re
  * /:category/:subcategory/:topic/lesson/:id  → Individual lesson view
  * /:category/:subcategory/:topic/quiz        → Quiz (difficulty via ?level=easy|medium|hard)
  * /:category/:subcategory/:topic/results     → Quiz results page
+ * 
+ * Dev-only endpoints are available via Vite middleware:
+ * POST /api/dev/generate-lesson               → LLM lesson generator (dev-only)
  */
 export const routes: RouteObject[] = [
   {
