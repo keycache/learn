@@ -1132,3 +1132,171 @@ WRONG order would be:
 
 - React Router Docs on Route Matching: https://reactrouter.com/routing/route-matching
 - Phase 8.1 Implementation: `/docs/IMPLEMENTATION.md#phase-81-setup--infrastructure`
+
+---
+
+## Phase 8.2: CSS Specificity & Tailwind Class Override (Button Styling)
+
+### The Problem
+
+**Context**: During Phase 8.2 button styling implementation, three buttons ("Test Connection", "Generate Lesson", "Generate Quiz") had correct Tailwind classes applied but showed **no background color** in the browser, even though the classes were present and TypeScript compiled successfully.
+
+**What we tried:**
+1. Added Tailwind classes: `bg-primary text-primary-foreground`
+2. Checked CSS variables: `--primary: 238 92% 66%` (HSL format) ✓
+3. Verified Tailwind config: `primary: 'hsl(var(--primary))'` ✓
+4. Build succeeded with no errors ✓
+5. Classes were in the HTML ✓
+6. **But buttons still had no background in UI** ❌
+
+### Root Cause: CSS Specificity Conflict
+
+The issue was **Tailwind class-based styling being overridden** by something with higher specificity. This is the **same root cause** as the dark mode color issue earlier (documented above in Phase 7).
+
+The CSS cascade follows specificity rules:
+- Inline `style=` attributes have **highest specificity**
+- CSS class selectors have **lower specificity**
+
+When both try to set the same property, inline styles win.
+
+### The Solution: Use Inline Styles
+
+Instead of relying on Tailwind classes for the background color, use **inline styles**:
+
+```tsx
+// BEFORE (didn't work):
+<button
+  className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 ..."
+>
+  Generate Lesson
+</button>
+
+// AFTER (works):
+<button
+  style={{
+    backgroundColor: 'hsl(238 92% 66%)',
+    color: 'hsl(0 0% 100%)',
+  }}
+  className="px-6 py-2 rounded-md hover:opacity-90 ..."
+>
+  Generate Lesson
+</button>
+```
+
+**Key differences:**
+- Move `backgroundColor` and text color to `style` prop (inline styles)
+- Keep layout classes in `className` (`px-6 py-2 rounded-md`)
+- Keep interactive classes in `className` (`hover:opacity-90`, `focus:ring-2`, `disabled:opacity-50`)
+- Use HSL values directly: `hsl(238 92% 66%)` matches CSS variable definition
+
+### Why This Works
+
+1. **Inline styles have highest specificity** - they override any CSS classes
+2. **Still uses Tailwind for other properties** - hover, focus, disabled states work with classes
+3. **Consistent with existing solution** - Same pattern fixed the dark mode issue in Phase 7
+4. **Explicit and clear** - Makes intent obvious: "This button must have this exact background color"
+
+### Files Changed
+
+- `/src/routes/dev/tabs/LLMSettingsTab.tsx` - Test Connection button
+- `/src/routes/dev/tabs/LessonsTab.tsx` - Generate Lesson button
+- `/src/routes/dev/tabs/QuizzesTab.tsx` - Generate Quiz button
+
+All three buttons now use inline styles for background/text color while keeping layout and interaction styles in Tailwind classes.
+
+### Why Debugging Took Long
+
+1. **Assumed Tailwind was broken** - Didn't consider specificity issue
+   - CSS variables looked correct (HSL format)
+   - Tailwind config looked correct
+   - TypeScript compiled with no errors
+   
+2. **Didn't check browser DevTools** - Could have inspected computed styles
+   - DevTools shows exactly which CSS rule is applied and why
+   - Would have revealed: "No `bg-primary` rule being applied" or "Being overridden by..."
+
+3. **Forgot the documented solution** - Didn't reference LEARNINGS.md until user suggested it
+   - This exact issue (specificity conflict) was solved before in Phase 7
+   - Pattern already established: Use inline styles when class-based styling doesn't work
+   - Should have checked LEARNINGS.md first instead of trying new approaches
+
+4. **Kept trying CSS solutions** - Tried changing Tailwind config, color format, etc.
+   - Problem wasn't with CSS variables or Tailwind setup
+   - Problem was CSS specificity - a cascade/priority issue
+   - CSS changes couldn't fix a specificity problem; only inline styles could
+
+### What Should Have Been Done Sooner
+
+1. **Check browser DevTools immediately**:
+   - Inspect the button element
+   - Look at "Computed Styles" tab
+   - See which rule is actually being applied
+   - Would have shown: "No background color property" or "Being overridden"
+
+2. **Reference prior solutions**:
+   - Look in LEARNINGS.md for "specificity" or "CSS"
+   - Find the Phase 7 dark mode solution using inline styles
+   - Apply same pattern to buttons
+
+3. **Incremental testing**:
+   - After each change, refresh browser and visually inspect
+   - Different styling = progress, no change = wrong direction
+   - Used TypeScript errors as success metric (wrong approach)
+
+4. **Ask: "What has higher specificity?"**:
+   - Tailwind classes = low specificity
+   - Inline styles = high specificity
+   - If class-based styling doesn't work, inline styles will always win
+
+### Lessons Learned
+
+1. **CSS Specificity is a cascade rule, not a Tailwind issue**:
+   - When class-based styling doesn't apply, check specificity first
+   - Inline styles are the nuclear option (always win)
+   - Better to use them explicitly than debug why they're not working
+
+2. **Consistency matters**:
+   - This problem was already solved in Phase 7 with inline styles
+   - Solution should be in documentation (LEARNINGS.md)
+   - Should have been found/applied immediately
+
+3. **Browser DevTools is the diagnostic tool**:
+   - Don't assume CSS is working; inspect it
+   - Computed Styles tab shows exactly what's applied and why
+   - Saves hours of guessing and trying alternatives
+
+4. **Patterns repeat**:
+   - Specificity issues with Tailwind classes
+   - CSS variable format mismatches
+   - Theme/color issues
+   - If you solve it once, document it and check the docs next time
+
+### Configuration Files Changed
+
+- `/src/routes/dev/tabs/LLMSettingsTab.tsx` - Added inline `style` prop to button
+- `/src/routes/dev/tabs/LessonsTab.tsx` - Added inline `style` prop to button
+- `/src/routes/dev/tabs/QuizzesTab.tsx` - Added inline `style` prop to button
+
+**Pattern:**
+```tsx
+style={{
+  backgroundColor: 'hsl(238 92% 66%)',  // Primary color from CSS variables
+  color: 'hsl(0 0% 100%)',               // Primary foreground color
+}}
+```
+
+### When to Use Inline Styles vs Tailwind Classes
+
+| Scenario | Use | Reason |
+|----------|-----|--------|
+| Layout, spacing, alignment | Tailwind classes | Responsive, consistent, reusable |
+| Interactive states (hover, focus, disabled) | Tailwind classes | Built-in support, state management |
+| Exact color that won't work with classes | Inline styles | Highest specificity, no conflicts |
+| Animations, transitions | Tailwind classes | Cleaner syntax, easier to maintain |
+| Theme colors that must display | Inline styles | Guaranteed to apply, no cascade issues |
+
+### Reference URLs
+
+- Tailwind CSS Specificity: https://tailwindcss.com/docs/installation#using-css-@apply
+- CSS Specificity Rules: https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
+- Phase 7.1 Dark Mode Fix (similar solution): `/docs/IMPLEMENTATION.md#phase-71-routing-setup--infrastructure`

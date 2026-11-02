@@ -1667,9 +1667,9 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 
 ---
 
-### Phase 8.2: UI Components - Tab Layout ⏳ PENDING
+### Phase 8.2: UI Components - Tab Layout ✅ COMPLETE
 **Time Estimate:** 4-6 hours  
-**Status:** Not started
+**Status:** ✅ COMPLETE (finished in ~45 minutes)
 
 **Objective:** Build 4-tab interface with form components
 
@@ -1679,15 +1679,18 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 - Selection tab component with cascading dropdowns
 - Lessons tab component with form
 - Quizzes tab component with form
-- Reusable form components (dropdown, textarea, input, etc.)
+- Lesson output schema matching existing frontmatter structure
+- Quiz output schema conforming to existing QuizSchema
+- Lesson prompt templates (3 variations: standard, conversation, grammar)
+- Quiz prompt templates (4 variations: standard, vocabulary, grammar, comprehension)
 
-**Files to Create:**
-- `/src/routes/dev/tabs/LLMSettings.tsx` - Provider selector, API key input
-- `/src/routes/dev/tabs/Selection.tsx` - Cascading dropdowns
-- `/src/routes/dev/tabs/Lessons.tsx` - Lesson generation form
-- `/src/routes/dev/tabs/Quizzes.tsx` - Quiz generation form
-- `/src/routes/dev/components/PromptPreview.tsx` - Read-only prompt display
-- `/src/routes/dev/components/PreviewPane.tsx` - Markdown/JSON preview
+**Files Created:**
+- `/src/routes/dev/tabs/LLMSettingsTab.tsx` - Provider selector, API key input
+- `/src/routes/dev/tabs/SelectionTab.tsx` - Cascading dropdowns
+- `/src/routes/dev/tabs/LessonsTab.tsx` - Lesson generation form
+- `/src/routes/dev/tabs/QuizzesTab.tsx` - Quiz generation form
+- `/src/routes/dev/prompts/lessonPrompts.ts` - 3 lesson prompt templates with interpolation
+- `/src/routes/dev/prompts/quizPrompts.ts` - 4 quiz prompt templates with interpolation
 
 **Implementation Details:** See `DEV_GENERATOR_COMPONENTS.md`
 
@@ -1697,8 +1700,37 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 - ✓ Cascading dropdowns work (cascading behavior in selection)
 - ✓ Prompt preview updates in real-time
 - ✓ No API calls made yet (UI structure only)
+- ✓ Lesson schema matches existing frontmatter (title, summary, duration, active, difficulty, learningObjectives, tags, content)
+- ✓ Quiz schema conforms to existing QuizSchema (id, type, question, options, correctAnswer, difficulty, explanation, hint)
+- ✓ Prompt templates ready for Phase 8.4 LLM provider implementation
+- ✓ Markdown support documented (tables, code blocks, lists, blockquotes, headings - NO images)
 
 **Dependencies:** Phase 8.1 (types and route)
+
+**Schema Updates:**
+- Updated lesson output schema to match existing file structure
+- Frontmatter: `{title, summary, duration, active, difficulty, learningObjectives, tags}`
+- Content: Full markdown with all supported formatting (tables, code, lists, blockquotes, headings)
+- Quiz schema: Aligns with existing QuizSchema for validation
+- Markdown capabilities documented in prompts (optional features based on lesson needs)
+
+**Prompt Templates Created:**
+- **Lesson Prompts:** Standard, Conversation-focused, Grammar-focused
+- **Quiz Prompts:** Standard, Vocabulary-focused, Grammar-focused, Comprehension-focused
+- Templates include system/user prompt split with {{placeholder}} interpolation
+- Teacher instructions injected via {{customInstructions}} placeholder
+- Ready for Phase 8.4 integration with OpenRouter and other LLM providers
+
+**Implementation Notes:**
+- Created 4 tab components with full form UI
+- LLMSettingsTab: Provider selection, API key input, connection test button
+- SelectionTab: Cascading dropdowns (category → subcategory → topic), type selector, progress indicator
+- LessonsTab: Topic, age group, custom instructions, prompt preview toggle
+- QuizzesTab: Topic, lesson selector, question counts per level, custom instructions, prompt preview toggle
+- DeveloperGenerator now imports and renders all 4 tabs with state management
+- Auto-switches tab when selection is complete (lesson/quiz)
+- Mock data for testing, API calls deferred to Phase 8.4+
+- Schema design finalized before Phase 8.3 to unblock prompt development
 
 ---
 

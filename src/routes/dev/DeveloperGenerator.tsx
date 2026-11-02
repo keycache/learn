@@ -12,6 +12,10 @@
  */
 
 import { useState } from 'react'
+import { LLMSettingsTab } from './tabs/LLMSettingsTab'
+import { SelectionTab } from './tabs/SelectionTab'
+import { LessonsTab } from './tabs/LessonsTab'
+import { QuizzesTab } from './tabs/QuizzesTab'
 
 interface DeveloperGeneratorProps {
   // No props needed - this is a self-contained dev tool
@@ -19,12 +23,7 @@ interface DeveloperGeneratorProps {
 
 export function DeveloperGenerator(_props: DeveloperGeneratorProps) {
   const [activeTab, setActiveTab] = useState<string>('settings')
-
-  // TODO: Phase 8.2 - Create 4 tab components
-  // - LLMSettingsTab: Configure API keys, test connection
-  // - SelectionTab: Category/subcategory/topic selection
-  // - LessonsTab: Generate lessons with custom instructions
-  // - QuizzesTab: Generate quizzes with question counts
+  const [selectedTopic, setSelectedTopic] = useState<string>('')
 
   const tabs = [
     { id: 'settings', label: 'LLM Settings' },
@@ -35,7 +34,7 @@ export function DeveloperGenerator(_props: DeveloperGeneratorProps) {
 
   return (
     <div className="container mx-auto py-8 px-4 min-h-screen bg-themed">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Developer Generator</h1>
           <p className="text-muted-foreground">
@@ -44,7 +43,7 @@ export function DeveloperGenerator(_props: DeveloperGeneratorProps) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-6 border-b border-border">
+        <div className="mb-6 border-b border-border sticky top-0 bg-themed">
           <div className="flex gap-2">
             {tabs.map((tab) => (
               <button
@@ -65,32 +64,47 @@ export function DeveloperGenerator(_props: DeveloperGeneratorProps) {
         {/* Tab Content */}
         <div className="p-6 border border-border rounded-lg bg-card">
           {activeTab === 'settings' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">LLM Settings</h2>
-              <p className="text-muted-foreground">LLM Settings tab (Phase 8.2)</p>
-            </div>
+            <LLMSettingsTab />
           )}
 
           {activeTab === 'selection' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Selection</h2>
-              <p className="text-muted-foreground">Selection tab (Phase 8.2)</p>
-            </div>
+            <SelectionTab 
+              onSelectionChange={(selection) => {
+                setSelectedTopic(selection.topic)
+                // Auto-switch to appropriate tab based on selection
+                if (selection.type === 'lesson') {
+                  setActiveTab('lessons')
+                } else if (selection.type === 'quiz') {
+                  setActiveTab('quizzes')
+                }
+              }}
+            />
           )}
 
           {activeTab === 'lessons' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Lessons</h2>
-              <p className="text-muted-foreground">Lessons tab (Phase 8.2)</p>
-            </div>
+            <LessonsTab 
+              selectedTopic={selectedTopic}
+              onGenerate={(form) => {
+                console.log('Lesson generation requested:', form)
+                // TODO: Phase 8.5 - Implement LLM API call
+              }}
+            />
           )}
 
           {activeTab === 'quizzes' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Quizzes</h2>
-              <p className="text-muted-foreground">Quizzes tab (Phase 8.2)</p>
-            </div>
+            <QuizzesTab 
+              selectedTopic={selectedTopic}
+              onGenerate={(form) => {
+                console.log('Quiz generation requested:', form)
+                // TODO: Phase 8.5 - Implement LLM API call
+              }}
+            />
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 p-4 bg-muted rounded-lg text-xs text-muted-foreground text-center">
+          <p>Phase 8.2 - UI Components Complete | Next: Phase 8.3 - State Management</p>
         </div>
       </div>
     </div>
