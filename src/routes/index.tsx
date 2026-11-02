@@ -12,6 +12,11 @@ const LessonRoute = lazy(() => import('./lesson').then(m => ({ default: m.Lesson
 const QuizRoute = lazy(() => import('./quiz').then(m => ({ default: m.QuizRoute })));
 const ResultsRoute = lazy(() => import('./results').then(m => ({ default: m.ResultsRoute })));
 
+// Dev-only route - completely tree-shaken from production builds
+const DevGeneratorRoute = import.meta.env.DEV
+  ? lazy(() => import('./dev/index').then(m => ({ default: m.DevGeneratorRoute })))
+  : null;
+
 /**
  * Loading fallback component for lazy-loaded routes
  */
@@ -49,11 +54,19 @@ function withSuspense(Component: React.LazyExoticComponent<() => ReactNode>): Re
  * /:category/:subcategory/:topic/lesson/:id  → Individual lesson view
  * /:category/:subcategory/:topic/quiz        → Quiz (difficulty via ?level=easy|medium|hard)
  * /:category/:subcategory/:topic/results     → Quiz results page
+ * /_dev/generator                            → Developer Generator (dev-only, tree-shaken from production)
  * 
  * Dev-only endpoints are available via Vite middleware:
  * POST /api/dev/generate-lesson               → LLM lesson generator (dev-only)
  */
 export const routes: RouteObject[] = [
+  // Dev-only route - at top level to avoid dynamic route interference
+  ...(import.meta.env.DEV && DevGeneratorRoute
+    ? [{
+        path: '_dev/generator',
+        element: withSuspense(DevGeneratorRoute),
+      }]
+    : []),
   {
     path: '/',
     element: <RootLayout />,

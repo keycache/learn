@@ -936,3 +936,199 @@ useEffect(() => {
 5. **Remember scroll position** - Per-route scroll restoration with sessionStorage
 
 ---
+
+## React Router - Static Routes Before Dynamic Routes (Phase 8.1)
+
+**Date:** November 1, 2026  
+**Phase:** 8.1 - Setup & Infrastructure  
+**Issue:** Dev-only route not matching; redirecting to 404
+
+### The Problem
+
+When implementing the dev-only Developer Generator route at `/learn/_dev/generator`, the route was not being matched despite being registered. Instead:
+
+1. User navigates to: `http://localhost:5173/learn/_dev/generator`
+2. Browser redirects to: `http://localhost:5173/learn/learn/dev/generator` (double /learn/)
+3. Finally settles to: `http://localhost:5173/learn/not-found`
+
+**Console errors** showed:
+```
+Failed to load topic generator from learn/_dev:
+Error: Unknown variable dynamic import
+port: ../data/categories/learn/_dev/generator.json
+```
+
+This revealed that `_dev` was being interpreted as a **category parameter** and `generator` as a **topic parameter**, not as a static route.
+
+### Root Cause
+
+React Router's route matching algorithm processes routes in the order they're defined, but within nested route structures, it prioritizes **route specificity and parameter matching**. The problem:
+
+```typescript
+// WRONG: Dev route nested inside dynamic children
+export const routes = [
+  {
+    path: '/',
+    children: [
+      { index: true, ... },
+      { path: '_dev/generator', ... },  // ❌ Matched AFTER :category
+      { path: ':category', ... },       // This matches "_dev" first!
+      { path: ':category/:subcategory', ... },
+    ]
+  }
+]
+```
+
+**Why it failed:**
+- React Router sees `_dev/generator` split as TWO segments
+- First segment `_dev` matches the `:category` parameter route
+- Second segment `generator` matches the `:subcategory/:topic` pattern
+- The static `_dev/generator` route is never reached because the dynamic route consumed the path first
+
+### Solution
+
+**Place the dev route OUTSIDE the nested dynamic routes** (at top-level) so it's evaluated before the dynamic catch-all:
+
+```typescript
+// CORRECT: Dev route at top level, before root catch-all
+export const routes = [
+  // Static routes first (evaluated first in route matching)
+  ...(import.meta.env.DEV && DevGeneratorRoute
+    ? [{
+        path: '_dev/generator',
+        element: withSuspense(DevGeneratorRoute),
+      }]
+    : []),
+  
+  // Then the root with dynamic children
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      // Dynamic routes here are only checked if static routes didn't match
+      { path: ':category', ... },
+      { path: ':category/:subcategory', ... },
+    ]
+  },
+  
+  // Catch-all at the end
+  { path: '*', element: <NotFoundRoute /> }
+]
+```
+
+**Why this works:**
+- React Router evaluates routes in array order at the **top level first**
+- `_dev/generator` is now a direct child of the root (same level as `/`)
+- Path `/_dev/generator` matches immediately without entering the dynamic route nesting
+- The dynamic `:category` route is only checked if the path doesn't match any static routes above it
+
+### Key Insight: Route Matching Order
+
+React Router's matching algorithm:
+1. **Top-level routes first** (in array order)
+2. **Match exact paths before parameters**
+3. **Within nested routes, same rules apply**
+4. **Catch-all (`*`) is always last**
+
+```
+Correct order:
+├── Static routes (/admin, /_dev, /api, etc.)
+├── Root route with children (/)
+│   ├── Index route
+│   ├── Static child routes (/foo, /bar)
+│   └── Dynamic child routes (:id, :slug)
+└── Catch-all (*)
+
+WRONG order would be:
+├── Dynamic routes first ❌ (consumes too many paths)
+├── Static routes (never reached) ❌
+```
+
+### Why Debugging Took Long
+
+**What went wrong in the debugging process:**
+
+1. **Assumption was wrong**: Initial approach assumed routes were being evaluated correctly with proper ordering
+   - Tried fixing with route name prefixes (`dev/`, `_dev/`) instead of root cause (nesting level)
+   - Should have recognized that error mentioned `learn/_dev` being treated as a category
+
+2. **Didn't use dev server logs early enough**:
+   - The error message "Failed to load topic generator from learn/_dev" **clearly indicated** the system was looking for a file like `data/categories/learn/_dev/generator.json`
+   - This was the smoking gun that `_dev` was being treated as a category
+   - Should have recognized this pattern immediately
+
+3. **Didn't trace the route matching behavior**:
+   - Should have added console.log in routes/index.tsx to see what path was being matched
+   - Could have inspected React Router's behavior with browser dev tools
+   - Testing with simple `console.log` would have revealed: "Route matched as `:category/_dev`, matched as `:subcategory/generator`"
+
+4. **Kept changing route registration instead of route structure**:
+   - Tried conditional spreads, ternary operators, null checks
+   - These were all syntactic variations of the same broken structure (nested route inside dynamic children)
+   - Solution wasn't about HOW to register it, but WHERE to register it (top-level vs nested)
+
+### What Should Have Been Done Sooner
+
+1. **Read the error message carefully**:
+   - Error showed `..../data/categories/learn/_dev/generator.json`
+   - Should have immediately recognized this as the file system trying to load a category
+   - Conclusion: "_dev" was being treated as a category, not a static route segment
+
+2. **Test route matching directly**:
+   ```typescript
+   // Add to routes/index.tsx during debugging:
+   console.log('Routes configuration:', routes);
+   // Then trace which route matched by adding logs in each component
+   ```
+
+3. **Check React Router documentation for static vs dynamic**:
+   - React Router docs clearly state: "More specific routes should come before less specific ones"
+   - A static route like `_dev/generator` is MORE specific than `:category/:subcategory`
+   - But placement matters: they must be siblings at the same nesting level to be evaluated in order
+
+4. **Use a different route prefix**:
+   - Instead of `_dev/generator` nested inside dynamic routes
+   - Could have used `/admin`, `/api`, or any other prefix that's clearly separated
+   - Or better yet, placed at root level immediately (which was the fix)
+
+5. **Incremental testing**:
+   - Test each attempted fix by actually navigating to the URL
+   - Instead of assuming it works, verify: "Did the error change?"
+   - Each iteration should show progress (different error messages indicate different matching behavior)
+
+### Lessons Learned
+
+1. **Route structure determines matching, not just route order**
+   - Static routes at a nesting level only prevent dynamic routes at that SAME level
+   - If you have `:category/:subcategory` as children of `/`, they will match ANY path under `/` (except those explicitly listed)
+   - Moving the static route up one level changes what it competes with
+
+2. **Error messages are clues**:
+   - "Failed to load topic generator from learn/_dev" = "_dev is being treated as a topic category"
+   - Read error messages critically - they tell you what went wrong
+   - In this case, the error was pointing to the file system loader, not the route matcher
+
+3. **Nesting + Dynamic routes = Greedy matching**:
+   - Once you enter nested dynamic routes, they consume many path segments
+   - Static routes nested with dynamic ones need to be very specific or placed outside
+
+4. **Test-driven would have helped**:
+   - Writing a test first: "Should load dev generator at /_dev/generator"
+   - Would have forced thinking about route matching behavior
+   - Test failure messages would have revealed the matching issue faster
+
+### Configuration Files Changed
+
+- **Before**: `/src/routes/index.tsx` (incorrectly nested dev route)
+- **After**: `/src/routes/index.tsx` (dev route at top level)
+
+**Change summary:**
+```diff
+- Nested dev route inside children array (competed with :category)
++ Moved dev route to top-level routes array (evaluated before dynamic routes)
+```
+
+### Reference URLs
+
+- React Router Docs on Route Matching: https://reactrouter.com/routing/route-matching
+- Phase 8.1 Implementation: `/docs/IMPLEMENTATION.md#phase-81-setup--infrastructure`

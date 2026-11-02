@@ -1625,9 +1625,9 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 
 ---
 
-### Phase 8.1: Setup & Infrastructure ⏳ PENDING
+### Phase 8.1: Setup & Infrastructure ✅ COMPLETE
 **Time Estimate:** 1-2 hours  
-**Status:** Not started
+**Status:** ✅ COMPLETE (finished in ~30 minutes)
 
 **Objective:** Create file structure, TypeScript types, and dev route guard
 
@@ -1655,6 +1655,15 @@ See `docs/ROUTING_PLAN.md` for detailed implementation guide including:
 - ✓ No dev code in production build (verify tree-shaking)
 
 **Dependencies:** None (first phase)
+
+**Implementation Notes:**
+- Route registered in `/src/routes/index.tsx` with conditional DEV check
+- All 6 files created per specification
+- LLMProvider interface supports extensible adapter pattern
+- Tree-shaking configured via import.meta.env.DEV
+- Ready for Phase 8.2 UI implementation
+
+**Completion Reference:** `/PHASE_8_1_COMPLETE.md`
 
 ---
 
