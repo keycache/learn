@@ -115,8 +115,8 @@ describe('FileOperations - File System Integration', () => {
       fs.mkdirSync(topicPath, { recursive: true })
 
       // Create existing lesson files
-      fs.writeFileSync(path.join(topicPath, 'lesson_v1.json'), '{}')
-      fs.writeFileSync(path.join(topicPath, 'lesson_v2.json'), '{}')
+      fs.writeFileSync(path.join(topicPath, 'lesson_v1.md'), '{}')
+      fs.writeFileSync(path.join(topicPath, 'lesson_v2.md'), '{}')
 
       const nextVersion = await fileOps.getNextLessonVersion(topicPath)
 
@@ -129,8 +129,8 @@ describe('FileOperations - File System Integration', () => {
       fs.mkdirSync(topicPath, { recursive: true })
 
       // Create non-sequential files
-      fs.writeFileSync(path.join(topicPath, 'lesson_v1.json'), '{}')
-      fs.writeFileSync(path.join(topicPath, 'lesson_v3.json'), '{}')
+      fs.writeFileSync(path.join(topicPath, 'lesson_v1.md'), '{}')
+      fs.writeFileSync(path.join(topicPath, 'lesson_v3.md'), '{}')
 
       const nextVersion = await fileOps.getNextLessonVersion(topicPath)
 
@@ -180,7 +180,7 @@ describe('FileOperations - File System Integration', () => {
 
       expect(result.success).toBe(true)
       expect(result.filePath).toBeDefined()
-      expect(result.filePath).toContain('lesson_v1.json')
+      expect(result.filePath).toContain('lesson_v1.md')
       expect(fs.existsSync(result.filePath!)).toBe(true)
     })
 
@@ -238,6 +238,113 @@ describe('FileOperations - File System Integration', () => {
       expect(readResult.data?.title).toBe(lessonData.title)
       expect(readResult.data?.content).toBe(lessonData.content)
       expect(readResult.data?.metadata.topic).toBe('spanish')
+    })
+
+    it('should synchronize metadata files when lesson is saved', async () => {
+      const fileOps = new FileOperations(TEST_DATA_DIR)
+      const category = 'test-languages'
+      const subcategory = 'german'
+      const topic = 'grammar'
+      const topicPath = path.join(TEST_DATA_DIR, category, subcategory, topic)
+      fs.mkdirSync(topicPath, { recursive: true })
+
+      const lessonData: LessonFileData = {
+        title: 'German Grammar Basics',
+        summary: 'Learn German grammar',
+        duration: '30 minutes',
+        difficulty: 'beginner',
+        content: '# German Grammar\n\nIntroduction to German grammar.',
+        metadata: {
+          createdAt: new Date().toISOString(),
+          category,
+          subcategory,
+          topic,
+        },
+      }
+
+      // Save lesson - this should trigger metadata sync
+      const saveResult = await fileOps.saveLessonFile(topicPath, lessonData)
+      expect(saveResult.success).toBe(true)
+
+      // Verify category metadata was created
+      const categoryMetadataPath = path.join(TEST_DATA_DIR, category, 'metadata.json')
+      expect(fs.existsSync(categoryMetadataPath)).toBe(true)
+      const categoryMetadata = JSON.parse(fs.readFileSync(categoryMetadataPath, 'utf-8'))
+      expect(categoryMetadata.id).toBe(category)
+      expect(categoryMetadata.subcategories).toContainEqual(
+        expect.objectContaining({ id: subcategory })
+      )
+
+      // Verify subcategory metadata was created
+      const subcategoryMetadataPath = path.join(
+        TEST_DATA_DIR,
+        category,
+        subcategory,
+        'metadata.json'
+      )
+      expect(fs.existsSync(subcategoryMetadataPath)).toBe(true)
+      const subcategoryMetadata = JSON.parse(
+        fs.readFileSync(subcategoryMetadataPath, 'utf-8')
+      )
+      expect(subcategoryMetadata.id).toBe(subcategory)
+      expect(subcategoryMetadata.topics).toContainEqual(expect.objectContaining({ id: topic }))
+    })
+
+    it('should not duplicate entries when metadata already exists', async () => {
+      const fileOps = new FileOperations(TEST_DATA_DIR)
+      const category = 'existing-languages'
+      const subcategory = 'french'
+      const topic = 'numbers'
+      const topicPath = path.join(TEST_DATA_DIR, category, subcategory, topic)
+      fs.mkdirSync(topicPath, { recursive: true })
+
+      // Create initial metadata
+      const categoryMetadataPath = path.join(TEST_DATA_DIR, category, 'metadata.json')
+      const subcategoryMetadataPath = path.join(
+        TEST_DATA_DIR,
+        category,
+        subcategory,
+        'metadata.json'
+      )
+
+      const lessonData: LessonFileData = {
+        title: 'French Numbers',
+        summary: 'Learn French numbers',
+        duration: '30 minutes',
+        difficulty: 'beginner',
+        content: '# French Numbers',
+        metadata: {
+          createdAt: new Date().toISOString(),
+          category,
+          subcategory,
+          topic,
+        },
+      }
+
+      // Save first lesson
+      await fileOps.saveLessonFile(topicPath, lessonData)
+      const firstCategoryMetadata = JSON.parse(
+        fs.readFileSync(categoryMetadataPath, 'utf-8')
+      )
+      const firstSubcategoryCount = firstCategoryMetadata.subcategories.length
+
+      // Save second lesson in same topic
+      const lessonData2 = { ...lessonData, title: 'French Numbers - Part 2' }
+      await fileOps.saveLessonFile(topicPath, lessonData2)
+
+      const secondCategoryMetadata = JSON.parse(
+        fs.readFileSync(categoryMetadataPath, 'utf-8')
+      )
+      const secondSubcategoryCount = secondCategoryMetadata.subcategories.length
+
+      // Verify no duplicate entries were added
+      expect(secondSubcategoryCount).toBe(firstSubcategoryCount)
+
+      const subcategoryMetadata = JSON.parse(
+        fs.readFileSync(subcategoryMetadataPath, 'utf-8')
+      )
+      const topicCount = subcategoryMetadata.topics.filter((t: any) => t.id === topic).length
+      expect(topicCount).toBe(1) // Only one entry for this topic
     })
   })
 
@@ -372,7 +479,7 @@ describe('FileOperations - File System Integration', () => {
   describe('File Cleanup & Error Handling', () => {
     it('should handle non-existent read operations gracefully', async () => {
       const fileOps = new FileOperations(TEST_DATA_DIR)
-      const nonexistentPath = path.join(TEST_DATA_DIR, 'nonexistent', 'lesson_v1.json')
+      const nonexistentPath = path.join(TEST_DATA_DIR, 'nonexistent', 'lesson_v1.md')
 
       const result = await fileOps.readLessonFile(nonexistentPath)
 
@@ -381,15 +488,15 @@ describe('FileOperations - File System Integration', () => {
       expect(result.error).toContain('not found')
     })
 
-    it('should handle invalid JSON gracefully', async () => {
+    it('should handle invalid markdown gracefully', async () => {
       const fileOps = new FileOperations(TEST_DATA_DIR)
       const topicPath = path.join(TEST_DATA_DIR, 'languages', 'spoken', 'spanish')
       fs.mkdirSync(topicPath, { recursive: true })
 
-      const invalidJsonPath = path.join(topicPath, 'lesson_v1.json')
-      fs.writeFileSync(invalidJsonPath, 'invalid json {]')
+      const invalidMarkdownPath = path.join(topicPath, 'lesson_v1.md')
+      fs.writeFileSync(invalidMarkdownPath, 'invalid markdown without frontmatter')
 
-      const result = await fileOps.readLessonFile(invalidJsonPath)
+      const result = await fileOps.readLessonFile(invalidMarkdownPath)
 
       expect(result.success).toBe(false)
       expect(result.error).toBeDefined()

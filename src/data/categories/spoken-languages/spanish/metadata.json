@@ -1,0 +1,14 @@
+{
+  "id": "spanish",
+  "name": "Spanish",
+  "description": "Learn Spanish vocabulary and essential phrases. Perfect for beginners starting their Spanish learning journey.",
+  "category": "spoken-languages",
+  "topics": [
+    {
+      "id": "numbers",
+      "name": "Numbers"
+    }
+  ],
+  "version": "1.0",
+  "createdAt": "2024-11-03"
+}

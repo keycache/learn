@@ -1,0 +1,23 @@
+{
+  "id": "spoken-languages",
+  "name": "Spoken Languages",
+  "description": "Learn various spoken languages around the world",
+  "subcategories": [
+    {
+      "id": "french",
+      "name": "French",
+      "description": "Learn French vocabulary and phrases",
+      "category": "spoken-languages",
+      "version": "1.0",
+      "createdAt": "2026-11-03"
+    },
+    {
+      "id": "spanish",
+      "name": "Spanish",
+      "description": "Learn Spanish vocabulary and phrases",
+      "category": "spoken-languages",
+      "version": "1.0",
+      "createdAt": "2026-11-03"
+    }
+  ]
+}

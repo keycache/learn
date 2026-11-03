@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Lesson, MarkdownContent } from '../../types/learning';
 import { Badge } from '../ui/badge';
 import { loadLessonContent } from '../../utils/dataLoader';
@@ -81,19 +81,23 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
   const handleTabChange = useCallback(
     async (tabId: string) => {
       setActiveTabId(tabId);
+      console.log(`[LessonTabs] Tab changed to: ${tabId}`);
 
       const tab = allTabs.find((t) => t.id === tabId);
       if (!tab || tab.type !== 'lesson' || !tab.lesson) {
+        console.log(`[LessonTabs] Tab is not a lesson or not found`);
         return;
       }
 
       // Check if already loaded
       if (lessonContents.has(tabId)) {
+        console.log(`[LessonTabs] Content already cached for ${tabId}`);
         return;
       }
 
       // Load content
       setLoadingLessonId(tabId);
+      console.log(`[LessonTabs] Loading content for lesson ${tabId}`);
       try {
         const content = await loadLessonContent(
           categoryId,
@@ -102,18 +106,21 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
           tabId
         );
 
+        console.log(`[LessonTabs] loadLessonContent returned:`, content ? 'content object' : 'null');
         if (content) {
+          console.log(`[LessonTabs] Lesson ${tabId} loaded, content length: ${content.content.length} chars`);
           setLessonContents((prev) => new Map(prev).set(tabId, content.content));
           lessonErrors.delete(tabId);
           onLessonLoad?.(tabId, content);
         } else {
+          console.warn(`[LessonTabs] Failed to load lesson ${tabId}: content is null`);
           setLessonErrors(
             (prev) =>
               new Map(prev).set(tabId, `Failed to load ${tab.lesson?.title}`)
           );
         }
       } catch (error) {
-        console.error(`Error loading lesson ${tabId}:`, error);
+        console.error(`[LessonTabs] Error loading lesson ${tabId}:`, error);
         setLessonErrors(
           (prev) =>
             new Map(prev).set(
@@ -127,6 +134,14 @@ export const LessonTabs: React.FC<LessonTabsProps> = ({
     },
     [categoryId, subcategoryId, topicId, allTabs, lessonContents, lessonErrors, onLessonLoad]
   );
+
+  // Auto-load first lesson on mount
+  useEffect(() => {
+    console.log(`[LessonTabs] Mounted, loading first lesson: ${allTabs[0]?.id}`);
+    if (allTabs.length > 0 && allTabs[0].type === 'lesson') {
+      handleTabChange(allTabs[0].id);
+    }
+  }, []); // Only run once on mount
 
   const activeTab = allTabs.find((t) => t.id === activeTabId);
   const isLessonTab = activeTab?.type === 'lesson';

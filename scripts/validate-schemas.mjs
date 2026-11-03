@@ -54,6 +54,10 @@ const lessonMetadataSchema = {
       minItems: 1,
       maxItems: 20,
     },
+    createdAt: { type: 'string', format: 'date-time' },
+    category: { type: 'string' },
+    subcategory: { type: 'string' },
+    topic: { type: 'string' },
   },
   additionalProperties: false,
 };

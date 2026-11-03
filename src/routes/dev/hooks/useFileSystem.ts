@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { FileOperations } from '@/services/fileOperations'
-import type { FileSystemQuery, LessonFileData, QuizFileData, OperationResult } from '@/services/fileOperations.types'
+import { FileSystemApi } from '../services/fileSystemApi'
+import type { LessonFileData, QuizFileData, OperationResult } from '@/services/fileOperations.types'
 
 interface UseFileSystemState {
   categories: string[]
@@ -11,8 +11,8 @@ interface UseFileSystemState {
 }
 
 /**
- * Hook for file system operations
- * Provides methods to query file system and save lesson/quiz files
+ * Hook for file system operations (browser-safe)
+ * Uses API client to query and modify file system via backend endpoints
  */
 export const useFileSystem = () => {
   const [state, setState] = useState<UseFileSystemState>({
@@ -23,7 +23,7 @@ export const useFileSystem = () => {
     error: null,
   })
 
-  const fileOps = new FileOperations()
+  const fsApi = new FileSystemApi()
 
   /**
    * Query categories
@@ -31,8 +31,7 @@ export const useFileSystem = () => {
   const queryCategories = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null }))
     try {
-      const query: FileSystemQuery = { type: 'categories' }
-      const result = await fileOps.queryFileSystem(query)
+      const result = await fsApi.queryCategories()
 
       if (result.success && result.data) {
         setState((prev) => ({
@@ -63,11 +62,7 @@ export const useFileSystem = () => {
 
       setState((prev) => ({ ...prev, loading: true, error: null }))
       try {
-        const query: FileSystemQuery = {
-          type: 'subcategories',
-          category,
-        }
-        const result = await fileOps.queryFileSystem(query)
+        const result = await fsApi.querySubcategories(category)
 
         if (result.success && result.data) {
           setState((prev) => ({
@@ -100,12 +95,7 @@ export const useFileSystem = () => {
 
       setState((prev) => ({ ...prev, loading: true, error: null }))
       try {
-        const query: FileSystemQuery = {
-          type: 'topics',
-          category,
-          subcategory,
-        }
-        const result = await fileOps.queryFileSystem(query)
+        const result = await fsApi.queryTopics(category, subcategory)
 
         if (result.success && result.data) {
           setState((prev) => ({
@@ -133,8 +123,7 @@ export const useFileSystem = () => {
     async (category: string, subcategory: string, topic: string, data: LessonFileData): Promise<OperationResult<void>> => {
       setState((prev) => ({ ...prev, loading: true, error: null }))
       try {
-        const topicPath = `${category}/${subcategory}/${topic}`
-        const result = await fileOps.saveLessonFile(topicPath, data)
+        const result = await fsApi.saveLessonFile(category, subcategory, topic, data)
 
         if (result.success) {
           setState((prev) => ({ ...prev, loading: false }))
@@ -160,8 +149,7 @@ export const useFileSystem = () => {
     async (category: string, subcategory: string, topic: string, data: QuizFileData): Promise<OperationResult<void>> => {
       setState((prev) => ({ ...prev, loading: true, error: null }))
       try {
-        const topicPath = `${category}/${subcategory}/${topic}`
-        const result = await fileOps.saveQuizFile(topicPath, data)
+        const result = await fsApi.saveQuizFile(category, subcategory, topic, data)
 
         if (result.success) {
           setState((prev) => ({ ...prev, loading: false }))
@@ -178,6 +166,75 @@ export const useFileSystem = () => {
       }
     },
     []
+  )
+
+  /**
+   * Create a new category
+   */
+  const createCategory = useCallback(async (categoryName: string): Promise<boolean> => {
+    try {
+      const result = await fsApi.createCategory(categoryName)
+      if (result.success && result.data) {
+        // Refresh categories list
+        await queryCategories()
+        return true
+      } else {
+        setState((prev) => ({ ...prev, error: result.error || 'Failed to create category' }))
+        return false
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setState((prev) => ({ ...prev, error: errorMsg }))
+      return false
+    }
+  }, [queryCategories])
+
+  /**
+   * Create a new subcategory
+   */
+  const createSubcategory = useCallback(
+    async (category: string, subcategoryName: string): Promise<boolean> => {
+      try {
+        const result = await fsApi.createSubcategory(category, subcategoryName)
+        if (result.success && result.data) {
+          // Refresh subcategories list
+          await querySubcategories(category)
+          return true
+        } else {
+          setState((prev) => ({ ...prev, error: result.error || 'Failed to create subcategory' }))
+          return false
+        }
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+        setState((prev) => ({ ...prev, error: errorMsg }))
+        return false
+      }
+    },
+    [querySubcategories]
+  )
+
+  /**
+   * Create a new topic
+   */
+  const createTopic = useCallback(
+    async (category: string, subcategory: string, topicName: string): Promise<boolean> => {
+      try {
+        const result = await fsApi.createTopic(category, subcategory, topicName)
+        if (result.success && result.data) {
+          // Refresh topics list
+          await queryTopics(category, subcategory)
+          return true
+        } else {
+          setState((prev) => ({ ...prev, error: result.error || 'Failed to create topic' }))
+          return false
+        }
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+        setState((prev) => ({ ...prev, error: errorMsg }))
+        return false
+      }
+    },
+    [queryTopics]
   )
 
   /**
@@ -198,6 +255,9 @@ export const useFileSystem = () => {
     queryCategories,
     querySubcategories,
     queryTopics,
+    createCategory,
+    createSubcategory,
+    createTopic,
     saveLessonFile,
     saveQuizFile,
     clearError,

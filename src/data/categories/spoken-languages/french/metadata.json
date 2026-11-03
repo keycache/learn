@@ -7,18 +7,6 @@
     {
       "id": "numbers",
       "name": "Numbers"
-    },
-    {
-      "id": "fruits",
-      "name": "Fruits"
-    },
-    {
-      "id": "vegetables",
-      "name": "Vegetables"
-    },
-    {
-      "id": "time-reading",
-      "name": "Time Reading"
     }
   ],
   "version": "1.0",

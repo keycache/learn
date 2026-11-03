@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { TopicInfo } from '../../types/learning';
 import { loadTopics } from '../../utils/dataLoader';
 import { getLevelStatus, getDetailedLevelProgress } from '../../utils/levelProgression';
@@ -68,7 +69,19 @@ export function TopicGrid({
             )}
             <div>
               <div className="text-sm text-muted-foreground mb-2">
-                {categoryName} › {subcategoryName}
+                <Link 
+                  to="/" 
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {categoryName}
+                </Link>
+                {' › '}
+                <Link 
+                  to={`/${categoryId}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {subcategoryName}
+                </Link>
               </div>
               <h1 className="text-4xl font-bold text-foreground">
                 Topics

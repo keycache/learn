@@ -58,7 +58,7 @@ describe('Dev Generator - Lesson Generation Workflow', () => {
     // Verify file exists
     const files = fs.readdirSync(topicPath)
     expect(files.length).toBeGreaterThan(0)
-    expect(files[0]).toMatch(/lesson_v\d+\.json/)
+    expect(files[0]).toMatch(/lesson_v\d+\.md/)
 
     // Read and verify content using the returned file path
     const readResult = await fileOps.readLessonFile(saveResult.filePath!)
@@ -134,9 +134,9 @@ describe('Dev Generator - Lesson Generation Workflow', () => {
     // Verify all three versions exist
     const files = fs.readdirSync(topicPath).sort()
     expect(files.length).toBe(3)
-    expect(files[0]).toMatch(/lesson_v1\.json/)
-    expect(files[1]).toMatch(/lesson_v2\.json/)
-    expect(files[2]).toMatch(/lesson_v3\.json/)
+    expect(files[0]).toMatch(/lesson_v1\.md/)
+    expect(files[1]).toMatch(/lesson_v2\.md/)
+    expect(files[2]).toMatch(/lesson_v3\.md/)
 
     // Verify content of each version
     const read1 = await fileOps.readLessonFile(save1.filePath!)

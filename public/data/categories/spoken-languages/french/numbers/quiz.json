@@ -1,0 +1,2370 @@
+{
+  "id": "numbers",
+  "name": "Numbers",
+  "description": "Learn French numbers from 0 to 1000",
+  "category": "spoken-languages",
+  "subcategory": "french",
+  "levels": {
+    "easy": {
+      "level": "easy",
+      "description": "Numbers 0-20",
+      "questionCount": 30,
+      "questions": [
+        {
+          "id": "q-easy-00",
+          "text": "What is 18 in French?",
+          "options": [
+            {
+              "id": "opt-easy-00-a",
+              "text": "dix-huit"
+            },
+            {
+              "id": "opt-easy-00-c",
+              "text": "dix-neuf"
+            },
+            {
+              "id": "opt-easy-00-d",
+              "text": "un cent-dix-huit"
+            },
+            {
+              "id": "opt-easy-00-b",
+              "text": "dix-sept"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-00-a"
+          ],
+          "explanation": "18 in French is 'dix-huit'"
+        },
+        {
+          "id": "q-easy-01",
+          "text": "What is 4 in French?",
+          "options": [
+            {
+              "id": "opt-easy-01-d",
+              "text": "cinq"
+            },
+            {
+              "id": "opt-easy-01-a",
+              "text": "quatre"
+            },
+            {
+              "id": "opt-easy-01-c",
+              "text": "trois"
+            },
+            {
+              "id": "opt-easy-01-b",
+              "text": "un cent-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-01-a"
+          ],
+          "explanation": "4 in French is 'quatre'"
+        },
+        {
+          "id": "q-easy-02",
+          "text": "What is 1 in French?",
+          "options": [
+            {
+              "id": "opt-easy-02-b",
+              "text": "zéro"
+            },
+            {
+              "id": "opt-easy-02-c",
+              "text": "deux"
+            },
+            {
+              "id": "opt-easy-02-a",
+              "text": "un"
+            },
+            {
+              "id": "opt-easy-02-d",
+              "text": "un cent-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-02-a"
+          ],
+          "explanation": "1 in French is 'un'"
+        },
+        {
+          "id": "q-easy-03",
+          "text": "What is 6 in French?",
+          "options": [
+            {
+              "id": "opt-easy-03-b",
+              "text": "un cent-six"
+            },
+            {
+              "id": "opt-easy-03-d",
+              "text": "sept"
+            },
+            {
+              "id": "opt-easy-03-c",
+              "text": "cinq"
+            },
+            {
+              "id": "opt-easy-03-a",
+              "text": "six"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-03-a"
+          ],
+          "explanation": "6 in French is 'six'"
+        },
+        {
+          "id": "q-easy-04",
+          "text": "What is 4 in French?",
+          "options": [
+            {
+              "id": "opt-easy-04-a",
+              "text": "quatre"
+            },
+            {
+              "id": "opt-easy-04-c",
+              "text": "trois"
+            },
+            {
+              "id": "opt-easy-04-d",
+              "text": "cinq"
+            },
+            {
+              "id": "opt-easy-04-b",
+              "text": "un cent-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-04-a"
+          ],
+          "explanation": "4 in French is 'quatre'"
+        },
+        {
+          "id": "q-easy-05",
+          "text": "What is 10 in French?",
+          "options": [
+            {
+              "id": "opt-easy-05-a",
+              "text": "dix"
+            },
+            {
+              "id": "opt-easy-05-c",
+              "text": "onze"
+            },
+            {
+              "id": "opt-easy-05-d",
+              "text": "un cent-dix"
+            },
+            {
+              "id": "opt-easy-05-b",
+              "text": "neuf"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-05-a"
+          ],
+          "explanation": "10 in French is 'dix'"
+        },
+        {
+          "id": "q-easy-06",
+          "text": "What is 8 in French?",
+          "options": [
+            {
+              "id": "opt-easy-06-b",
+              "text": "neuf"
+            },
+            {
+              "id": "opt-easy-06-a",
+              "text": "huit"
+            },
+            {
+              "id": "opt-easy-06-d",
+              "text": "sept"
+            },
+            {
+              "id": "opt-easy-06-c",
+              "text": "un cent-huit"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-06-a"
+          ],
+          "explanation": "8 in French is 'huit'"
+        },
+        {
+          "id": "q-easy-07",
+          "text": "What is 13 in French?",
+          "options": [
+            {
+              "id": "opt-easy-07-a",
+              "text": "treize"
+            },
+            {
+              "id": "opt-easy-07-d",
+              "text": "quatorze"
+            },
+            {
+              "id": "opt-easy-07-b",
+              "text": "un cent-treize"
+            },
+            {
+              "id": "opt-easy-07-c",
+              "text": "douze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-07-a"
+          ],
+          "explanation": "13 in French is 'treize'"
+        },
+        {
+          "id": "q-easy-08",
+          "text": "What is 16 in French?",
+          "options": [
+            {
+              "id": "opt-easy-08-b",
+              "text": "dix-sept"
+            },
+            {
+              "id": "opt-easy-08-c",
+              "text": "un cent-seize"
+            },
+            {
+              "id": "opt-easy-08-d",
+              "text": "quinze"
+            },
+            {
+              "id": "opt-easy-08-a",
+              "text": "seize"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-08-a"
+          ],
+          "explanation": "16 in French is 'seize'"
+        },
+        {
+          "id": "q-easy-09",
+          "text": "What is 14 in French?",
+          "options": [
+            {
+              "id": "opt-easy-09-c",
+              "text": "treize"
+            },
+            {
+              "id": "opt-easy-09-a",
+              "text": "quatorze"
+            },
+            {
+              "id": "opt-easy-09-d",
+              "text": "quinze"
+            },
+            {
+              "id": "opt-easy-09-b",
+              "text": "un cent-quatorze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-09-a"
+          ],
+          "explanation": "14 in French is 'quatorze'"
+        },
+        {
+          "id": "q-easy-10",
+          "text": "What is 0 in French?",
+          "options": [
+            {
+              "id": "opt-easy-10-a",
+              "text": "zéro"
+            },
+            {
+              "id": "opt-easy-10-b",
+              "text": "un"
+            },
+            {
+              "id": "opt-easy-10-c",
+              "text": "un cent"
+            },
+            {
+              "id": "opt-easy-10-d",
+              "text": "neuf"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-10-a"
+          ],
+          "explanation": "0 in French is 'zéro'"
+        },
+        {
+          "id": "q-easy-11",
+          "text": "What is 0 in French?",
+          "options": [
+            {
+              "id": "opt-easy-11-a",
+              "text": "zéro"
+            },
+            {
+              "id": "opt-easy-11-d",
+              "text": "dix-huit"
+            },
+            {
+              "id": "opt-easy-11-c",
+              "text": "un cent"
+            },
+            {
+              "id": "opt-easy-11-b",
+              "text": "un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-11-a"
+          ],
+          "explanation": "0 in French is 'zéro'"
+        },
+        {
+          "id": "q-easy-12",
+          "text": "What is 5 in French?",
+          "options": [
+            {
+              "id": "opt-easy-12-b",
+              "text": "un cent-cinq"
+            },
+            {
+              "id": "opt-easy-12-a",
+              "text": "cinq"
+            },
+            {
+              "id": "opt-easy-12-d",
+              "text": "six"
+            },
+            {
+              "id": "opt-easy-12-c",
+              "text": "quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-12-a"
+          ],
+          "explanation": "5 in French is 'cinq'"
+        },
+        {
+          "id": "q-easy-13",
+          "text": "What is 7 in French?",
+          "options": [
+            {
+              "id": "opt-easy-13-a",
+              "text": "sept"
+            },
+            {
+              "id": "opt-easy-13-c",
+              "text": "un cent-sept"
+            },
+            {
+              "id": "opt-easy-13-d",
+              "text": "six"
+            },
+            {
+              "id": "opt-easy-13-b",
+              "text": "huit"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-13-a"
+          ],
+          "explanation": "7 in French is 'sept'"
+        },
+        {
+          "id": "q-easy-14",
+          "text": "What is 12 in French?",
+          "options": [
+            {
+              "id": "opt-easy-14-c",
+              "text": "onze"
+            },
+            {
+              "id": "opt-easy-14-a",
+              "text": "douze"
+            },
+            {
+              "id": "opt-easy-14-d",
+              "text": "treize"
+            },
+            {
+              "id": "opt-easy-14-b",
+              "text": "un cent-douze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-14-a"
+          ],
+          "explanation": "12 in French is 'douze'"
+        },
+        {
+          "id": "q-easy-15",
+          "text": "What is 15 in French?",
+          "options": [
+            {
+              "id": "opt-easy-15-a",
+              "text": "quinze"
+            },
+            {
+              "id": "opt-easy-15-d",
+              "text": "quatorze"
+            },
+            {
+              "id": "opt-easy-15-b",
+              "text": "seize"
+            },
+            {
+              "id": "opt-easy-15-c",
+              "text": "un cent-quinze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-15-a"
+          ],
+          "explanation": "15 in French is 'quinze'"
+        },
+        {
+          "id": "q-easy-16",
+          "text": "What is 20 in French?",
+          "options": [
+            {
+              "id": "opt-easy-16-d",
+              "text": "vingt-un"
+            },
+            {
+              "id": "opt-easy-16-a",
+              "text": "vingt"
+            },
+            {
+              "id": "opt-easy-16-c",
+              "text": "dix-neuf"
+            },
+            {
+              "id": "opt-easy-16-b",
+              "text": "un cent-vingt"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-16-a"
+          ],
+          "explanation": "20 in French is 'vingt'"
+        },
+        {
+          "id": "q-easy-17",
+          "text": "What is 3 in French?",
+          "options": [
+            {
+              "id": "opt-easy-17-a",
+              "text": "trois"
+            },
+            {
+              "id": "opt-easy-17-c",
+              "text": "quatre"
+            },
+            {
+              "id": "opt-easy-17-d",
+              "text": "un cent-trois"
+            },
+            {
+              "id": "opt-easy-17-b",
+              "text": "deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-17-a"
+          ],
+          "explanation": "3 in French is 'trois'"
+        },
+        {
+          "id": "q-easy-18",
+          "text": "What is 19 in French?",
+          "options": [
+            {
+              "id": "opt-easy-18-a",
+              "text": "dix-neuf"
+            },
+            {
+              "id": "opt-easy-18-c",
+              "text": "vingt"
+            },
+            {
+              "id": "opt-easy-18-b",
+              "text": "dix-huit"
+            },
+            {
+              "id": "opt-easy-18-d",
+              "text": "un cent-dix-neuf"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-18-a"
+          ],
+          "explanation": "19 in French is 'dix-neuf'"
+        },
+        {
+          "id": "q-easy-19",
+          "text": "What is 1 in French?",
+          "options": [
+            {
+              "id": "opt-easy-19-c",
+              "text": "deux"
+            },
+            {
+              "id": "opt-easy-19-d",
+              "text": "un cent-un"
+            },
+            {
+              "id": "opt-easy-19-a",
+              "text": "un"
+            },
+            {
+              "id": "opt-easy-19-b",
+              "text": "zéro"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-19-a"
+          ],
+          "explanation": "1 in French is 'un'"
+        },
+        {
+          "id": "q-easy-20",
+          "text": "What is 3 in French?",
+          "options": [
+            {
+              "id": "opt-easy-20-c",
+              "text": "quatre"
+            },
+            {
+              "id": "opt-easy-20-d",
+              "text": "un cent-trois"
+            },
+            {
+              "id": "opt-easy-20-a",
+              "text": "trois"
+            },
+            {
+              "id": "opt-easy-20-b",
+              "text": "deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-20-a"
+          ],
+          "explanation": "3 in French is 'trois'"
+        },
+        {
+          "id": "q-easy-21",
+          "text": "What is 7 in French?",
+          "options": [
+            {
+              "id": "opt-easy-21-a",
+              "text": "sept"
+            },
+            {
+              "id": "opt-easy-21-b",
+              "text": "huit"
+            },
+            {
+              "id": "opt-easy-21-d",
+              "text": "six"
+            },
+            {
+              "id": "opt-easy-21-c",
+              "text": "un cent-sept"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-21-a"
+          ],
+          "explanation": "7 in French is 'sept'"
+        },
+        {
+          "id": "q-easy-22",
+          "text": "What is 11 in French?",
+          "options": [
+            {
+              "id": "opt-easy-22-b",
+              "text": "dix"
+            },
+            {
+              "id": "opt-easy-22-d",
+              "text": "un cent-onze"
+            },
+            {
+              "id": "opt-easy-22-a",
+              "text": "onze"
+            },
+            {
+              "id": "opt-easy-22-c",
+              "text": "douze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-22-a"
+          ],
+          "explanation": "11 in French is 'onze'"
+        },
+        {
+          "id": "q-easy-23",
+          "text": "What is 6 in French?",
+          "options": [
+            {
+              "id": "opt-easy-23-b",
+              "text": "un cent-six"
+            },
+            {
+              "id": "opt-easy-23-d",
+              "text": "sept"
+            },
+            {
+              "id": "opt-easy-23-a",
+              "text": "six"
+            },
+            {
+              "id": "opt-easy-23-c",
+              "text": "cinq"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-23-a"
+          ],
+          "explanation": "6 in French is 'six'"
+        },
+        {
+          "id": "q-easy-24",
+          "text": "What is 17 in French?",
+          "options": [
+            {
+              "id": "opt-easy-24-c",
+              "text": "dix-huit"
+            },
+            {
+              "id": "opt-easy-24-d",
+              "text": "un cent-dix-sept"
+            },
+            {
+              "id": "opt-easy-24-b",
+              "text": "seize"
+            },
+            {
+              "id": "opt-easy-24-a",
+              "text": "dix-sept"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-24-a"
+          ],
+          "explanation": "17 in French is 'dix-sept'"
+        },
+        {
+          "id": "q-easy-25",
+          "text": "What is 8 in French?",
+          "options": [
+            {
+              "id": "opt-easy-25-b",
+              "text": "neuf"
+            },
+            {
+              "id": "opt-easy-25-a",
+              "text": "huit"
+            },
+            {
+              "id": "opt-easy-25-d",
+              "text": "sept"
+            },
+            {
+              "id": "opt-easy-25-c",
+              "text": "un cent-huit"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-25-a"
+          ],
+          "explanation": "8 in French is 'huit'"
+        },
+        {
+          "id": "q-easy-26",
+          "text": "What is 5 in French?",
+          "options": [
+            {
+              "id": "opt-easy-26-b",
+              "text": "un cent-cinq"
+            },
+            {
+              "id": "opt-easy-26-a",
+              "text": "cinq"
+            },
+            {
+              "id": "opt-easy-26-d",
+              "text": "six"
+            },
+            {
+              "id": "opt-easy-26-c",
+              "text": "quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-26-a"
+          ],
+          "explanation": "5 in French is 'cinq'"
+        },
+        {
+          "id": "q-easy-27",
+          "text": "What is 9 in French?",
+          "options": [
+            {
+              "id": "opt-easy-27-c",
+              "text": "dix"
+            },
+            {
+              "id": "opt-easy-27-a",
+              "text": "neuf"
+            },
+            {
+              "id": "opt-easy-27-b",
+              "text": "huit"
+            },
+            {
+              "id": "opt-easy-27-d",
+              "text": "un cent-neuf"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-27-a"
+          ],
+          "explanation": "9 in French is 'neuf'"
+        },
+        {
+          "id": "q-easy-28",
+          "text": "What is 2 in French?",
+          "options": [
+            {
+              "id": "opt-easy-28-c",
+              "text": "trois"
+            },
+            {
+              "id": "opt-easy-28-a",
+              "text": "deux"
+            },
+            {
+              "id": "opt-easy-28-b",
+              "text": "un"
+            },
+            {
+              "id": "opt-easy-28-d",
+              "text": "un cent-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-28-a"
+          ],
+          "explanation": "2 in French is 'deux'"
+        },
+        {
+          "id": "q-easy-29",
+          "text": "What is 2 in French?",
+          "options": [
+            {
+              "id": "opt-easy-29-c",
+              "text": "trois"
+            },
+            {
+              "id": "opt-easy-29-d",
+              "text": "un cent-deux"
+            },
+            {
+              "id": "opt-easy-29-a",
+              "text": "deux"
+            },
+            {
+              "id": "opt-easy-29-b",
+              "text": "un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-easy-29-a"
+          ],
+          "explanation": "2 in French is 'deux'"
+        }
+      ]
+    },
+    "medium": {
+      "level": "medium",
+      "description": "Numbers 21-100",
+      "questionCount": 30,
+      "questions": [
+        {
+          "id": "q-medium-00",
+          "text": "What is 46 in French?",
+          "options": [
+            {
+              "id": "opt-medium-00-a",
+              "text": "quarante-six"
+            },
+            {
+              "id": "opt-medium-00-b",
+              "text": "un cent-quarante-six"
+            },
+            {
+              "id": "opt-medium-00-d",
+              "text": "quarante-sept"
+            },
+            {
+              "id": "opt-medium-00-c",
+              "text": "quarante-cinq"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-00-a"
+          ],
+          "explanation": "46 in French is 'quarante-six'"
+        },
+        {
+          "id": "q-medium-01",
+          "text": "What is 30 in French?",
+          "options": [
+            {
+              "id": "opt-medium-01-a",
+              "text": "trente"
+            },
+            {
+              "id": "opt-medium-01-d",
+              "text": "trente-un"
+            },
+            {
+              "id": "opt-medium-01-c",
+              "text": "vingt-neuf"
+            },
+            {
+              "id": "opt-medium-01-b",
+              "text": "un cent-trente"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-01-a"
+          ],
+          "explanation": "30 in French is 'trente'"
+        },
+        {
+          "id": "q-medium-02",
+          "text": "What is 33 in French?",
+          "options": [
+            {
+              "id": "opt-medium-02-b",
+              "text": "trente-deux"
+            },
+            {
+              "id": "opt-medium-02-d",
+              "text": "un cent-trente-trois"
+            },
+            {
+              "id": "opt-medium-02-a",
+              "text": "trente-trois"
+            },
+            {
+              "id": "opt-medium-02-c",
+              "text": "trente-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-02-a"
+          ],
+          "explanation": "33 in French is 'trente-trois'"
+        },
+        {
+          "id": "q-medium-03",
+          "text": "What is 28 in French?",
+          "options": [
+            {
+              "id": "opt-medium-03-b",
+              "text": "un cent-vingt-huit"
+            },
+            {
+              "id": "opt-medium-03-a",
+              "text": "vingt-huit"
+            },
+            {
+              "id": "opt-medium-03-c",
+              "text": "vingt-sept"
+            },
+            {
+              "id": "opt-medium-03-d",
+              "text": "vingt-neuf"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-03-a"
+          ],
+          "explanation": "28 in French is 'vingt-huit'"
+        },
+        {
+          "id": "q-medium-04",
+          "text": "What is 48 in French?",
+          "options": [
+            {
+              "id": "opt-medium-04-a",
+              "text": "quarante-huit"
+            },
+            {
+              "id": "opt-medium-04-d",
+              "text": "quarante-sept"
+            },
+            {
+              "id": "opt-medium-04-b",
+              "text": "quarante-neuf"
+            },
+            {
+              "id": "opt-medium-04-c",
+              "text": "un cent-quarante-huit"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-04-a"
+          ],
+          "explanation": "48 in French is 'quarante-huit'"
+        },
+        {
+          "id": "q-medium-05",
+          "text": "What is 36 in French?",
+          "options": [
+            {
+              "id": "opt-medium-05-b",
+              "text": "un cent-trente-six"
+            },
+            {
+              "id": "opt-medium-05-a",
+              "text": "trente-six"
+            },
+            {
+              "id": "opt-medium-05-d",
+              "text": "trente-sept"
+            },
+            {
+              "id": "opt-medium-05-c",
+              "text": "trente-cinq"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-05-a"
+          ],
+          "explanation": "36 in French is 'trente-six'"
+        },
+        {
+          "id": "q-medium-06",
+          "text": "What is 35 in French?",
+          "options": [
+            {
+              "id": "opt-medium-06-a",
+              "text": "trente-cinq"
+            },
+            {
+              "id": "opt-medium-06-c",
+              "text": "trente-six"
+            },
+            {
+              "id": "opt-medium-06-d",
+              "text": "un cent-trente-cinq"
+            },
+            {
+              "id": "opt-medium-06-b",
+              "text": "trente-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-06-a"
+          ],
+          "explanation": "35 in French is 'trente-cinq'"
+        },
+        {
+          "id": "q-medium-07",
+          "text": "What is 31 in French?",
+          "options": [
+            {
+              "id": "opt-medium-07-b",
+              "text": "trente-deux"
+            },
+            {
+              "id": "opt-medium-07-a",
+              "text": "trente-un"
+            },
+            {
+              "id": "opt-medium-07-d",
+              "text": "trente"
+            },
+            {
+              "id": "opt-medium-07-c",
+              "text": "un cent-trente-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-07-a"
+          ],
+          "explanation": "31 in French is 'trente-un'"
+        },
+        {
+          "id": "q-medium-08",
+          "text": "What is 21 in French?",
+          "options": [
+            {
+              "id": "opt-medium-08-b",
+              "text": "un cent-vingt-un"
+            },
+            {
+              "id": "opt-medium-08-a",
+              "text": "vingt-un"
+            },
+            {
+              "id": "opt-medium-08-d",
+              "text": "vingt-deux"
+            },
+            {
+              "id": "opt-medium-08-c",
+              "text": "vingt"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-08-a"
+          ],
+          "explanation": "21 in French is 'vingt-un'"
+        },
+        {
+          "id": "q-medium-09",
+          "text": "What is 40 in French?",
+          "options": [
+            {
+              "id": "opt-medium-09-b",
+              "text": "quarante-un"
+            },
+            {
+              "id": "opt-medium-09-c",
+              "text": "un cent-quarante"
+            },
+            {
+              "id": "opt-medium-09-d",
+              "text": "trente-neuf"
+            },
+            {
+              "id": "opt-medium-09-a",
+              "text": "quarante"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-09-a"
+          ],
+          "explanation": "40 in French is 'quarante'"
+        },
+        {
+          "id": "q-medium-10",
+          "text": "What is 45 in French?",
+          "options": [
+            {
+              "id": "opt-medium-10-c",
+              "text": "quarante-quatre"
+            },
+            {
+              "id": "opt-medium-10-b",
+              "text": "un cent-quarante-cinq"
+            },
+            {
+              "id": "opt-medium-10-a",
+              "text": "quarante-cinq"
+            },
+            {
+              "id": "opt-medium-10-d",
+              "text": "quarante-six"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-10-a"
+          ],
+          "explanation": "45 in French is 'quarante-cinq'"
+        },
+        {
+          "id": "q-medium-11",
+          "text": "What is 43 in French?",
+          "options": [
+            {
+              "id": "opt-medium-11-b",
+              "text": "quarante-deux"
+            },
+            {
+              "id": "opt-medium-11-d",
+              "text": "un cent-quarante-trois"
+            },
+            {
+              "id": "opt-medium-11-a",
+              "text": "quarante-trois"
+            },
+            {
+              "id": "opt-medium-11-c",
+              "text": "quarante-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-11-a"
+          ],
+          "explanation": "43 in French is 'quarante-trois'"
+        },
+        {
+          "id": "q-medium-12",
+          "text": "What is 32 in French?",
+          "options": [
+            {
+              "id": "opt-medium-12-a",
+              "text": "trente-deux"
+            },
+            {
+              "id": "opt-medium-12-b",
+              "text": "trente-trois"
+            },
+            {
+              "id": "opt-medium-12-c",
+              "text": "un cent-trente-deux"
+            },
+            {
+              "id": "opt-medium-12-d",
+              "text": "trente-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-12-a"
+          ],
+          "explanation": "32 in French is 'trente-deux'"
+        },
+        {
+          "id": "q-medium-13",
+          "text": "What is 37 in French?",
+          "options": [
+            {
+              "id": "opt-medium-13-b",
+              "text": "un cent-trente-sept"
+            },
+            {
+              "id": "opt-medium-13-c",
+              "text": "trente-six"
+            },
+            {
+              "id": "opt-medium-13-d",
+              "text": "trente-huit"
+            },
+            {
+              "id": "opt-medium-13-a",
+              "text": "trente-sept"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-13-a"
+          ],
+          "explanation": "37 in French is 'trente-sept'"
+        },
+        {
+          "id": "q-medium-14",
+          "text": "What is 38 in French?",
+          "options": [
+            {
+              "id": "opt-medium-14-a",
+              "text": "trente-huit"
+            },
+            {
+              "id": "opt-medium-14-c",
+              "text": "trente-sept"
+            },
+            {
+              "id": "opt-medium-14-d",
+              "text": "trente-neuf"
+            },
+            {
+              "id": "opt-medium-14-b",
+              "text": "un cent-trente-huit"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-14-a"
+          ],
+          "explanation": "38 in French is 'trente-huit'"
+        },
+        {
+          "id": "q-medium-15",
+          "text": "What is 44 in French?",
+          "options": [
+            {
+              "id": "opt-medium-15-c",
+              "text": "quarante-trois"
+            },
+            {
+              "id": "opt-medium-15-b",
+              "text": "un cent-quarante-quatre"
+            },
+            {
+              "id": "opt-medium-15-a",
+              "text": "quarante-quatre"
+            },
+            {
+              "id": "opt-medium-15-d",
+              "text": "quarante-cinq"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-15-a"
+          ],
+          "explanation": "44 in French is 'quarante-quatre'"
+        },
+        {
+          "id": "q-medium-16",
+          "text": "What is 50 in French?",
+          "options": [
+            {
+              "id": "opt-medium-16-c",
+              "text": "cinquante-un"
+            },
+            {
+              "id": "opt-medium-16-b",
+              "text": "quarante-neuf"
+            },
+            {
+              "id": "opt-medium-16-a",
+              "text": "cinquante"
+            },
+            {
+              "id": "opt-medium-16-d",
+              "text": "un cent-cinquante"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-16-a"
+          ],
+          "explanation": "50 in French is 'cinquante'"
+        },
+        {
+          "id": "q-medium-17",
+          "text": "What is 23 in French?",
+          "options": [
+            {
+              "id": "opt-medium-17-c",
+              "text": "un cent-vingt-trois"
+            },
+            {
+              "id": "opt-medium-17-b",
+              "text": "vingt-quatre"
+            },
+            {
+              "id": "opt-medium-17-d",
+              "text": "vingt-deux"
+            },
+            {
+              "id": "opt-medium-17-a",
+              "text": "vingt-trois"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-17-a"
+          ],
+          "explanation": "23 in French is 'vingt-trois'"
+        },
+        {
+          "id": "q-medium-18",
+          "text": "What is 25 in French?",
+          "options": [
+            {
+              "id": "opt-medium-18-d",
+              "text": "un cent-vingt-cinq"
+            },
+            {
+              "id": "opt-medium-18-c",
+              "text": "vingt-six"
+            },
+            {
+              "id": "opt-medium-18-a",
+              "text": "vingt-cinq"
+            },
+            {
+              "id": "opt-medium-18-b",
+              "text": "vingt-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-18-a"
+          ],
+          "explanation": "25 in French is 'vingt-cinq'"
+        },
+        {
+          "id": "q-medium-19",
+          "text": "What is 29 in French?",
+          "options": [
+            {
+              "id": "opt-medium-19-a",
+              "text": "vingt-neuf"
+            },
+            {
+              "id": "opt-medium-19-b",
+              "text": "un cent-vingt-neuf"
+            },
+            {
+              "id": "opt-medium-19-c",
+              "text": "vingt-huit"
+            },
+            {
+              "id": "opt-medium-19-d",
+              "text": "trente"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-19-a"
+          ],
+          "explanation": "29 in French is 'vingt-neuf'"
+        },
+        {
+          "id": "q-medium-20",
+          "text": "What is 47 in French?",
+          "options": [
+            {
+              "id": "opt-medium-20-a",
+              "text": "quarante-sept"
+            },
+            {
+              "id": "opt-medium-20-d",
+              "text": "quarante-six"
+            },
+            {
+              "id": "opt-medium-20-b",
+              "text": "quarante-huit"
+            },
+            {
+              "id": "opt-medium-20-c",
+              "text": "un cent-quarante-sept"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-20-a"
+          ],
+          "explanation": "47 in French is 'quarante-sept'"
+        },
+        {
+          "id": "q-medium-21",
+          "text": "What is 42 in French?",
+          "options": [
+            {
+              "id": "opt-medium-21-a",
+              "text": "quarante-deux"
+            },
+            {
+              "id": "opt-medium-21-d",
+              "text": "un cent-quarante-deux"
+            },
+            {
+              "id": "opt-medium-21-c",
+              "text": "quarante-trois"
+            },
+            {
+              "id": "opt-medium-21-b",
+              "text": "quarante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-21-a"
+          ],
+          "explanation": "42 in French is 'quarante-deux'"
+        },
+        {
+          "id": "q-medium-22",
+          "text": "What is 22 in French?",
+          "options": [
+            {
+              "id": "opt-medium-22-b",
+              "text": "un cent-vingt-deux"
+            },
+            {
+              "id": "opt-medium-22-d",
+              "text": "vingt-trois"
+            },
+            {
+              "id": "opt-medium-22-c",
+              "text": "vingt-un"
+            },
+            {
+              "id": "opt-medium-22-a",
+              "text": "vingt-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-22-a"
+          ],
+          "explanation": "22 in French is 'vingt-deux'"
+        },
+        {
+          "id": "q-medium-23",
+          "text": "What is 34 in French?",
+          "options": [
+            {
+              "id": "opt-medium-23-c",
+              "text": "trente-cinq"
+            },
+            {
+              "id": "opt-medium-23-b",
+              "text": "trente-trois"
+            },
+            {
+              "id": "opt-medium-23-d",
+              "text": "un cent-trente-quatre"
+            },
+            {
+              "id": "opt-medium-23-a",
+              "text": "trente-quatre"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-23-a"
+          ],
+          "explanation": "34 in French is 'trente-quatre'"
+        },
+        {
+          "id": "q-medium-24",
+          "text": "What is 24 in French?",
+          "options": [
+            {
+              "id": "opt-medium-24-c",
+              "text": "un cent-vingt-quatre"
+            },
+            {
+              "id": "opt-medium-24-a",
+              "text": "vingt-quatre"
+            },
+            {
+              "id": "opt-medium-24-b",
+              "text": "vingt-cinq"
+            },
+            {
+              "id": "opt-medium-24-d",
+              "text": "vingt-trois"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-24-a"
+          ],
+          "explanation": "24 in French is 'vingt-quatre'"
+        },
+        {
+          "id": "q-medium-25",
+          "text": "What is 27 in French?",
+          "options": [
+            {
+              "id": "opt-medium-25-d",
+              "text": "un cent-vingt-sept"
+            },
+            {
+              "id": "opt-medium-25-c",
+              "text": "vingt-huit"
+            },
+            {
+              "id": "opt-medium-25-b",
+              "text": "vingt-six"
+            },
+            {
+              "id": "opt-medium-25-a",
+              "text": "vingt-sept"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-25-a"
+          ],
+          "explanation": "27 in French is 'vingt-sept'"
+        },
+        {
+          "id": "q-medium-26",
+          "text": "What is 39 in French?",
+          "options": [
+            {
+              "id": "opt-medium-26-d",
+              "text": "trente-huit"
+            },
+            {
+              "id": "opt-medium-26-a",
+              "text": "trente-neuf"
+            },
+            {
+              "id": "opt-medium-26-c",
+              "text": "un cent-trente-neuf"
+            },
+            {
+              "id": "opt-medium-26-b",
+              "text": "quarante"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-26-a"
+          ],
+          "explanation": "39 in French is 'trente-neuf'"
+        },
+        {
+          "id": "q-medium-27",
+          "text": "What is 41 in French?",
+          "options": [
+            {
+              "id": "opt-medium-27-a",
+              "text": "quarante-un"
+            },
+            {
+              "id": "opt-medium-27-c",
+              "text": "quarante-deux"
+            },
+            {
+              "id": "opt-medium-27-d",
+              "text": "un cent-quarante-un"
+            },
+            {
+              "id": "opt-medium-27-b",
+              "text": "quarante"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-27-a"
+          ],
+          "explanation": "41 in French is 'quarante-un'"
+        },
+        {
+          "id": "q-medium-28",
+          "text": "What is 49 in French?",
+          "options": [
+            {
+              "id": "opt-medium-28-c",
+              "text": "cinquante"
+            },
+            {
+              "id": "opt-medium-28-d",
+              "text": "un cent-quarante-neuf"
+            },
+            {
+              "id": "opt-medium-28-a",
+              "text": "quarante-neuf"
+            },
+            {
+              "id": "opt-medium-28-b",
+              "text": "quarante-huit"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-28-a"
+          ],
+          "explanation": "49 in French is 'quarante-neuf'"
+        },
+        {
+          "id": "q-medium-29",
+          "text": "What is 26 in French?",
+          "options": [
+            {
+              "id": "opt-medium-29-a",
+              "text": "vingt-six"
+            },
+            {
+              "id": "opt-medium-29-b",
+              "text": "vingt-cinq"
+            },
+            {
+              "id": "opt-medium-29-c",
+              "text": "vingt-sept"
+            },
+            {
+              "id": "opt-medium-29-d",
+              "text": "un cent-vingt-six"
+            }
+          ],
+          "correctAnswers": [
+            "opt-medium-29-a"
+          ],
+          "explanation": "26 in French is 'vingt-six'"
+        }
+      ]
+    },
+    "hard": {
+      "level": "hard",
+      "description": "Numbers 101-1000",
+      "questionCount": 30,
+      "questions": [
+        {
+          "id": "q-hard-00",
+          "text": "What is 171 in French?",
+          "options": [
+            {
+              "id": "opt-hard-00-b",
+              "text": "un cent-soixante-dix"
+            },
+            {
+              "id": "opt-hard-00-c",
+              "text": "un cent-soixante-dix-deux"
+            },
+            {
+              "id": "opt-hard-00-a",
+              "text": "un cent-soixante-dix-un"
+            },
+            {
+              "id": "opt-hard-00-d",
+              "text": "soixante-dix-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-00-a"
+          ],
+          "explanation": "171 in French is 'un cent-soixante-dix-un'"
+        },
+        {
+          "id": "q-hard-01",
+          "text": "What is 201 in French?",
+          "options": [
+            {
+              "id": "opt-hard-01-a",
+              "text": "deux cent-un"
+            },
+            {
+              "id": "opt-hard-01-b",
+              "text": "deux cent"
+            },
+            {
+              "id": "opt-hard-01-c",
+              "text": "deux cent-deux"
+            },
+            {
+              "id": "opt-hard-01-d",
+              "text": "un cent-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-01-a"
+          ],
+          "explanation": "201 in French is 'deux cent-un'"
+        },
+        {
+          "id": "q-hard-02",
+          "text": "What is 311 in French?",
+          "options": [
+            {
+              "id": "opt-hard-02-a",
+              "text": "trois cent-onze"
+            },
+            {
+              "id": "opt-hard-02-d",
+              "text": "trois cent-dix"
+            },
+            {
+              "id": "opt-hard-02-b",
+              "text": "trois cent-douze"
+            },
+            {
+              "id": "opt-hard-02-c",
+              "text": "quatre cent-onze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-02-a"
+          ],
+          "explanation": "311 in French is 'trois cent-onze'"
+        },
+        {
+          "id": "q-hard-03",
+          "text": "What is 371 in French?",
+          "options": [
+            {
+              "id": "opt-hard-03-d",
+              "text": "deux cent-soixante-dix-un"
+            },
+            {
+              "id": "opt-hard-03-a",
+              "text": "trois cent-soixante-dix-un"
+            },
+            {
+              "id": "opt-hard-03-c",
+              "text": "trois cent-soixante-dix-deux"
+            },
+            {
+              "id": "opt-hard-03-b",
+              "text": "trois cent-soixante-dix"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-03-a"
+          ],
+          "explanation": "371 in French is 'trois cent-soixante-dix-un'"
+        },
+        {
+          "id": "q-hard-04",
+          "text": "What is 151 in French?",
+          "options": [
+            {
+              "id": "opt-hard-04-d",
+              "text": "deux cent-cinquante-un"
+            },
+            {
+              "id": "opt-hard-04-c",
+              "text": "cinquante-un"
+            },
+            {
+              "id": "opt-hard-04-b",
+              "text": "un cent-cinquante-deux"
+            },
+            {
+              "id": "opt-hard-04-a",
+              "text": "un cent-cinquante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-04-a"
+          ],
+          "explanation": "151 in French is 'un cent-cinquante-un'"
+        },
+        {
+          "id": "q-hard-05",
+          "text": "What is 341 in French?",
+          "options": [
+            {
+              "id": "opt-hard-05-a",
+              "text": "trois cent-quarante-un"
+            },
+            {
+              "id": "opt-hard-05-c",
+              "text": "trois cent-quarante"
+            },
+            {
+              "id": "opt-hard-05-b",
+              "text": "quatre cent-quarante-un"
+            },
+            {
+              "id": "opt-hard-05-d",
+              "text": "deux cent-quarante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-05-a"
+          ],
+          "explanation": "341 in French is 'trois cent-quarante-un'"
+        },
+        {
+          "id": "q-hard-06",
+          "text": "What is 231 in French?",
+          "options": [
+            {
+              "id": "opt-hard-06-a",
+              "text": "deux cent-trente-un"
+            },
+            {
+              "id": "opt-hard-06-b",
+              "text": "deux cent-trente-deux"
+            },
+            {
+              "id": "opt-hard-06-c",
+              "text": "trois cent-trente-un"
+            },
+            {
+              "id": "opt-hard-06-d",
+              "text": "un cent-trente-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-06-a"
+          ],
+          "explanation": "231 in French is 'deux cent-trente-un'"
+        },
+        {
+          "id": "q-hard-07",
+          "text": "What is 321 in French?",
+          "options": [
+            {
+              "id": "opt-hard-07-a",
+              "text": "trois cent-vingt-un"
+            },
+            {
+              "id": "opt-hard-07-d",
+              "text": "trois cent-vingt-deux"
+            },
+            {
+              "id": "opt-hard-07-c",
+              "text": "deux cent-vingt-un"
+            },
+            {
+              "id": "opt-hard-07-b",
+              "text": "trois cent-vingt"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-07-a"
+          ],
+          "explanation": "321 in French is 'trois cent-vingt-un'"
+        },
+        {
+          "id": "q-hard-08",
+          "text": "What is 281 in French?",
+          "options": [
+            {
+              "id": "opt-hard-08-b",
+              "text": "deux cent-quatre-vingts"
+            },
+            {
+              "id": "opt-hard-08-d",
+              "text": "trois cent-quatre-vingt-un"
+            },
+            {
+              "id": "opt-hard-08-a",
+              "text": "deux cent-quatre-vingt-un"
+            },
+            {
+              "id": "opt-hard-08-c",
+              "text": "deux cent-quatre-vingt-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-08-a"
+          ],
+          "explanation": "281 in French is 'deux cent-quatre-vingt-un'"
+        },
+        {
+          "id": "q-hard-09",
+          "text": "What is 331 in French?",
+          "options": [
+            {
+              "id": "opt-hard-09-a",
+              "text": "trois cent-trente-un"
+            },
+            {
+              "id": "opt-hard-09-c",
+              "text": "deux cent-trente-un"
+            },
+            {
+              "id": "opt-hard-09-b",
+              "text": "trois cent-trente"
+            },
+            {
+              "id": "opt-hard-09-d",
+              "text": "trois cent-trente-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-09-a"
+          ],
+          "explanation": "331 in French is 'trois cent-trente-un'"
+        },
+        {
+          "id": "q-hard-10",
+          "text": "What is 191 in French?",
+          "options": [
+            {
+              "id": "opt-hard-10-c",
+              "text": "quatre-vingt-dix-un"
+            },
+            {
+              "id": "opt-hard-10-a",
+              "text": "un cent-quatre-vingt-dix-un"
+            },
+            {
+              "id": "opt-hard-10-b",
+              "text": "un cent-quatre-vingt-dix-deux"
+            },
+            {
+              "id": "opt-hard-10-d",
+              "text": "deux cent-quatre-vingt-dix-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-10-a"
+          ],
+          "explanation": "191 in French is 'un cent-quatre-vingt-dix-un'"
+        },
+        {
+          "id": "q-hard-11",
+          "text": "What is 361 in French?",
+          "options": [
+            {
+              "id": "opt-hard-11-b",
+              "text": "trois cent-soixante"
+            },
+            {
+              "id": "opt-hard-11-c",
+              "text": "trois cent-soixante-deux"
+            },
+            {
+              "id": "opt-hard-11-d",
+              "text": "deux cent-soixante-un"
+            },
+            {
+              "id": "opt-hard-11-a",
+              "text": "trois cent-soixante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-11-a"
+          ],
+          "explanation": "361 in French is 'trois cent-soixante-un'"
+        },
+        {
+          "id": "q-hard-12",
+          "text": "What is 271 in French?",
+          "options": [
+            {
+              "id": "opt-hard-12-a",
+              "text": "deux cent-soixante-dix-un"
+            },
+            {
+              "id": "opt-hard-12-c",
+              "text": "trois cent-soixante-dix-un"
+            },
+            {
+              "id": "opt-hard-12-d",
+              "text": "un cent-soixante-dix-un"
+            },
+            {
+              "id": "opt-hard-12-b",
+              "text": "deux cent-soixante-dix-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-12-a"
+          ],
+          "explanation": "271 in French is 'deux cent-soixante-dix-un'"
+        },
+        {
+          "id": "q-hard-13",
+          "text": "What is 131 in French?",
+          "options": [
+            {
+              "id": "opt-hard-13-a",
+              "text": "un cent-trente-un"
+            },
+            {
+              "id": "opt-hard-13-b",
+              "text": "un cent-trente"
+            },
+            {
+              "id": "opt-hard-13-d",
+              "text": "trente-un"
+            },
+            {
+              "id": "opt-hard-13-c",
+              "text": "un cent-trente-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-13-a"
+          ],
+          "explanation": "131 in French is 'un cent-trente-un'"
+        },
+        {
+          "id": "q-hard-14",
+          "text": "What is 381 in French?",
+          "options": [
+            {
+              "id": "opt-hard-14-b",
+              "text": "quatre cent-quatre-vingt-un"
+            },
+            {
+              "id": "opt-hard-14-d",
+              "text": "trois cent-quatre-vingt-deux"
+            },
+            {
+              "id": "opt-hard-14-c",
+              "text": "trois cent-quatre-vingts"
+            },
+            {
+              "id": "opt-hard-14-a",
+              "text": "trois cent-quatre-vingt-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-14-a"
+          ],
+          "explanation": "381 in French is 'trois cent-quatre-vingt-un'"
+        },
+        {
+          "id": "q-hard-15",
+          "text": "What is 291 in French?",
+          "options": [
+            {
+              "id": "opt-hard-15-b",
+              "text": "un cent-quatre-vingt-dix-un"
+            },
+            {
+              "id": "opt-hard-15-c",
+              "text": "deux cent-quatre-vingt-dix"
+            },
+            {
+              "id": "opt-hard-15-d",
+              "text": "deux cent-quatre-vingt-dix-deux"
+            },
+            {
+              "id": "opt-hard-15-a",
+              "text": "deux cent-quatre-vingt-dix-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-15-a"
+          ],
+          "explanation": "291 in French is 'deux cent-quatre-vingt-dix-un'"
+        },
+        {
+          "id": "q-hard-16",
+          "text": "What is 391 in French?",
+          "options": [
+            {
+              "id": "opt-hard-16-d",
+              "text": "quatre cent-quatre-vingt-dix-un"
+            },
+            {
+              "id": "opt-hard-16-a",
+              "text": "trois cent-quatre-vingt-dix-un"
+            },
+            {
+              "id": "opt-hard-16-b",
+              "text": "trois cent-quatre-vingt-dix-deux"
+            },
+            {
+              "id": "opt-hard-16-c",
+              "text": "deux cent-quatre-vingt-dix-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-16-a"
+          ],
+          "explanation": "391 in French is 'trois cent-quatre-vingt-dix-un'"
+        },
+        {
+          "id": "q-hard-17",
+          "text": "What is 141 in French?",
+          "options": [
+            {
+              "id": "opt-hard-17-d",
+              "text": "un cent-quarante-deux"
+            },
+            {
+              "id": "opt-hard-17-c",
+              "text": "un cent-quarante"
+            },
+            {
+              "id": "opt-hard-17-a",
+              "text": "un cent-quarante-un"
+            },
+            {
+              "id": "opt-hard-17-b",
+              "text": "deux cent-quarante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-17-a"
+          ],
+          "explanation": "141 in French is 'un cent-quarante-un'"
+        },
+        {
+          "id": "q-hard-18",
+          "text": "What is 181 in French?",
+          "options": [
+            {
+              "id": "opt-hard-18-c",
+              "text": "deux cent-quatre-vingt-un"
+            },
+            {
+              "id": "opt-hard-18-a",
+              "text": "un cent-quatre-vingt-un"
+            },
+            {
+              "id": "opt-hard-18-b",
+              "text": "quatre-vingt-un"
+            },
+            {
+              "id": "opt-hard-18-d",
+              "text": "un cent-quatre-vingts"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-18-a"
+          ],
+          "explanation": "181 in French is 'un cent-quatre-vingt-un'"
+        },
+        {
+          "id": "q-hard-19",
+          "text": "What is 111 in French?",
+          "options": [
+            {
+              "id": "opt-hard-19-c",
+              "text": "onze"
+            },
+            {
+              "id": "opt-hard-19-d",
+              "text": "deux cent-onze"
+            },
+            {
+              "id": "opt-hard-19-a",
+              "text": "un cent-onze"
+            },
+            {
+              "id": "opt-hard-19-b",
+              "text": "un cent-douze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-19-a"
+          ],
+          "explanation": "111 in French is 'un cent-onze'"
+        },
+        {
+          "id": "q-hard-20",
+          "text": "What is 101 in French?",
+          "options": [
+            {
+              "id": "opt-hard-20-a",
+              "text": "un cent-un"
+            },
+            {
+              "id": "opt-hard-20-b",
+              "text": "deux cent-un"
+            },
+            {
+              "id": "opt-hard-20-d",
+              "text": "un cent-deux"
+            },
+            {
+              "id": "opt-hard-20-c",
+              "text": "un cent"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-20-a"
+          ],
+          "explanation": "101 in French is 'un cent-un'"
+        },
+        {
+          "id": "q-hard-21",
+          "text": "What is 211 in French?",
+          "options": [
+            {
+              "id": "opt-hard-21-c",
+              "text": "deux cent-douze"
+            },
+            {
+              "id": "opt-hard-21-b",
+              "text": "deux cent-dix"
+            },
+            {
+              "id": "opt-hard-21-d",
+              "text": "un cent-onze"
+            },
+            {
+              "id": "opt-hard-21-a",
+              "text": "deux cent-onze"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-21-a"
+          ],
+          "explanation": "211 in French is 'deux cent-onze'"
+        },
+        {
+          "id": "q-hard-22",
+          "text": "What is 301 in French?",
+          "options": [
+            {
+              "id": "opt-hard-22-c",
+              "text": "trois cent"
+            },
+            {
+              "id": "opt-hard-22-b",
+              "text": "quatre cent-un"
+            },
+            {
+              "id": "opt-hard-22-d",
+              "text": "deux cent-un"
+            },
+            {
+              "id": "opt-hard-22-a",
+              "text": "trois cent-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-22-a"
+          ],
+          "explanation": "301 in French is 'trois cent-un'"
+        },
+        {
+          "id": "q-hard-23",
+          "text": "What is 251 in French?",
+          "options": [
+            {
+              "id": "opt-hard-23-a",
+              "text": "deux cent-cinquante-un"
+            },
+            {
+              "id": "opt-hard-23-b",
+              "text": "un cent-cinquante-un"
+            },
+            {
+              "id": "opt-hard-23-c",
+              "text": "deux cent-cinquante"
+            },
+            {
+              "id": "opt-hard-23-d",
+              "text": "deux cent-cinquante-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-23-a"
+          ],
+          "explanation": "251 in French is 'deux cent-cinquante-un'"
+        },
+        {
+          "id": "q-hard-24",
+          "text": "What is 121 in French?",
+          "options": [
+            {
+              "id": "opt-hard-24-d",
+              "text": "vingt-un"
+            },
+            {
+              "id": "opt-hard-24-a",
+              "text": "un cent-vingt-un"
+            },
+            {
+              "id": "opt-hard-24-b",
+              "text": "un cent-vingt"
+            },
+            {
+              "id": "opt-hard-24-c",
+              "text": "un cent-vingt-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-24-a"
+          ],
+          "explanation": "121 in French is 'un cent-vingt-un'"
+        },
+        {
+          "id": "q-hard-25",
+          "text": "What is 221 in French?",
+          "options": [
+            {
+              "id": "opt-hard-25-c",
+              "text": "deux cent-vingt"
+            },
+            {
+              "id": "opt-hard-25-a",
+              "text": "deux cent-vingt-un"
+            },
+            {
+              "id": "opt-hard-25-b",
+              "text": "trois cent-vingt-un"
+            },
+            {
+              "id": "opt-hard-25-d",
+              "text": "deux cent-vingt-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-25-a"
+          ],
+          "explanation": "221 in French is 'deux cent-vingt-un'"
+        },
+        {
+          "id": "q-hard-26",
+          "text": "What is 351 in French?",
+          "options": [
+            {
+              "id": "opt-hard-26-d",
+              "text": "trois cent-cinquante"
+            },
+            {
+              "id": "opt-hard-26-c",
+              "text": "quatre cent-cinquante-un"
+            },
+            {
+              "id": "opt-hard-26-a",
+              "text": "trois cent-cinquante-un"
+            },
+            {
+              "id": "opt-hard-26-b",
+              "text": "trois cent-cinquante-deux"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-26-a"
+          ],
+          "explanation": "351 in French is 'trois cent-cinquante-un'"
+        },
+        {
+          "id": "q-hard-27",
+          "text": "What is 241 in French?",
+          "options": [
+            {
+              "id": "opt-hard-27-d",
+              "text": "trois cent-quarante-un"
+            },
+            {
+              "id": "opt-hard-27-a",
+              "text": "deux cent-quarante-un"
+            },
+            {
+              "id": "opt-hard-27-c",
+              "text": "deux cent-quarante-deux"
+            },
+            {
+              "id": "opt-hard-27-b",
+              "text": "deux cent-quarante"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-27-a"
+          ],
+          "explanation": "241 in French is 'deux cent-quarante-un'"
+        },
+        {
+          "id": "q-hard-28",
+          "text": "What is 261 in French?",
+          "options": [
+            {
+              "id": "opt-hard-28-d",
+              "text": "deux cent-soixante"
+            },
+            {
+              "id": "opt-hard-28-a",
+              "text": "deux cent-soixante-un"
+            },
+            {
+              "id": "opt-hard-28-c",
+              "text": "un cent-soixante-un"
+            },
+            {
+              "id": "opt-hard-28-b",
+              "text": "trois cent-soixante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-28-a"
+          ],
+          "explanation": "261 in French is 'deux cent-soixante-un'"
+        },
+        {
+          "id": "q-hard-29",
+          "text": "What is 161 in French?",
+          "options": [
+            {
+              "id": "opt-hard-29-c",
+              "text": "un cent-soixante-deux"
+            },
+            {
+              "id": "opt-hard-29-a",
+              "text": "un cent-soixante-un"
+            },
+            {
+              "id": "opt-hard-29-b",
+              "text": "un cent-soixante"
+            },
+            {
+              "id": "opt-hard-29-d",
+              "text": "soixante-un"
+            }
+          ],
+          "correctAnswers": [
+            "opt-hard-29-a"
+          ],
+          "explanation": "161 in French is 'un cent-soixante-un'"
+        }
+      ]
+    }
+  }
+}

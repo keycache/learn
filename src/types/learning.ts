@@ -32,6 +32,10 @@ export interface LessonMetadata {
   difficulty: "beginner" | "intermediate" | "advanced"
   learningObjectives: string[]
   tags: string[]
+  createdAt?: string // ISO 8601 timestamp
+  category?: string // e.g., "spoken-languages"
+  subcategory?: string // e.g., "french"
+  topic?: string // e.g., "numbers"
 }
 
 /**

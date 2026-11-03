@@ -119,6 +119,11 @@ export const LessonView: React.FC<LessonViewProps> = ({
           <p className="font-semibold">Error loading lesson content</p>
           <p className="text-sm mt-1">{error}</p>
         </div>
+      ) : !content ? (
+        <div className="rounded-lg bg-amber-50 dark:bg-amber-950 p-4 text-amber-600 dark:text-amber-400">
+          <p className="font-semibold">No lesson content available</p>
+          <p className="text-sm mt-1">The lesson content could not be loaded. Please try refreshing the page.</p>
+        </div>
       ) : (
         <MarkdownRenderer
           content={content}

@@ -2,9 +2,13 @@
  * Selection Tab Component
  * Allows user to select category, subcategory, topic, and generation type
  * Phase 8.3 - Integrated with Context
+ * Phase 8.10 - Updated to use real file system and CreatableSelect
  */
 
+import { useEffect } from 'react'
 import { useSelection } from '../hooks/useSelection'
+import { useFileSystem } from '../hooks/useFileSystem'
+import { CreatableSelect } from '../components/CreatableSelect'
 
 export interface SelectionFormState {
   category: string
@@ -19,10 +23,42 @@ interface SelectionTabProps {
 
 export function SelectionTab(props: SelectionTabProps) {
   const { selection, setCategory, setSubcategory, setTopic, setType } = useSelection()
+  const {
+    categories,
+    subcategories,
+    topics,
+    loading: fsLoading,
+    error: fsError,
+    queryCategories,
+    querySubcategories,
+    queryTopics,
+    createCategory,
+    createSubcategory,
+    createTopic,
+    clearError: clearFsError,
+  } = useFileSystem()
 
-  const mockCategories = ['Spoken Languages', 'Grammar', 'Vocabulary', 'Pronunciation']
-  const mockSubcategories = selection.category ? ['French', 'Spanish', 'German', 'Italian'] : []
-  const mockTopics = selection.subcategory ? ['Numbers', 'Colors', 'Greetings', 'Food', 'Animals'] : []
+  // Initialize categories on mount
+  useEffect(() => {
+    queryCategories()
+  }, [])
+
+  // Load subcategories when category changes
+  useEffect(() => {
+    if (selection.category) {
+      querySubcategories(selection.category)
+      setSubcategory(null)
+      setTopic(null)
+    }
+  }, [selection.category])
+
+  // Load topics when subcategory changes
+  useEffect(() => {
+    if (selection.category && selection.subcategory) {
+      queryTopics(selection.category, selection.subcategory)
+      setTopic(null)
+    }
+  }, [selection.category, selection.subcategory])
 
   const handleCategoryChange = (value: string) => {
     setCategory(value || null)
@@ -57,88 +93,76 @@ export function SelectionTab(props: SelectionTabProps) {
         </p>
       </div>
 
+      {/* File System Error Display */}
+      {fsError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-red-900">File System Error</p>
+              <p className="text-sm text-red-700">{fsError}</p>
+            </div>
+            <button
+              onClick={clearFsError}
+              className="text-red-700 hover:text-red-900 font-medium text-sm"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Category Selector */}
-      <div className="space-y-2">
-        <label htmlFor="category" className="text-sm font-medium">
-          Category *
-        </label>
-        <select
-          id="category"
-          value={selection.category || ''}
-          onChange={(e) => handleCategoryChange(e.target.value)}
-          style={{
-            appearance: 'none',
-            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 0.75rem center',
-            backgroundSize: '1.5em 1.5em',
-            paddingRight: '2.5rem',
-          }}
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
-        >
-          <option value="">Select a category...</option>
-          {mockCategories.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-        {!selection.category && <p className="text-xs text-muted-foreground">Required</p>}
-      </div>
+      <CreatableSelect
+        options={categories}
+        value={selection.category || ''}
+        onChange={(value) => {
+          handleCategoryChange(value)
+          setSubcategory(null)
+          setTopic(null)
+        }}
+        onCreateNew={createCategory}
+        placeholder="Select or type to create category..."
+        label="Category"
+        required
+        disabled={fsLoading}
+        loading={fsLoading}
+        error={fsError && !selection.category ? fsError : null}
+      />
 
       {/* Subcategory Selector */}
-      <div className="space-y-2">
-        <label htmlFor="subcategory" className="text-sm font-medium">
-          Subcategory * {!selection.category && <span className="text-xs text-muted-foreground">(select category first)</span>}
-        </label>
-        <select
-          id="subcategory"
-          value={selection.subcategory || ''}
-          onChange={(e) => handleSubcategoryChange(e.target.value)}
-          disabled={!selection.category}
-          style={{
-            appearance: 'none',
-            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 0.75rem center',
-            backgroundSize: '1.5em 1.5em',
-            paddingRight: '2.5rem',
-          }}
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <option value="">Select a subcategory...</option>
-          {mockSubcategories.map((sub) => (
-            <option key={sub} value={sub}>{sub}</option>
-          ))}
-        </select>
-        {!selection.subcategory && selection.category && <p className="text-xs text-muted-foreground">Required</p>}
-      </div>
+      <CreatableSelect
+        options={subcategories}
+        value={selection.subcategory || ''}
+        onChange={(value) => {
+          handleSubcategoryChange(value)
+          setTopic(null)
+        }}
+        onCreateNew={(subName) => 
+          selection.category ? createSubcategory(selection.category, subName) : Promise.resolve(false)
+        }
+        placeholder="Select or type to create subcategory..."
+        label="Subcategory"
+        required
+        disabled={!selection.category || fsLoading}
+        loading={fsLoading}
+      />
 
       {/* Topic Selector */}
-      <div className="space-y-2">
-        <label htmlFor="topic" className="text-sm font-medium">
-          Topic * {!selection.subcategory && <span className="text-xs text-muted-foreground">(select subcategory first)</span>}
-        </label>
-        <select
-          id="topic"
-          value={selection.topic || ''}
-          onChange={(e) => handleTopicChange(e.target.value)}
-          disabled={!selection.subcategory}
-          style={{
-            appearance: 'none',
-            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 0.75rem center',
-            backgroundSize: '1.5em 1.5em',
-            paddingRight: '2.5rem',
-          }}
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <option value="">Select a topic...</option>
-          {mockTopics.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-        {!selection.topic && selection.subcategory && <p className="text-xs text-muted-foreground">Required</p>}
-      </div>
+      <CreatableSelect
+        options={topics}
+        value={selection.topic || ''}
+        onChange={handleTopicChange}
+        onCreateNew={(topicName) =>
+          selection.category && selection.subcategory
+            ? createTopic(selection.category, selection.subcategory, topicName)
+            : Promise.resolve(false)
+        }
+        placeholder="Select or type to create topic..."
+        label="Topic"
+        required
+        disabled={!selection.category || !selection.subcategory || fsLoading}
+        loading={fsLoading}
+      />
 
       {/* Type Selector */}
       {selection.topic && (

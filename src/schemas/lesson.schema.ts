@@ -24,7 +24,11 @@ export const LessonFrontmatterSchema = z.object({
   learningObjectives: z.array(z.string()).min(1).describe(
     'Key outcomes students should achieve (e.g., "Pronounce numbers 0-10 correctly")'
   ),
-  tags: z.array(z.string()).describe('Keywords for categorization (e.g., ["beginner", "numbers", "vocabulary"])')
+  tags: z.array(z.string()).describe('Keywords for categorization (e.g., ["beginner", "numbers", "vocabulary"])'),
+  createdAt: z.string().datetime().optional().describe('ISO 8601 timestamp when lesson was created'),
+  category: z.string().optional().describe('Content category (e.g., "spoken-languages")'),
+  subcategory: z.string().optional().describe('Subcategory (e.g., "french")'),
+  topic: z.string().optional().describe('Specific topic (e.g., "numbers")')
 })
 
 /**

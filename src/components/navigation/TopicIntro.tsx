@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Topic } from '../../types/learning';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -84,15 +85,37 @@ export function TopicIntro({
       <PageTransition animationType="slideUp">
         <div className="min-h-screen bg-themed p-6">
           <div className="max-w-4xl mx-auto">
-            {/* Header with Back Button */}
+            {/* Header with Back Button and Breadcrumb */}
             <div className="mb-8 flex items-start gap-4">
               {onBack && (
                 <Button onClick={onBack} variant="ghost" size="icon" className="flex-shrink-0 mt-1">
                   <ChevronLeft className="w-6 h-6" />
                 </Button>
               )}
-              <div>
-                <h1 className="text-4xl font-bold text-foreground capitalize mb-2">
+              <div className="flex-1">
+                <div className="text-sm text-muted-foreground mb-3">
+                  <Link 
+                    to="/" 
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {topic.category?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  </Link>
+                  {' › '}
+                  <Link 
+                    to={`/${topic.category}`}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {topic.subcategory?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  </Link>
+                  {' › '}
+                  <Link 
+                    to={`/${topic.category}/${topic.subcategory}/${topic.id}`}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {topic.id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  </Link>
+                </div>
+                <h1 className="text-4xl font-bold text-foreground mb-2">
                   {topic.name || topic.id}
                 </h1>
                 <p className="text-lg text-muted-foreground">
@@ -137,6 +160,11 @@ export function TopicIntro({
                 // Track viewed lessons when content is loaded
                 setViewedLessons(prev => new Set([...prev, lessonId]));
               }}
+              showQuizTab={
+                topic.levels?.easy?.questions?.length > 0 ||
+                topic.levels?.medium?.questions?.length > 0 ||
+                topic.levels?.hard?.questions?.length > 0
+              }
               renderQuizContent={renderQuizContent}
             />
 
@@ -172,7 +200,29 @@ export function TopicIntro({
                 <ChevronLeft className="w-6 h-6" />
               </Button>
             )}
-            <div>
+            <div className="flex-1">
+              <div className="text-sm text-muted-foreground mb-3">
+                <Link 
+                  to="/" 
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {topic.category?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                </Link>
+                {' › '}
+                <Link 
+                  to={`/${topic.category}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {topic.subcategory?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                </Link>
+                {' › '}
+                <Link 
+                  to={`/${topic.category}/${topic.subcategory}/${topic.id}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {topic.id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                </Link>
+              </div>
               <h1 className="text-4xl font-bold text-foreground capitalize mb-2">
                 {topic.name || topic.id}
               </h1>

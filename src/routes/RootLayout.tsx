@@ -10,7 +10,8 @@ import { useTrailingSlashRedirect } from '@/middleware/trailingSlashRedirect';
  */
 export function RootLayout() {
   const location = useLocation();
-  useTrailingSlashRedirect();
+  // Disabled: Vite handles trailing slash redirects
+  // useTrailingSlashRedirect();
 
   // Scroll to top on route change
   useEffect(() => {

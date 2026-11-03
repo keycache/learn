@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "validate": "node scripts/validate-schemas.mjs",
-    "build": "npm run validate && tsc -b && vite build",
+    "sync-metadata": "node scripts/sync-metadata.js",
+    "build": "npm run sync-metadata && npm run validate && tsc -b && vite build && npm run sync-public-data",
+    "sync-public-data": "node scripts/sync-public-data.js",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",

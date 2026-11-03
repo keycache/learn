@@ -109,7 +109,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         prose-tbody:divide-muted
         prose-img:rounded-lg prose-img:shadow-md
         prose-hr:border-muted
-        space-y-4`}
+        space-y-4
+        [&_table]:border-collapse [&_table]:w-full
+        [&_table_th]:border [&_table_th]:border-muted [&_table_th]:px-4 [&_table_th]:py-2
+        [&_table_td]:border [&_table_td]:border-muted [&_table_td]:px-4 [&_table_td]:py-2`}
       dangerouslySetInnerHTML={{ __html: html }}
       aria-live="polite"
       aria-label="Rendered lesson content"

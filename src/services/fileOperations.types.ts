@@ -15,6 +15,8 @@ export interface LessonFileData {
   summary: string
   duration: string
   difficulty: 'beginner' | 'intermediate' | 'advanced'
+  learningObjectives?: string[]
+  tags?: string[]
   content: string
   metadata: {
     createdAt: string

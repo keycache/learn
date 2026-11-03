@@ -1,20 +1,27 @@
 /**
  * Quizzes Tab Component
- * Allows user to generate quizzes with customizable question counts
- * Phase 8.6 - Enhanced with validation error display and recovery
+ * Allows user to generate quizzes with customizable parameters
+ * Phase 8.9 - Enhanced with file system cascade dropdowns and save functionality
+ * Phase 8.10 - Enhanced with creatable category/subcategory/topic dropdowns
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { QUIZ_PROMPTS, interpolateQuizPrompt } from '../prompts/quizPrompts'
 import { useSelection } from '../hooks/useSelection'
 import { useGeneration } from '../hooks/useGeneration'
 import { useGenerateQuizMutation } from '../hooks/useGenerateQuizMutation'
+import { useFileSystem } from '../hooks/useFileSystem'
 import { ValidationErrorDisplay } from '../components/ValidationErrorDisplay'
+import { CreatableSelect } from '../components/CreatableSelect'
 import { QuizValidator } from '@/services/validators'
+import type { QuizFileData } from '@/services/fileOperations.types'
 
 export interface QuizFormState {
+  category: string
+  subcategory: string
   topic: string
-  lessonId: string
   easyCount: number
   mediumCount: number
   hardCount: number
@@ -30,19 +37,36 @@ export function QuizzesTab(props: QuizzesTabProps) {
   const { selection } = useSelection()
   const { generation } = useGeneration()
   const { generateQuiz } = useGenerateQuizMutation()
-  const [lessonId, setLessonId] = useState<string>('')
+  const {
+    categories,
+    subcategories,
+    topics,
+    loading: fsLoading,
+    error: fsError,
+    queryCategories,
+    querySubcategories,
+    queryTopics,
+    createCategory,
+    createSubcategory,
+    createTopic,
+    saveQuizFile,
+    clearError: clearFsError,
+  } = useFileSystem()
+
+  const [category, setCategory] = useState<string>('')
+  const [subcategory, setSubcategory] = useState<string>('')
+  const [topic, setTopic] = useState<string>('')
+  const [lessonTitle, setLessonTitle] = useState<string>('')
+  const [lessonVersion, setLessonVersion] = useState<string>('1.0')
   const [easyCount, setEasyCount] = useState<number>(30)
   const [mediumCount, setMediumCount] = useState<number>(30)
   const [hardCount, setHardCount] = useState<number>(30)
   const [promptTemplate, setPromptTemplate] = useState<'standard' | 'vocabulary' | 'grammar' | 'comprehension'>('standard')
   const [customInstructions, setCustomInstructions] = useState<string>('')
   const [showPromptPreview, setShowPromptPreview] = useState<boolean>(false)
-
-  const mockLessons = [
-    { id: 'lesson-001', name: 'French Greetings' },
-    { id: 'lesson-002', name: 'Numbers 1-100' },
-    { id: 'lesson-003', name: 'Basic Colors' },
-  ]
+  const [saving, setSaving] = useState<boolean>(false)
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const promptTemplates = [
     { id: 'standard' as const, label: 'Standard Quiz' },
@@ -51,9 +75,29 @@ export function QuizzesTab(props: QuizzesTabProps) {
     { id: 'comprehension' as const, label: 'Comprehension-Focused' },
   ]
 
-  const totalQuestions = easyCount + mediumCount + hardCount
+  // Initialize categories on mount
+  useEffect(() => {
+    queryCategories()
+  }, [])
 
-  const isComplete = selection.topic && lessonId && customInstructions.trim()
+  // Load subcategories when category changes
+  useEffect(() => {
+    if (category) {
+      querySubcategories(category)
+      setSubcategory('')
+      setTopic('')
+    }
+  }, [category])
+
+  // Load topics when subcategory changes
+  useEffect(() => {
+    if (category && subcategory) {
+      queryTopics(category, subcategory)
+      setTopic('')
+    }
+  }, [category, subcategory])
+
+  const isComplete = category && subcategory && topic && lessonTitle && easyCount > 0 && mediumCount > 0 && hardCount > 0 && customInstructions.trim()
 
   const handleGenerate = async () => {
     if (!isComplete) {
@@ -61,16 +105,61 @@ export function QuizzesTab(props: QuizzesTabProps) {
     }
 
     await generateQuiz({
-      category: selection.category || 'Language',
-      subcategory: selection.subcategory || 'General',
-      topic: selection.topic || '',
-      lessonTitle: mockLessons.find(l => l.id === lessonId)?.name || 'Untitled Lesson',
+      category,
+      subcategory,
+      topic,
+      lessonTitle,
       easyCount,
       mediumCount,
       hardCount,
       customInstructions,
       promptTemplate,
     })
+  }
+
+  const handleSaveQuiz = async () => {
+    if (!generation.result || !('questions' in generation.result)) {
+      setSaveError('No quiz generated yet')
+      return
+    }
+
+    if (!category || !subcategory || !topic) {
+      setSaveError('Please select category, subcategory, and topic')
+      return
+    }
+
+    setSaving(true)
+    setSaveError(null)
+    setSaveSuccess(false)
+
+    try {
+      const quizData: QuizFileData = {
+        title: (generation.result as any).title,
+        summary: (generation.result as any).summary,
+        difficulty: (generation.result as any).difficulty,
+        questions: (generation.result as any).questions,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          lessonVersion,
+          category,
+          subcategory,
+          topic,
+        },
+      }
+
+      const result = await saveQuizFile(category, subcategory, topic, quizData)
+
+      if (result.success) {
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 3000)
+      } else {
+        setSaveError(result.error || 'Failed to save quiz')
+      }
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Failed to save quiz')
+    } finally {
+      setSaving(false)
+    }
   }
 
   // Get the selected prompt template
@@ -80,14 +169,14 @@ export function QuizzesTab(props: QuizzesTabProps) {
   const interpolatedPrompt = interpolateQuizPrompt(
     selectedPrompt.userPrompt,
     {
-      category: selection.category || 'Language',
-      subcategory: selection.subcategory || 'General',
-      topic: selection.topic || '',
-      lessonTitle: mockLessons.find(l => l.id === lessonId)?.name || 'Untitled Lesson',
+      category: category || 'Language',
+      subcategory: subcategory || 'General',
+      topic: topic || '',
+      lessonTitle: lessonTitle || '',
       easyCount,
       mediumCount,
       hardCount,
-      totalCount: totalQuestions,
+      totalCount: easyCount + mediumCount + hardCount,
       customInstructions,
     }
   )
@@ -101,108 +190,154 @@ export function QuizzesTab(props: QuizzesTabProps) {
         </p>
       </div>
 
-      {/* Topic Display */}
+      {/* File System Dropdowns */}
+      {fsError && (
+        <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md">
+          <p className="text-sm text-red-800 dark:text-red-100">
+            <strong>Error:</strong> {fsError}
+          </p>
+          <button
+            onClick={clearFsError}
+            className="mt-2 text-xs text-red-700 dark:text-red-200 hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Category Dropdown */}
+      <CreatableSelect
+        options={categories}
+        value={category}
+        onChange={(value) => {
+          setCategory(value)
+          setSubcategory('')
+          setTopic('')
+        }}
+        onCreateNew={createCategory}
+        placeholder="Select or type to create category..."
+        label="Category"
+        required
+        disabled={fsLoading}
+        loading={fsLoading}
+        error={fsError && category === '' ? fsError : null}
+      />
+
+      {/* Subcategory Dropdown */}
+      <CreatableSelect
+        options={subcategories}
+        value={subcategory}
+        onChange={(value) => {
+          setSubcategory(value)
+          setTopic('')
+        }}
+        onCreateNew={(subName) => (category ? createSubcategory(category, subName) : Promise.resolve(false))}
+        placeholder="Select or type to create subcategory..."
+        label="Subcategory"
+        required
+        disabled={!category || fsLoading}
+        loading={fsLoading}
+      />
+
+      {/* Topic Dropdown */}
+      <CreatableSelect
+        options={topics}
+        value={topic}
+        onChange={setTopic}
+        onCreateNew={(topicName) =>
+          category && subcategory ? createTopic(category, subcategory, topicName) : Promise.resolve(false)
+        }
+        placeholder="Select or type to create topic..."
+        label="Topic"
+        required
+        disabled={!category || !subcategory || fsLoading}
+        loading={fsLoading}
+      />
+
+      {/* Lesson Title Input */}
       <div className="space-y-2">
-        <label htmlFor="topic" className="text-sm font-medium">
-          Topic
+        <label htmlFor="lessonTitle" className="text-sm font-medium">
+          Lesson Title *
         </label>
         <input
-          id="topic"
+          id="lessonTitle"
           type="text"
-          value={selection.topic || ''}
-          readOnly
-          placeholder="Select topic from Selection tab"
-          className="w-full px-3 py-2 border border-border rounded-md bg-muted text-foreground text-sm placeholder-muted-foreground"
+          value={lessonTitle}
+          onChange={(e) => setLessonTitle(e.target.value)}
+          placeholder="e.g., Spanish Numbers: From 1 to a Million"
+          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
         />
         <p className="text-xs text-muted-foreground">
-          Automatically populated from Selection tab
+          Reference to the lesson this quiz is based on
         </p>
       </div>
 
-      {/* Lesson Selector */}
+      {/* Lesson Version Input */}
       <div className="space-y-2">
-        <label htmlFor="lesson" className="text-sm font-medium">
-          Select Lesson * (Quiz should correspond to a lesson)
+        <label htmlFor="lessonVersion" className="text-sm font-medium">
+          Lesson Version
         </label>
-        <select
-          id="lesson"
-          value={lessonId}
-          onChange={(e) => setLessonId(e.target.value)}
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
-        >
-          <option value="">Choose a lesson...</option>
-          {mockLessons.map((lesson) => (
-            <option key={lesson.id} value={lesson.id}>
-              {lesson.name}
-            </option>
-          ))}
-        </select>
+        <input
+          id="lessonVersion"
+          type="text"
+          value={lessonVersion}
+          onChange={(e) => setLessonVersion(e.target.value)}
+          placeholder="e.g., 1.0"
+          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
+        />
         <p className="text-xs text-muted-foreground">
-          The quiz will test knowledge from the selected lesson
+          Version of the lesson
         </p>
       </div>
 
       {/* Question Counts */}
-      <div className="space-y-4">
-        <div className="text-sm font-medium">Questions Per Difficulty Level</div>
-
-        <div className="grid grid-cols-3 gap-3">
-          <div className="space-y-2">
-            <label htmlFor="easy" className="text-xs font-medium block">
-              Easy
-            </label>
-            <input
-              id="easy"
-              type="number"
-              min="0"
-              max="100"
-              value={easyCount}
-              onChange={(e) => setEasyCount(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-full px-2 py-2 border border-border rounded-md bg-background text-foreground text-sm"
-            />
-            <p className="text-xs text-muted-foreground text-center">{Math.round((easyCount / totalQuestions) * 100)}%</p>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="medium" className="text-xs font-medium block">
-              Medium
-            </label>
-            <input
-              id="medium"
-              type="number"
-              min="0"
-              max="100"
-              value={mediumCount}
-              onChange={(e) => setMediumCount(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-full px-2 py-2 border border-border rounded-md bg-background text-foreground text-sm"
-            />
-            <p className="text-xs text-muted-foreground text-center">{Math.round((mediumCount / totalQuestions) * 100)}%</p>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="hard" className="text-xs font-medium block">
-              Hard
-            </label>
-            <input
-              id="hard"
-              type="number"
-              min="0"
-              max="100"
-              value={hardCount}
-              onChange={(e) => setHardCount(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-full px-2 py-2 border border-border rounded-md bg-background text-foreground text-sm"
-            />
-            <p className="text-xs text-muted-foreground text-center">{Math.round((hardCount / totalQuestions) * 100)}%</p>
-          </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="easyCount" className="text-sm font-medium">
+            Easy Questions *
+          </label>
+          <input
+            id="easyCount"
+            type="number"
+            min="0"
+            max="100"
+            value={easyCount}
+            onChange={(e) => setEasyCount(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          />
+          <p className="text-xs text-muted-foreground">0-100</p>
         </div>
 
-        <div className="p-3 bg-muted rounded-md">
-          <p className="text-sm font-medium">
-            Total Questions: <span className="text-primary">{totalQuestions}</span>
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Estimated completion time: {Math.ceil(totalQuestions * 1.5)} minutes
-          </p>
+        <div className="space-y-2">
+          <label htmlFor="mediumCount" className="text-sm font-medium">
+            Medium Questions *
+          </label>
+          <input
+            id="mediumCount"
+            type="number"
+            min="0"
+            max="100"
+            value={mediumCount}
+            onChange={(e) => setMediumCount(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          />
+          <p className="text-xs text-muted-foreground">0-100</p>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="hardCount" className="text-sm font-medium">
+            Hard Questions *
+          </label>
+          <input
+            id="hardCount"
+            type="number"
+            min="0"
+            max="100"
+            value={hardCount}
+            onChange={(e) => setHardCount(Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          />
+          <p className="text-xs text-muted-foreground">0-100</p>
         </div>
       </div>
 
@@ -218,7 +353,9 @@ export function QuizzesTab(props: QuizzesTabProps) {
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
         >
           {promptTemplates.map((t) => (
-            <option key={t.id} value={t.id}>{t.label}</option>
+            <option key={t.id} value={t.id}>
+              {t.label}
+            </option>
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
@@ -235,7 +372,7 @@ export function QuizzesTab(props: QuizzesTabProps) {
           id="instructions"
           value={customInstructions}
           onChange={(e) => setCustomInstructions(e.target.value)}
-          placeholder="Provide specific instructions for quiz generation (e.g., focus on vocabulary, include grammatical forms, etc.)"
+          placeholder="Provide specific instructions for quiz generation (e.g., question format, difficulty distribution, time limits)"
           rows={4}
           className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground resize-none"
         />
@@ -298,7 +435,7 @@ export function QuizzesTab(props: QuizzesTabProps) {
         </p>
       )}
 
-      {/* Generation Error - Enhanced Display */}
+      {/* Generation Error */}
       {generation.error && (
         <ValidationErrorDisplay
           errorMessage={generation.error}
@@ -315,11 +452,15 @@ export function QuizzesTab(props: QuizzesTabProps) {
           <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-md">
             <p className="text-sm text-green-800 dark:text-green-100 font-medium">✓ Quiz Generated Successfully</p>
             <div className="text-sm text-green-700 dark:text-green-200 mt-2">
-              <p><strong>Total Questions:</strong> {generation.result.questions.length}</p>
-              <p><strong>Quiz Version:</strong> {generation.result.quiz_version}</p>
-              {generation.result.questions && (
-                <p><strong>Topics Covered:</strong> {Array.from(new Set(generation.result.questions.map(q => q.type))).join(', ')}</p>
-              )}
+              <p>
+                <strong>Title:</strong> {(generation.result as any).title}
+              </p>
+              <p>
+                <strong>Questions:</strong> {(generation.result as any).questions.length}
+              </p>
+              <p>
+                <strong>Difficulty:</strong> {(generation.result as any).difficulty}
+              </p>
 
               {/* Business Rule Validation */}
               {(() => {
@@ -329,8 +470,8 @@ export function QuizzesTab(props: QuizzesTabProps) {
                     <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
                       <p className="text-xs font-medium text-green-700 dark:text-green-200">Validation Warnings:</p>
                       <ul className="text-xs mt-1 space-y-1 text-green-600 dark:text-green-300">
-                        {QuizValidator.getErrorMessages(validationErrors).map((msg, idx) => (
-                          <li key={idx}>• {msg}</li>
+                        {validationErrors.map((err, idx) => (
+                          <li key={idx}>• {err.message}</li>
                         ))}
                       </ul>
                     </div>
@@ -339,48 +480,66 @@ export function QuizzesTab(props: QuizzesTabProps) {
                 return null
               })()}
             </div>
+
+            {/* Save Status */}
+            {saveSuccess && (
+              <div className="mt-3 p-2 bg-green-200 dark:bg-green-800 rounded text-sm text-green-800 dark:text-green-100">
+                ✓ Quiz saved successfully!
+              </div>
+            )}
+
+            {saveError && (
+              <div className="mt-3 p-2 bg-red-200 dark:bg-red-800 rounded text-sm text-red-800 dark:text-red-100">
+                Error: {saveError}
+              </div>
+            )}
+
+            {/* Save Button */}
+            <button
+              onClick={handleSaveQuiz}
+              disabled={saving || !category || !subcategory || !topic}
+              style={{
+                backgroundColor: saving ? 'hsl(0 0% 60%)' : 'hsl(142 71% 45%)',
+                color: 'hsl(0 0% 100%)',
+              }}
+              className="mt-3 px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {saving ? 'Saving...' : '💾 Save Quiz to File System'}
+            </button>
           </div>
 
-          {/* Quiz Questions Display */}
+          {/* Quiz Content Display */}
           <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Questions Preview</h3>
-            <div className="max-h-96 overflow-y-auto space-y-3">
-              {generation.result.questions.map((question, idx) => (
-                <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
-                  <p className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-2">
-                    Q{idx + 1}: {question.question}
-                  </p>
-                  <div className="ml-3 space-y-1">
-                    {question.options && question.options.map((option, optIdx) => {
-                      const isCorrect = typeof question.correctAnswer === 'number' 
-                        ? optIdx === question.correctAnswer 
-                        : option === question.correctAnswer;
-                      return (
-                        <div 
-                          key={optIdx} 
-                          className={`text-xs p-1.5 rounded ${
-                            isCorrect
-                              ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 font-medium'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                          }`}
-                        >
-                          <span className="font-medium">{String.fromCharCode(65 + optIdx)}:</span> {option}
-                          {isCorrect && ' ✓'}
-                        </div>
-                      );
-                    })}
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Quiz Questions</h3>
+            <div className="max-h-96 overflow-y-auto p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+              <div className="space-y-4">
+                {(generation.result as any).questions.map((question: any, idx: number) => (
+                  <div key={idx} className="pb-4 border-b border-slate-200 dark:border-slate-700 last:border-b-0">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Q{idx + 1}: {question.question}
+                    </div>
+                    {question.options && (
+                      <ul className="text-sm text-slate-700 dark:text-slate-300 space-y-1 ml-4">
+                        {question.options.map((option: string, optIdx: number) => (
+                          <li key={optIdx}>
+                            {String.fromCharCode(65 + optIdx)}) {option}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {question.correctAnswer && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        <strong>Answer:</strong> {question.correctAnswer}
+                      </p>
+                    )}
+                    {question.explanation && (
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">
+                        {question.explanation}
+                      </p>
+                    )}
                   </div>
-                  {question.explanation && (
-                    <p className="text-xs italic text-slate-600 dark:text-slate-400 mt-2">
-                      <strong>Explanation:</strong> {question.explanation}
-                    </p>
-                  )}
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                    <span>Difficulty: <span className="font-medium">{question.difficulty}</span></span>
-                    {question.points && <span className="ml-3">Points: <span className="font-medium">{question.points}</span></span>}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -389,8 +548,7 @@ export function QuizzesTab(props: QuizzesTabProps) {
       {/* Info Box */}
       <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>What happens next:</strong> After you click Generate, the LLM will create a quiz
-          following the template shown above. You'll see a preview and have the option to save or retry.
+          <strong>What happens next:</strong> After you click Generate, the LLM will create a quiz. You'll see a preview and can save it to the file system.
         </p>
       </div>
     </div>

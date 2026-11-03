@@ -83,6 +83,9 @@ export async function loadSubcategories(
 
 /**
  * Load topics for a given category and subcategory
+ * Uses dynamic discovery from file system first (via API), then falls back to metadata.json
+ * This ensures new topics appear immediately when lessons are created
+ * 
  * Example: loadTopics('spoken-languages', 'french') -> returns [{id: 'numbers', name: 'Numbers'}, ...]
  */
 export async function loadTopics(
@@ -90,6 +93,34 @@ export async function loadTopics(
   subcategoryId: string
 ): Promise<TopicInfo[]> {
   try {
+    // First, try to discover topics dynamically from file system via API
+    // This works in both dev and production builds
+    try {
+      const response = await fetch(
+        `/learn/api/dev/fs/topics/${categoryId}/${subcategoryId}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data && Array.isArray(data.data)) {
+          // Convert from API format to TopicInfo format
+          const topics = (data.data as string[]).map((topicId: string) => ({
+            id: topicId,
+            name: topicId
+              .split(/[-_]/)
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' '),
+          }));
+          if (topics.length > 0) {
+            return topics;
+          }
+        }
+      }
+    } catch (apiError) {
+      // API not available in production - will fall back to metadata
+      console.debug('Topic discovery API not available, falling back to metadata');
+    }
+
+    // Fall back to static metadata.json if API unavailable
     const metadata = await import(
       `../data/categories/${categoryId}/${subcategoryId}/metadata.json`
     );
@@ -107,9 +138,10 @@ export async function loadTopics(
  * Load a complete topic with all its levels and questions
  * Also attempts to discover lessons if topic folder structure exists
  * 
- * Supports two structures:
- * 1. Old: categoryId/subcategoryId/topicId.json (single file with levels and questions)
- * 2. New: categoryId/subcategoryId/topicId/quiz.json (quiz in folder with lessons)
+ * Supports three structures:
+ * 1. Lessons only: categoryId/subcategoryId/topicId/ with lesson_*.md files (no quiz)
+ * 2. Old: categoryId/subcategoryId/topicId.json (single file with levels and questions)
+ * 3. New: categoryId/subcategoryId/topicId/quiz.json (quiz in folder with lessons)
  * 
  * Example: loadTopic('spoken-languages', 'french', 'numbers')
  */
@@ -143,30 +175,57 @@ export async function loadTopic(
       };
       
       return result;
-    } catch (e) {
-      // New structure not found, try old structure (file-based)
-      const topicData = await import(
-        `../data/categories/${categoryId}/${subcategoryId}/${topicId}.json`
-      );
-      
-      // Old structure found - still attempt to discover lessons for backward compatibility
-      const lessons = await discoverLessons(categoryId, subcategoryId, topicId);
-      
-      const result = {
-        id: topicData.id,
-        name: topicData.name,
-        description: topicData.description,
-        category: topicData.category,
-        subcategory: topicData.subcategory,
-        levels: {
-          easy: topicData.levels.easy,
-          medium: topicData.levels.medium,
-          hard: topicData.levels.hard,
-        },
-        ...(lessons && lessons.length > 0 && { lessons }),
-      };
-      
-      return result;
+    } catch (quizError) {
+      // Quiz not found, try old file-based structure
+      try {
+        const topicData = await import(
+          `../data/categories/${categoryId}/${subcategoryId}/${topicId}.json`
+        );
+        
+        // Old structure found - still attempt to discover lessons for backward compatibility
+        const lessons = await discoverLessons(categoryId, subcategoryId, topicId);
+        
+        const result = {
+          id: topicData.id,
+          name: topicData.name,
+          description: topicData.description,
+          category: topicData.category,
+          subcategory: topicData.subcategory,
+          levels: {
+            easy: topicData.levels.easy,
+            medium: topicData.levels.medium,
+            hard: topicData.levels.hard,
+          },
+          ...(lessons && lessons.length > 0 && { lessons }),
+        };
+        
+        return result;
+      } catch (fileError) {
+        // Neither quiz.json nor topicId.json found
+        // Try to load as lessons-only topic
+        const lessons = await discoverLessons(categoryId, subcategoryId, topicId);
+        
+        if (lessons && lessons.length > 0) {
+          // Create a minimal topic object from the first lesson
+          const firstLesson = lessons[0];
+          return {
+            id: topicId,
+            name: firstLesson.title || topicId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+            description: firstLesson.summary || `Learn ${topicId}`,
+            category: categoryId,
+            subcategory: subcategoryId,
+            levels: {
+              easy: { level: 'easy', description: '', questionCount: 0, questions: [] },
+              medium: { level: 'medium', description: '', questionCount: 0, questions: [] },
+              hard: { level: 'hard', description: '', questionCount: 0, questions: [] },
+            },
+            lessons,
+          };
+        }
+        
+        // No lessons or quiz found
+        return null;
+      }
     }
   } catch (error) {
     console.error(
@@ -338,21 +397,27 @@ export async function loadLessonContent(
 
   // Check cache first
   if (lessonContentCache.has(cacheKey)) {
+    console.log(`[loadLessonContent] Returning cached content for ${lessonId}`);
     return lessonContentCache.get(cacheKey)!;
   }
 
   try {
     const basePath = import.meta.env.BASE_URL || '/learn/';
     const lessonPath = `${basePath}data/categories/${categoryId}/${subcategoryId}/${topicId}/${lessonId}.md`;
+    console.log(`[loadLessonContent] Fetching from: ${lessonPath}`);
+    
     const response = await fetch(lessonPath);
     
     if (!response.ok) {
-      console.error(`Failed to load lesson ${lessonId}: ${response.status}`);
+      console.error(`[loadLessonContent] Failed to load lesson ${lessonId}: HTTP ${response.status}`);
       return null;
     }
     
     const content = await response.text();
+    console.log(`[loadLessonContent] Fetched ${content.length} characters`);
+    
     const markdownContent = parseFrontmatter(content);
+    console.log(`[loadLessonContent] Parsed markdown, content length: ${markdownContent.content.length} chars`);
 
     // Cache the result
     lessonContentCache.set(cacheKey, markdownContent);
@@ -360,7 +425,7 @@ export async function loadLessonContent(
     return markdownContent;
   } catch (error) {
     console.error(
-      `Failed to load lesson content for ${categoryId}/${subcategoryId}/${topicId}/${lessonId}:`,
+      `[loadLessonContent] Failed to load lesson content for ${categoryId}/${subcategoryId}/${topicId}/${lessonId}:`,
       error
     );
     return null;
