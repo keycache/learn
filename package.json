@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist --dotfiles"
+    "deploy": "node scripts/deploy.mjs"
   },
   "repository": {
     "type": "git",
