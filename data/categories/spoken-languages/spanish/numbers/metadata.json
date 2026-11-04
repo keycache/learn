@@ -1,0 +1,15 @@
+{
+  "id": "numbers",
+  "name": "Numbers",
+  "description": "Learn Spanish numbers, counting, and basic numerals from 0-1000+",
+  "category": "spoken-languages",
+  "subcategory": "spanish",
+  "version": "1.0",
+  "createdAt": "2024-11-01",
+  "lessons": [
+    {
+      "id": "lesson_1",
+      "order": 1
+    }
+  ]
+}
