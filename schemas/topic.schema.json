@@ -1,145 +1,110 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Topic Schema",
-  "description": "Schema for a learning topic containing questions across three difficulty levels (easy, medium, hard)",
+  "title": "Generated Quiz Schema",
+  "description": "Schema for generated quizzes with flat question structure and per-question metadata. Compatible with LLM quiz generation output.",
   "type": "object",
-  "required": ["id", "name", "description", "category", "subcategory", "levels"],
+  "required": ["title", "lesson_id", "quiz_version", "questions", "metadata"],
   "additionalProperties": false,
   "properties": {
-    "id": {
+    "title": {
       "type": "string",
-      "description": "Unique identifier for the topic",
-      "pattern": "^[a-z]+(-[a-z]+)*$",
+      "description": "Descriptive quiz title (e.g., 'French Numbers Quiz - Beginner')",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "lesson_id": {
+      "type": "string",
+      "description": "Unique identifier of the associated lesson (e.g., 'french/numbers')",
       "minLength": 1
     },
-    "name": {
-      "type": "string",
-      "description": "Display name of the topic",
-      "minLength": 1
+    "quiz_version": {
+      "type": "integer",
+      "description": "Version number of this quiz (1, 2, 3, ...)",
+      "minimum": 1
     },
-    "description": {
-      "type": "string",
-      "description": "Description of the topic",
-      "minLength": 1
-    },
-    "category": {
-      "type": "string",
-      "description": "Parent category ID",
-      "pattern": "^[a-z]+(-[a-z]+)*$"
-    },
-    "subcategory": {
-      "type": "string",
-      "description": "Parent subcategory ID",
-      "pattern": "^[a-z]+(-[a-z]+)*$"
-    },
-    "levels": {
-      "type": "object",
-      "description": "Three difficulty levels for this topic",
-      "required": ["easy", "medium", "hard"],
-      "additionalProperties": false,
-      "properties": {
-        "easy": {
-          "$ref": "#/definitions/level"
-        },
-        "medium": {
-          "$ref": "#/definitions/level"
-        },
-        "hard": {
-          "$ref": "#/definitions/level"
-        }
+    "questions": {
+      "type": "array",
+      "description": "Array of quiz questions",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/question"
       }
+    },
+    "metadata": {
+      "$ref": "#/definitions/metadata"
     }
   },
   "definitions": {
-    "level": {
-      "type": "object",
-      "description": "A single difficulty level with 30 questions",
-      "required": ["level", "questionCount", "questions"],
-      "additionalProperties": false,
-      "properties": {
-        "level": {
-          "type": "string",
-          "enum": ["easy", "medium", "hard"],
-          "description": "Difficulty level identifier"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of this level"
-        },
-        "questionCount": {
-          "type": "integer",
-          "minimum": 30,
-          "maximum": 30,
-          "description": "Must be exactly 30 questions per level"
-        },
-        "questions": {
-          "type": "array",
-          "minItems": 30,
-          "maxItems": 30,
-          "description": "Array of exactly 30 questions",
-          "items": {
-            "$ref": "#/definitions/question"
-          }
-        }
-      }
-    },
     "question": {
       "type": "object",
-      "description": "A single quiz question",
-      "required": ["id", "text", "options", "correctAnswers"],
+      "description": "A single quiz question with type, difficulty, and points metadata",
+      "required": ["id", "type", "question", "correctAnswer", "explanation", "difficulty", "points"],
       "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the question within the topic",
-          "pattern": "^q-[a-z]+-[0-9]{2}$",
-          "minLength": 1
+          "description": "Unique question identifier (e.g., 'q-easy-00')"
         },
-        "text": {
+        "type": {
           "type": "string",
-          "description": "The question text",
-          "minLength": 5
+          "enum": ["multiple-choice", "true-false", "short-answer"],
+          "description": "Question type: multiple-choice (4 options), true-false (2 options), or short-answer (text response)"
+        },
+        "question": {
+          "type": "string",
+          "description": "The question text or prompt",
+          "minLength": 1
         },
         "options": {
           "type": "array",
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "Array of exactly 4 answer options",
+          "description": "Answer options (required for multiple-choice and true-false; should have 4 items for MC, 2 for T/F)",
           "items": {
-            "$ref": "#/definitions/option"
+            "type": "string"
           }
         },
-        "correctAnswers": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 4,
-          "description": "Array of one or more correct option IDs",
-          "items": {
-            "type": "string",
-            "pattern": "^opt-"
-          }
+        "correctAnswer": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "number"}
+          ],
+          "description": "The correct answer (option text or index for short-answer)"
         },
         "explanation": {
           "type": "string",
-          "description": "Explanation of the correct answer"
+          "description": "Detailed explanation of why this is correct, for student learning",
+          "minLength": 1
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"],
+          "description": "Question difficulty: easy (recall), medium (comprehension), hard (application/analysis)"
+        },
+        "points": {
+          "type": "integer",
+          "description": "Points awarded for correct answer",
+          "minimum": 1
         }
       }
     },
-    "option": {
+    "metadata": {
       "type": "object",
-      "description": "A single answer option",
-      "required": ["id", "text"],
+      "description": "Quiz metadata - contextual information",
+      "required": ["totalQuestions", "createdAt", "lessonId"],
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for this option",
-          "pattern": "^opt-[a-z]+-[0-9]{2}-[a-d]$",
-          "minLength": 1
+        "totalQuestions": {
+          "type": "integer",
+          "description": "Total number of questions in this quiz",
+          "minimum": 1
         },
-        "text": {
+        "createdAt": {
           "type": "string",
-          "description": "The option text",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when quiz was generated"
+        },
+        "lessonId": {
+          "type": "string",
+          "description": "Reference to the lesson this quiz covers",
           "minLength": 1
         }
       }

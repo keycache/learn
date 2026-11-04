@@ -23,6 +23,9 @@ const categoryMetadataSchema = JSON.parse(
 const subcategoryMetadataSchema = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../schemas/subcategory-metadata.schema.json'), 'utf-8')
 );
+const topicMetadataSchema = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../schemas/topic-metadata.schema.json'), 'utf-8')
+);
 const topicSchema = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../schemas/topic.schema.json'), 'utf-8')
 );
@@ -30,6 +33,7 @@ const topicSchema = JSON.parse(
 // Compile validators
 const validateCategoryMetadata = ajv.compile(categoryMetadataSchema);
 const validateSubcategoryMetadata = ajv.compile(subcategoryMetadataSchema);
+const validateTopicMetadata = ajv.compile(topicMetadataSchema);
 const validateTopic = ajv.compile(topicSchema);
 
 // Markdown lesson metadata schema
@@ -228,6 +232,24 @@ function validateSubcategoryMetadataFile(filePath) {
 }
 
 /**
+ * Validate a topic metadata file
+ */
+function validateTopicMetadataFile(filePath) {
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    if (!validateTopicMetadata(data)) {
+      errors.push({ file: filePath, errors: validateTopicMetadata.errors });
+      return false;
+    }
+    validatedFiles++;
+    return true;
+  } catch (error) {
+    errors.push({ file: filePath, errors: [{ message: error.message }] });
+    return false;
+  }
+}
+
+/**
  * Validate a topic file
  */
 function validateTopicFile(filePath) {
@@ -357,15 +379,28 @@ function main() {
             validateCategoryMetadataFile(filePath);
           }
           // Subcategory metadata: categories/[category]/[subcategory]/metadata.json
+          // Topic metadata: categories/[category]/[subcategory]/[topic]/metadata.json
           else {
-            validateSubcategoryMetadataFile(filePath);
+            // Check depth to determine if this is subcategory or topic metadata
+            const depth = filePath.split(path.sep).length;
+            const dataPathDepth = dataDir.split(path.sep).length;
+            const relativeDepth = depth - dataPathDepth;
+            
+            // Topic level is 3 levels deep (category/subcategory/topic/metadata.json = 5 total)
+            // Subcategory level is 2 levels deep (category/subcategory/metadata.json = 4 total)
+            if (relativeDepth >= 4) {
+              validateTopicMetadataFile(filePath);
+            } else {
+              validateSubcategoryMetadataFile(filePath);
+            }
           }
         } else if (
           fileName !== 'package.json' &&
           fileName !== 'tsconfig.json' &&
-          fileName !== 'vite.config.json'
+          fileName !== 'vite.config.json' &&
+          !fileName.endsWith('.backup.json')
         ) {
-          // Topic files
+          // Topic files (quiz.json)
           validateTopicFile(filePath);
         }
       });

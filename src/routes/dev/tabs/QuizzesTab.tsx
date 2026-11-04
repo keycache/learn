@@ -3,6 +3,7 @@
  * Allows user to generate quizzes with customizable parameters
  * Phase 8.9 - Enhanced with file system cascade dropdowns and save functionality
  * Phase 8.10 - Enhanced with creatable category/subcategory/topic dropdowns
+ * Phase 8.11 - Enhanced with multi-select lesson picker and dynamic prompt generation
  */
 
 import { useState, useEffect } from 'react'
@@ -13,8 +14,10 @@ import { useSelection } from '../hooks/useSelection'
 import { useGeneration } from '../hooks/useGeneration'
 import { useGenerateQuizMutation } from '../hooks/useGenerateQuizMutation'
 import { useFileSystem } from '../hooks/useFileSystem'
+import { useLessonDiscovery } from '../hooks/useLessonDiscovery'
 import { ValidationErrorDisplay } from '../components/ValidationErrorDisplay'
 import { CreatableSelect } from '../components/CreatableSelect'
+import { LessonMultiSelect } from '../components/LessonMultiSelect'
 import { QuizValidator } from '@/services/validators'
 import type { QuizFileData } from '@/services/fileOperations.types'
 
@@ -22,6 +25,7 @@ export interface QuizFormState {
   category: string
   subcategory: string
   topic: string
+  selectedLessons: string[]
   easyCount: number
   mediumCount: number
   hardCount: number
@@ -53,9 +57,19 @@ export function QuizzesTab(props: QuizzesTabProps) {
     clearError: clearFsError,
   } = useFileSystem()
 
+  const {
+    lessons,
+    loading: lessonsLoading,
+    error: lessonsError,
+    discoverTopicLessons,
+    getSelectedLessonContents,
+    clearLessons,
+  } = useLessonDiscovery()
+
   const [category, setCategory] = useState<string>('')
   const [subcategory, setSubcategory] = useState<string>('')
   const [topic, setTopic] = useState<string>('')
+  const [selectedLessons, setSelectedLessons] = useState<string[]>([])
   const [lessonTitle, setLessonTitle] = useState<string>('')
   const [lessonVersion, setLessonVersion] = useState<string>('1.0')
   const [easyCount, setEasyCount] = useState<number>(30)
@@ -67,6 +81,8 @@ export function QuizzesTab(props: QuizzesTabProps) {
   const [saving, setSaving] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [lessonContentsLoading, setLessonContentsLoading] = useState(false)
+  const [previewLessonContent, setPreviewLessonContent] = useState<string>('')
 
   const promptTemplates = [
     { id: 'standard' as const, label: 'Standard Quiz' },
@@ -94,27 +110,71 @@ export function QuizzesTab(props: QuizzesTabProps) {
     if (category && subcategory) {
       queryTopics(category, subcategory)
       setTopic('')
+      setSelectedLessons([])
+      clearLessons()
     }
   }, [category, subcategory])
 
-  const isComplete = category && subcategory && topic && lessonTitle && easyCount > 0 && mediumCount > 0 && hardCount > 0 && customInstructions.trim()
+  // Discover lessons when topic changes
+  useEffect(() => {
+    if (category && subcategory && topic) {
+      discoverTopicLessons(category, subcategory, topic)
+      setSelectedLessons([])
+    }
+  }, [topic, category, subcategory])
 
-  const handleGenerate = async () => {
+  // Load lesson content when preview is opened or lessons are selected
+  useEffect(() => {
+    const loadPreviewContent = async () => {
+      if (showPromptPreview && selectedLessons.length > 0 && category && subcategory && topic) {
+        try {
+          setLessonContentsLoading(true)
+          const content = await getSelectedLessonContents(category, subcategory, topic, selectedLessons)
+          setPreviewLessonContent(content)
+        } catch (err) {
+          setPreviewLessonContent('Error loading lesson content: ' + (err instanceof Error ? err.message : String(err)))
+        } finally {
+          setLessonContentsLoading(false)
+        }
+      } else if (!showPromptPreview) {
+        setPreviewLessonContent('')
+      }
+    }
+
+    loadPreviewContent()
+  }, [showPromptPreview, selectedLessons, category, subcategory, topic, getSelectedLessonContents])
+
+  const isComplete = category && subcategory && topic && selectedLessons.length > 0 && easyCount > 0 && mediumCount > 0 && hardCount > 0 && customInstructions.trim()
+
+  const handleGenerateWithLessonContent = async () => {
     if (!isComplete) {
       return
     }
 
-    await generateQuiz({
-      category,
-      subcategory,
-      topic,
-      lessonTitle,
-      easyCount,
-      mediumCount,
-      hardCount,
-      customInstructions,
-      promptTemplate,
-    })
+    setLessonContentsLoading(true)
+    try {
+      // Get the full content of selected lessons
+      const lessonContents = await getSelectedLessonContents(category, subcategory, topic, selectedLessons)
+
+      // Build augmented custom instructions with lesson content
+      const augmentedInstructions = `## Selected Lesson Content:\n\n${lessonContents}\n\n## Custom Instructions:\n\n${customInstructions}`
+
+      await generateQuiz({
+        category,
+        subcategory,
+        topic,
+        lessonTitle: selectedLessons.join(', '),
+        easyCount,
+        mediumCount,
+        hardCount,
+        customInstructions: augmentedInstructions,
+        promptTemplate,
+      })
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to load lesson contents')
+    } finally {
+      setLessonContentsLoading(false)
+    }
   }
 
   const handleSaveQuiz = async () => {
@@ -165,19 +225,39 @@ export function QuizzesTab(props: QuizzesTabProps) {
   // Get the selected prompt template
   const selectedPrompt = QUIZ_PROMPTS[promptTemplate]
 
-  // Interpolate the prompt with current values
+  // Interpolate the prompt with current values (without lesson content - used when not previewing)
   const interpolatedPrompt = interpolateQuizPrompt(
     selectedPrompt.userPrompt,
     {
       category: category || 'Language',
       subcategory: subcategory || 'General',
       topic: topic || '',
-      lessonTitle: lessonTitle || '',
+      lessonTitle: selectedLessons.join(', ') || 'Selected lessons',
       easyCount,
       mediumCount,
       hardCount,
       totalCount: easyCount + mediumCount + hardCount,
       customInstructions,
+    }
+  )
+
+  // Interpolate the prompt WITH lesson content for preview
+  const augmentedCustomInstructions = previewLessonContent
+    ? `## Selected Lesson Content:\n\n${previewLessonContent}\n\n## Custom Instructions:\n\n${customInstructions}`
+    : customInstructions
+
+  const interpolatedPromptWithContent = interpolateQuizPrompt(
+    selectedPrompt.userPrompt,
+    {
+      category: category || 'Language',
+      subcategory: subcategory || 'General',
+      topic: topic || '',
+      lessonTitle: selectedLessons.join(', ') || 'Selected lessons',
+      easyCount,
+      mediumCount,
+      hardCount,
+      totalCount: easyCount + mediumCount + hardCount,
+      customInstructions: augmentedCustomInstructions,
     }
   )
 
@@ -205,89 +285,72 @@ export function QuizzesTab(props: QuizzesTabProps) {
         </div>
       )}
 
-      {/* Category Dropdown */}
-      <CreatableSelect
-        options={categories}
-        value={category}
-        onChange={(value) => {
-          setCategory(value)
-          setSubcategory('')
-          setTopic('')
-        }}
-        onCreateNew={createCategory}
-        placeholder="Select or type to create category..."
-        label="Category"
-        required
-        disabled={fsLoading}
-        loading={fsLoading}
-        error={fsError && category === '' ? fsError : null}
-      />
-
-      {/* Subcategory Dropdown */}
-      <CreatableSelect
-        options={subcategories}
-        value={subcategory}
-        onChange={(value) => {
-          setSubcategory(value)
-          setTopic('')
-        }}
-        onCreateNew={(subName) => (category ? createSubcategory(category, subName) : Promise.resolve(false))}
-        placeholder="Select or type to create subcategory..."
-        label="Subcategory"
-        required
-        disabled={!category || fsLoading}
-        loading={fsLoading}
-      />
-
-      {/* Topic Dropdown */}
-      <CreatableSelect
-        options={topics}
-        value={topic}
-        onChange={setTopic}
-        onCreateNew={(topicName) =>
-          category && subcategory ? createTopic(category, subcategory, topicName) : Promise.resolve(false)
-        }
-        placeholder="Select or type to create topic..."
-        label="Topic"
-        required
-        disabled={!category || !subcategory || fsLoading}
-        loading={fsLoading}
-      />
-
-      {/* Lesson Title Input */}
-      <div className="space-y-2">
-        <label htmlFor="lessonTitle" className="text-sm font-medium">
-          Lesson Title *
-        </label>
-        <input
-          id="lessonTitle"
-          type="text"
-          value={lessonTitle}
-          onChange={(e) => setLessonTitle(e.target.value)}
-          placeholder="e.g., Spanish Numbers: From 1 to a Million"
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
+      {/* Category & Subcategory Row */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Category Dropdown */}
+        <CreatableSelect
+          options={categories}
+          value={category}
+          onChange={(value) => {
+            setCategory(value)
+            setSubcategory('')
+            setTopic('')
+          }}
+          onCreateNew={createCategory}
+          placeholder="Select or type to create category..."
+          label="Category"
+          required
+          disabled={fsLoading}
+          loading={fsLoading}
+          error={fsError && category === '' ? fsError : null}
         />
-        <p className="text-xs text-muted-foreground">
-          Reference to the lesson this quiz is based on
-        </p>
+
+        {/* Subcategory Dropdown */}
+        <CreatableSelect
+          options={subcategories}
+          value={subcategory}
+          onChange={(value) => {
+            setSubcategory(value)
+            setTopic('')
+          }}
+          onCreateNew={(subName) => (category ? createSubcategory(category, subName) : Promise.resolve(false))}
+          placeholder="Select or type to create subcategory..."
+          label="Subcategory"
+          required
+          disabled={!category || fsLoading}
+          loading={fsLoading}
+        />
       </div>
 
-      {/* Lesson Version Input */}
-      <div className="space-y-2">
-        <label htmlFor="lessonVersion" className="text-sm font-medium">
-          Lesson Version
-        </label>
-        <input
-          id="lessonVersion"
-          type="text"
-          value={lessonVersion}
-          onChange={(e) => setLessonVersion(e.target.value)}
-          placeholder="e.g., 1.0"
-          className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm placeholder-muted-foreground"
+      {/* Topic & Lessons Row */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Topic Dropdown */}
+        <CreatableSelect
+          options={topics}
+          value={topic}
+          onChange={setTopic}
+          onCreateNew={(topicName) =>
+            category && subcategory ? createTopic(category, subcategory, topicName) : Promise.resolve(false)
+          }
+          placeholder="Select or type to create topic..."
+          label="Topic"
+          required
+          disabled={!category || !subcategory || fsLoading}
+          loading={fsLoading}
         />
-        <p className="text-xs text-muted-foreground">
-          Version of the lesson
-        </p>
+
+        {/* Multi-Select Lessons */}
+        <LessonMultiSelect
+          options={lessons}
+          selectedIds={selectedLessons}
+          onChange={setSelectedLessons}
+          placeholder="Select lessons to include in the quiz..."
+          label="Lessons *"
+          required
+          disabled={!category || !subcategory || !topic || lessonsLoading || fsLoading}
+          loading={lessonsLoading}
+          error={lessonsError ? lessonsError.message : null}
+        />
       </div>
 
       {/* Question Counts */}
@@ -381,6 +444,18 @@ export function QuizzesTab(props: QuizzesTabProps) {
         </p>
       </div>
 
+      {/* Quiz Configuration Summary */}
+      {selectedLessons.length > 0 && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md space-y-2">
+          <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">Quiz Configuration</h4>
+          <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+            <p><strong>Selected Lessons:</strong> {selectedLessons.join(', ')}</p>
+            <p><strong>Question Distribution:</strong> {easyCount} Easy + {mediumCount} Medium + {hardCount} Hard = {easyCount + mediumCount + hardCount} Total</p>
+            <p><strong>Lesson Content:</strong> Automatically included in the generation prompt</p>
+          </div>
+        </div>
+      )}
+
       {/* Prompt Preview Toggle */}
       <div>
         <button
@@ -394,6 +469,7 @@ export function QuizzesTab(props: QuizzesTabProps) {
           <div>
             <div className="space-y-3">
               <div>
+                <br />
                 <h4 className="text-xs font-semibold mb-1">System Prompt:</h4>
                 <div className="max-h-64 overflow-y-auto">
                   <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
@@ -402,10 +478,16 @@ export function QuizzesTab(props: QuizzesTabProps) {
                 </div>
               </div>
               <div>
-                <h4 className="text-xs font-semibold mb-1">Interpolated User Prompt:</h4>
+                <br />
+                <h4 className="text-xs font-semibold mb-1">Interpolated User Prompt (with lesson content and custom instructions):</h4>
                 <div className="max-h-64 overflow-y-auto">
+                  {lessonContentsLoading && (
+                    <div className="text-xs text-muted-foreground p-2">
+                      Loading lesson content...
+                    </div>
+                  )}
                   <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
-                    {interpolatedPrompt}
+                    {lessonContentsLoading ? 'Loading...' : interpolatedPromptWithContent}
                   </pre>
                 </div>
               </div>
@@ -417,15 +499,15 @@ export function QuizzesTab(props: QuizzesTabProps) {
       {/* Generate Button */}
       <div className="flex justify-end pt-2">
         <button
-          onClick={handleGenerate}
-          disabled={!isComplete || generation.isLoading}
+          onClick={handleGenerateWithLessonContent}
+          disabled={!isComplete || generation.isLoading || lessonContentsLoading}
           style={{
             backgroundColor: 'hsl(238 92% 66%)',
             color: 'hsl(0 0% 100%)',
           }}
           className="px-6 py-2 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
         >
-          {generation.isLoading ? 'Generating...' : 'Generate Quiz'}
+          {generation.isLoading || lessonContentsLoading ? 'Generating...' : 'Generate Quiz'}
         </button>
       </div>
 
@@ -436,12 +518,12 @@ export function QuizzesTab(props: QuizzesTabProps) {
       )}
 
       {/* Generation Error */}
-      {generation.error && (
+      {(generation.error || saveError) && (
         <ValidationErrorDisplay
-          errorMessage={generation.error}
+          errorMessage={generation.error || saveError || ''}
           validationErrors={generation.validationErrors}
           rawResponse={generation.rawResponse}
-          onRetry={handleGenerate}
+          onRetry={handleGenerateWithLessonContent}
           isLoading={generation.isLoading}
         />
       )}

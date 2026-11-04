@@ -1,0 +1,23 @@
+{
+  "id": "numbers",
+  "name": "Numbers",
+  "description": "Learn French numbers, counting, and basic numerals from 0-1000+",
+  "category": "spoken-languages",
+  "subcategory": "french",
+  "version": "1.0",
+  "createdAt": "2024-11-01",
+  "lessons": [
+    {
+      "id": "lesson_1",
+      "order": 1
+    },
+    {
+      "id": "lesson_2",
+      "order": 2
+    },
+    {
+      "id": "lesson_3",
+      "order": 3
+    }
+  ]
+}

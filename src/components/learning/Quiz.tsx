@@ -88,14 +88,7 @@ export function Quiz({
     updateQuestionProgress(category, subcategory, topic, level, currentQuestion.id, isCorrect);
 
     setSubmitted(true);
-
-    // Auto-advance after 1.5 seconds if not the last question
-    if (currentIndex < totalQuestions - 1) {
-      setTimeout(() => {
-        setSubmitted(false);
-        handleNext();
-      }, 1500);
-    }
+    // Explanation now persists until user manually clicks Next or Continue
   };
 
   const handleFinishQuiz = () => {

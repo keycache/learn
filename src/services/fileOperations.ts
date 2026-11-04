@@ -197,17 +197,17 @@ export class FileOperations {
   /**
    * Get next quiz version for a lesson
    */
-  async getNextQuizVersion(lessonDir: string): Promise<string> {
+  async getNextQuizVersion(lessonDir: string): Promise<number> {
     try {
       if (!this.fs.existsSync(lessonDir)) {
-        return 'v1'
+        return 1
       }
 
       const files = this.fs.readdirSync(lessonDir)
       const quizFiles = files.filter((f: string) => f.startsWith('quiz_v'))
 
       if (quizFiles.length === 0) {
-        return 'v1'
+        return 1
       }
 
       // Extract version numbers and find max
@@ -219,10 +219,10 @@ export class FileOperations {
         .filter((v: number) => v > 0)
 
       const maxVersion = Math.max(...versions)
-      return `v${maxVersion + 1}`
+      return maxVersion + 1
     } catch (error) {
       console.error('Error getting next quiz version:', error)
-      return 'v1'
+      return 1
     }
   }
 
@@ -557,14 +557,32 @@ export class FileOperations {
 
       // Get next version
       const version = await this.getNextQuizVersion(lessonDir)
-      const fileName = `quiz_${version}.json`
+      const fileName = `quiz_v${version}.json`
       const filePath = this.path.join(lessonDir, fileName)
 
+      // Convert QuizFileData to GeneratedQuizSchema format
+      const category = data.metadata.category
+      const subcategory = data.metadata.subcategory
+      const topic = data.metadata.topic
+      const lessonId = `${subcategory}/${topic}`
+
+      const generatedQuizData = {
+        title: data.title,
+        lesson_id: lessonId,
+        quiz_version: version,
+        questions: data.questions,
+        metadata: {
+          totalQuestions: data.questions.length,
+          createdAt: data.metadata.createdAt,
+          lessonId: lessonId,
+        },
+      }
+
       // Write file
-      this.fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+      this.fs.writeFileSync(filePath, JSON.stringify(generatedQuizData, null, 2))
 
       // Synchronize metadata files with the new quiz
-      await this.syncMetadata(data.metadata.category, data.metadata.subcategory, data.metadata.topic)
+      await this.syncMetadata(category, subcategory, topic)
 
       return {
         success: true,

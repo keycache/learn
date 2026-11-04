@@ -37,6 +37,128 @@ export function randomizeQuestionOptions(questions: Question[]): Question[] {
 }
 
 /**
+ * New GeneratedQuizSchema format (LLM output format)
+ * This is what the new quiz.json files use
+ */
+interface GeneratedQuizQuestion {
+  id: string;
+  type: "multiple-choice" | "true-false" | "short-answer";
+  question: string;
+  options: string[];
+  correctAnswer: string | number;
+  explanation: string;
+  difficulty: "easy" | "medium" | "hard";
+  points: number;
+}
+
+interface GeneratedQuizMetadata {
+  totalQuestions: number;
+  createdAt: string;
+  lessonId: string;
+}
+
+interface GeneratedQuiz {
+  title: string;
+  lesson_id: string;
+  quiz_version: number;
+  questions: GeneratedQuizQuestion[];
+  metadata: GeneratedQuizMetadata;
+}
+
+/**
+ * Detects if quiz data is in new GeneratedQuizSchema format
+ * Old format has: id, name, category, subcategory, levels
+ * New format has: title, lesson_id, quiz_version, questions, metadata
+ */
+function isNewQuizFormat(data: any): data is GeneratedQuiz {
+  return (
+    data &&
+    typeof data === "object" &&
+    "quiz_version" in data &&
+    "questions" in data &&
+    "metadata" in data &&
+    Array.isArray(data.questions) &&
+    !("levels" in data)
+  );
+}
+
+/**
+ * Converts new GeneratedQuizSchema format to old Topic format
+ * Handles the migration transparently so UI code doesn't need to change
+ */
+function convertNewFormatToTopic(
+  quizData: GeneratedQuiz,
+  categoryId: string,
+  subcategoryId: string,
+  topicId: string,
+  lessons?: Lesson[]
+): Topic {
+  // Group questions by difficulty
+  const questionsByDifficulty = {
+    easy: quizData.questions.filter((q) => q.difficulty === "easy"),
+    medium: quizData.questions.filter((q) => q.difficulty === "medium"),
+    hard: quizData.questions.filter((q) => q.difficulty === "hard"),
+  };
+
+  // Convert question format from new to old
+  const convertQuestions = (
+    newQuestions: GeneratedQuizQuestion[]
+  ): Question[] => {
+    return newQuestions.map((q) => {
+      // Convert string options to Option objects with generated IDs
+      const options = q.options.map((optionText, index) => ({
+        id: `opt-${index}`,
+        text: optionText,
+      }));
+
+      // Find the correct answer and get its ID
+      const correctAnswerIndex =
+        typeof q.correctAnswer === "string"
+          ? q.options.indexOf(q.correctAnswer)
+          : q.correctAnswer;
+      const correctAnswerId = `opt-${correctAnswerIndex}`;
+
+      return {
+        id: q.id,
+        text: q.question, // NEW: "question" → "text"
+        options, // Converted to objects
+        correctAnswers: [correctAnswerId], // Wrapped in array
+        explanation: q.explanation,
+      };
+    });
+  };
+
+  return {
+    id: topicId,
+    name: quizData.title,
+    description: `Quiz for ${quizData.title}`, // Use title as description if not available
+    category: categoryId,
+    subcategory: subcategoryId,
+    levels: {
+      easy: {
+        level: "easy",
+        description: "Easy difficulty questions",
+        questionCount: questionsByDifficulty.easy.length,
+        questions: convertQuestions(questionsByDifficulty.easy),
+      },
+      medium: {
+        level: "medium",
+        description: "Medium difficulty questions",
+        questionCount: questionsByDifficulty.medium.length,
+        questions: convertQuestions(questionsByDifficulty.medium),
+      },
+      hard: {
+        level: "hard",
+        description: "Hard difficulty questions",
+        questionCount: questionsByDifficulty.hard.length,
+        questions: convertQuestions(questionsByDifficulty.hard),
+      },
+    },
+    ...(lessons && lessons.length > 0 && { lessons }),
+  };
+}
+
+/**
  * Load categories from the data directory
  * Currently supports: spoken-languages, system-design, algorithms, programming-languages
  */
@@ -145,6 +267,31 @@ export async function loadTopics(
  * 
  * Example: loadTopic('spoken-languages', 'french', 'numbers')
  */
+/**
+ * Find the latest versioned quiz file (e.g., quiz_v1.json, quiz_v2.json)
+ * Returns the module import for the latest version
+ */
+async function findLatestQuizFile(
+  categoryId: string,
+  subcategoryId: string,
+  topicId: string
+): Promise<any> {
+  // Try to find all quiz_vN.json files by attempting imports
+  // Start from a high version and work backwards
+  for (let v = 100; v >= 1; v--) {
+    try {
+      const quizData = await import(
+        `../data/categories/${categoryId}/${subcategoryId}/${topicId}/quiz_v${v}.json`
+      );
+      return quizData;
+    } catch (e) {
+      // Continue to next version
+    }
+  }
+  // No versioned quiz file found
+  return null;
+}
+
 export async function loadTopic(
   categoryId: string,
   subcategoryId: string,
@@ -160,6 +307,13 @@ export async function loadTopic(
       // New structure found - also look for lessons
       const lessons = await discoverLessons(categoryId, subcategoryId, topicId);
       
+      // Check if quiz.json is in new GeneratedQuizSchema format
+      if (isNewQuizFormat(quizData)) {
+        // Convert new format to old format for UI compatibility
+        return convertNewFormatToTopic(quizData, categoryId, subcategoryId, topicId, lessons);
+      }
+      
+      // Otherwise assume old format
       const result = {
         id: quizData.id,
         name: quizData.name,
@@ -176,7 +330,42 @@ export async function loadTopic(
       
       return result;
     } catch (quizError) {
-      // Quiz not found, try old file-based structure
+      // quiz.json not found, try to find versioned quiz file (quiz_v1.json, quiz_v2.json, etc.)
+      try {
+        const versionedQuizData = await findLatestQuizFile(categoryId, subcategoryId, topicId);
+        
+        if (versionedQuizData) {
+          // Found versioned quiz file - also look for lessons
+          const lessons = await discoverLessons(categoryId, subcategoryId, topicId);
+          
+          // Check if it's in new GeneratedQuizSchema format
+          if (isNewQuizFormat(versionedQuizData)) {
+            // Convert new format to old format for UI compatibility
+            return convertNewFormatToTopic(versionedQuizData, categoryId, subcategoryId, topicId, lessons);
+          }
+          
+          // Otherwise assume old format
+          const result = {
+            id: versionedQuizData.id,
+            name: versionedQuizData.name,
+            description: versionedQuizData.description,
+            category: versionedQuizData.category,
+            subcategory: versionedQuizData.subcategory,
+            levels: {
+              easy: versionedQuizData.levels.easy,
+              medium: versionedQuizData.levels.medium,
+              hard: versionedQuizData.levels.hard,
+            },
+            ...(lessons && lessons.length > 0 && { lessons }),
+          };
+          
+          return result;
+        }
+      } catch (versionedError) {
+        // Versioned quiz not found either, continue to next fallback
+      }
+      
+      // Try old file-based structure
       try {
         const topicData = await import(
           `../data/categories/${categoryId}/${subcategoryId}/${topicId}.json`
@@ -321,10 +510,60 @@ export async function discoverLessons(
   const lessons: Lesson[] = [];
 
   try {
-    // Fetch each lesson file using HTTP fetch
-    // Use import.meta.env.BASE_URL to get the base path (typically '/learn/')
     const basePath = import.meta.env.BASE_URL || '/learn/';
     
+    // First, try to load topic metadata which contains lesson list
+    try {
+      const metadataPath = `${basePath}data/categories/${categoryId}/${subcategoryId}/${topicId}/metadata.json`;
+      const metadataResponse = await fetch(metadataPath);
+      
+      if (metadataResponse.ok) {
+        const metadata = await metadataResponse.json();
+        
+        // If metadata has lessons array, use it
+        if (metadata.lessons && Array.isArray(metadata.lessons)) {
+          // Load each lesson from the list in metadata
+          for (const lessonRef of metadata.lessons) {
+            const lessonId = lessonRef.id;
+            const lessonPath = `${basePath}data/categories/${categoryId}/${subcategoryId}/${topicId}/${lessonId}.md`;
+            
+            try {
+              const response = await fetch(lessonPath);
+              
+              if (!response.ok) {
+                console.warn(`Failed to fetch lesson: ${lessonId} (${response.statusText})`);
+                continue;
+              }
+              
+              const content = await response.text();
+              const markdownContent = parseFrontmatter(content);
+
+              if (!markdownContent.metadata.active) {
+                continue;
+              }
+
+              const lesson: Lesson = {
+                id: lessonId,
+                order: lessonRef.order || lessons.length + 1,
+                ...markdownContent.metadata,
+              };
+
+              lessons.push(lesson);
+            } catch (e) {
+              console.error(`Failed to load lesson ${lessonId}:`, e);
+            }
+          }
+          
+          const sorted = lessons.sort((a, b) => a.order - b.order);
+          return sorted;
+        }
+      }
+    } catch (metadataError) {
+      console.debug(`Topic metadata not found, falling back to trial-and-error discovery`, metadataError);
+    }
+    
+    // Fallback: Discover lessons by trial-and-error (for topics without metadata)
+    // This maintains backward compatibility for topics that haven't been set up with metadata
     let consecutiveMissing = 0;
     
     for (let i = 1; i <= 20; i++) {
