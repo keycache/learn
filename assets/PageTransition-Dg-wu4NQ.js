@@ -1,1 +1,0 @@
-import{c as e}from"./index-dLjvvtb4.js";var t=e();function n({children:e,animationType:n=`slideUp`,className:r=``}){let i={fade:`fade-in`,slideUp:`slide-in-bottom`,slideDown:`slide-in-top`}[n];return(0,t.jsx)(`div`,{className:`${i} ${r}`,children:e})}export{n as t};
