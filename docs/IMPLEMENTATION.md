@@ -3299,7 +3299,533 @@ cat src/data/categories/spoken-languages/german/metadata.json
 
 ---
 
-## Phase 9: Future Enhancements 💡 BACKLOG
+## Phase 9: Clock Renderer Framework ⏳ IN PROGRESS
+
+**Objective:** Build a reusable clock rendering framework for reading time questions that work across all languages and topics.
+
+**Why This Matters:**
+- Multiple lessons share the same interactive element (clock faces for telling time in Spanish, French, German)
+- Clock-based questions are common across language topics ("What time is shown?")
+- Consistent, accessible clock visualization improves learning experience
+- Foundation for future media types (audio, images) can be built from this pattern
+
+**Scope for Phase 9:**
+- ✅ Build clock renderer only (Audio and Image deferred to Phase 10+)
+- ✅ Cross-language reusability (Spanish, French, German all use same ClockRenderer)
+- ✅ Extensible design (pattern supports future renderers)
+- ✅ Asset management (SVG clock files stored with topic)
+- ✅ Error resilience (graceful fallbacks with alt text)
+- ✅ Validation (both build-time and runtime in dev mode)
+
+---
+
+### Stage 1: Type Definitions & Schema ⏳ TODO
+
+**Objective:** Extend TypeScript types and create JSON schemas for media references
+
+**Tasks:**
+- [ ] Create `MediaReference` interface in `src/types/learning.ts`
+  - [ ] Properties: `type` (enum: 'clock' only for now)
+  - [ ] Properties: `asset` (relative path from topic folder)
+  - [ ] Properties: `altText` (fallback description)
+  - [ ] Properties: `metadata` (type-specific configuration)
+- [ ] Update `Question` interface to include optional `media?: MediaReference`
+- [ ] Create `src/services/media/types.ts` with detailed media type definitions
+  - [ ] `MediaType` enum (only 'clock' for Phase 9)
+  - [ ] `MediaRendererProps` interface (for clock renderer)
+  - [ ] `ValidationResult` interface for media validation
+- [ ] Create `schemas/media.schema.json` (JSON Schema)
+  - [ ] Validate MediaReference structure
+  - [ ] Define constraints on asset paths (allowed characters, extensions)
+  - [ ] Clock metadata validation (time format, etc.)
+- [ ] Update `Question` schema in existing schemas to allow media field
+- [ ] Add JSDoc comments to all new types
+
+**Deliverables:**
+- Type-safe media references for clock questions
+- Schema validates all media definitions at build-time
+- Clear documentation for content creators on media structure
+
+**Testing:**
+- [ ] Type checking: `tsc -b` validates all uses
+- [ ] Schema validation: New quiz.json files validate against media schema
+
+**Acceptance Criteria:**
+- ✅ No TypeScript errors when using `MediaReference` with type 'clock'
+- ✅ Build passes schema validation with media fields present
+- ✅ Media references can be optional (backward compatible with existing quizzes)
+
+---
+
+### Stage 2: Media Registry & Base Renderer ⏳ TODO
+
+**Objective:** Create extensible registry system and base MediaRenderer component
+
+**Tasks:**
+- [ ] Create `src/services/media/core/mediaRegistry.ts`
+  - [ ] `mediaRegistry` Map<MediaType, ComponentType> (initially only 'clock')
+  - [ ] `registerMediaRenderer(type, component)` function (for future extensibility)
+  - [ ] `getMediaRenderer(type)` function with fallback handling
+  - [ ] `isValidMediaType(type)` helper function
+- [ ] Create `src/services/media/core/MediaRenderer.tsx`
+  - [ ] Export `MediaRendererProps` interface
+  - [ ] Implement core component with `React.Suspense` for lazy loading
+  - [ ] Path resolution logic: `resolveAssetPath(topicPath, asset)`
+  - [ ] Error boundary for renderer failures
+  - [ ] Loading state with spinner
+  - [ ] Fallback UI when renderer not found
+- [ ] Create error handling utilities in `src/services/media/utils/errorHandler.ts`
+  - [ ] `MediaRenderError` custom error class
+  - [ ] Error logging (console warnings in dev, silent in prod)
+  - [ ] User-friendly error messages
+- [ ] Create `src/services/media/utils/pathResolver.ts`
+  - [ ] `resolveAssetPath(topicPath, asset)` - converts relative paths to URLs
+  - [ ] `validateAssetPath(asset)` - ensures safe paths (no `../`, only alphanumeric)
+  - [ ] Support for both public/ and relative paths
+- [ ] Create `src/services/media/index.ts` (public API)
+  - [ ] Export `MediaRenderer` component
+  - [ ] Export `registerMediaRenderer` function (for future extensibility)
+  - [ ] Export all types from `types.ts`
+
+**Deliverables:**
+- Pluggable architecture for media renderers (ready for future types)
+- Safe path resolution preventing directory traversal attacks
+- Clear separation of concerns (registry, rendering, error handling)
+- Foundation supports adding AudioRenderer, ImageRenderer later
+
+**Testing:**
+- [ ] Unit tests for `mediaRegistry.ts`
+  - [ ] Register and retrieve renderers
+  - [ ] Fallback handling when renderer not found
+- [ ] Unit tests for `pathResolver.ts`
+  - [ ] Relative path resolution
+  - [ ] Path validation (reject `../` and special chars)
+  - [ ] Public URL conversion
+- [ ] Component tests for `MediaRenderer.tsx`
+  - [ ] Renders correct renderer based on media type (clock)
+  - [ ] Shows loading state while loading
+  - [ ] Shows error state on load failure
+  - [ ] Shows fallback UI when renderer missing
+
+**Acceptance Criteria:**
+- ✅ Media renderers can be dynamically registered
+- ✅ Path resolution is safe and correct
+- ✅ Errors don't crash the quiz
+- ✅ Loading and error states are visible to user
+- ✅ Architecture allows adding new media types later
+
+---
+
+### Stage 3: ClockRenderer Implementation ⏳ TODO
+
+**Objective:** Implement the clock renderer for displaying SVG clock faces in quiz questions
+
+**Tasks:**
+- [ ] Create `src/services/media/renderers/ClockRenderer.tsx`
+  - [ ] Load SVG clock files from `assets/`
+  - [ ] Props: `asset`, `altText`, `metadata`, `topicPath`
+  - [ ] Display SVG with responsive sizing
+  - [ ] Error handling if SVG load fails
+  - [ ] Dark mode support (CSS filter or SVG color variables)
+  - [ ] Accessibility: `<figure>` with `<figcaption>` for alt text
+- [ ] Create `src/services/media/utils/svgLoader.ts`
+  - [ ] `loadSVG(url)` - fetch and parse SVG safely
+  - [ ] `validateSVG(svg)` - ensure no malicious scripts
+  - [ ] `applySVGColorTheme(svg, isDark)` - adapt colors for dark mode
+- [ ] Create example clock SVGs in `public/assets/clocks/`
+  - [ ] `clock-1-00.svg` (1:00)
+  - [ ] `clock-3-30.svg` (3:30)
+  - [ ] `clock-8-45.svg` (8:45)
+  - [ ] Clock faces should be simple, scalable, accessible
+- [ ] Register ClockRenderer in registry
+  - [ ] In `src/services/media/core/mediaRegistry.ts`
+  - [ ] Import and register `ClockRenderer` under type 'clock'
+
+**Deliverables:**
+- Working clock renderer with responsive display
+- Safe SVG loading with XSS prevention
+- Dark mode support for clock assets
+- Example clock SVGs ready for use
+
+**Testing:**
+- [ ] Unit tests for `svgLoader.ts`
+  - [ ] Valid SVG loads correctly
+  - [ ] Invalid/malicious SVG is rejected
+  - [ ] Color theme is applied
+- [ ] Component tests for `ClockRenderer.tsx`
+  - [ ] Renders SVG when asset path valid
+  - [ ] Shows error message on load failure
+  - [ ] Alt text displays in `<figcaption>`
+  - [ ] Responsive sizing on different screen sizes
+  - [ ] Dark mode colors applied correctly
+  - [ ] Accessibility: proper semantic HTML
+
+**Acceptance Criteria:**
+- ✅ Clock SVGs render cleanly in light/dark modes
+- ✅ Fails gracefully with error message if SVG missing
+- ✅ Accessible to screen readers (alt text, semantic HTML)
+- ✅ Examples clocks ready for use in Spanish/French topics
+
+---
+
+### Stage 4: Media Validation Framework ⏳ TODO
+
+**Objective:** Implement build-time and runtime validation for media references
+
+**Tasks:**
+- [ ] Create `src/services/media/validators/mediaValidator.ts`
+  - [ ] `validateMediaReference(media, topicPath)` - async validation
+  - [ ] Check that asset file exists at resolved path
+  - [ ] Validate media type is 'clock' (only supported type in Phase 9)
+  - [ ] Type-specific metadata validation (clock time format, etc.)
+  - [ ] Return `ValidationResult` with errors/warnings
+- [ ] Create `src/services/media/validators/schema.ts`
+  - [ ] Export Zod schemas for media validation
+  - [ ] `MediaReferenceSchema` - validates structure
+  - [ ] `ClockMetadataSchema` - validates clock-specific metadata
+  - [ ] Use existing `schemas/media.schema.json` for reference
+- [ ] Update build script `scripts/validate-schemas.mjs`
+  - [ ] New validation step: scan all quiz.json files
+  - [ ] For each media reference found:
+    - [ ] Validate structure against MediaReferenceSchema
+    - [ ] Validate type is 'clock' (only type supported in Phase 9)
+    - [ ] Check that asset file exists
+    - [ ] Report missing files with path and line number
+  - [ ] Summary: "✅ All media validated" or "❌ X missing media assets"
+  - [ ] Fail build if validation errors
+- [ ] Add runtime validation for dev mode
+  - [ ] In `MediaRenderer.tsx`, validate before rendering
+  - [ ] Logs warnings to console if validation fails
+  - [ ] Only in `import.meta.env.DEV` mode
+
+**Deliverables:**
+- Build-time validation catches missing clock SVG files
+- Runtime validation in dev mode helps during creation
+- Clear error messages with file paths and suggestions
+- Foundation for validating additional media types in future phases
+
+**Testing:**
+- [ ] Unit tests for `mediaValidator.ts`
+  - [ ] Valid clock media reference passes validation
+  - [ ] Invalid media type fails validation
+  - [ ] Missing asset file fails validation
+  - [ ] Clock metadata validation works (e.g., time format)
+- [ ] Integration test: Build script validation
+  - [ ] Create test quiz.json with clock media reference
+  - [ ] Run build validation
+  - [ ] Verify missing assets are reported
+  - [ ] Verify valid assets pass
+
+**Acceptance Criteria:**
+- ✅ Build fails if clock assets referenced but not found
+- ✅ Error messages show file path and missing asset
+- ✅ Runtime warnings in dev mode help during creation
+- ✅ No false positives (valid assets pass)
+- ✅ Build succeeds with valid clock-based quizzes
+
+---
+
+### Stage 5: Integration with QuestionCard & Quiz Components ⏳ TODO
+
+**Objective:** Update existing quiz components to render media when present
+
+**Tasks:**
+- [ ] Update `src/components/learning/QuestionCard.tsx`
+  - [ ] Import `MediaRenderer` from `@/services/media`
+  - [ ] Add `topicPath` prop (passed from Quiz component)
+  - [ ] If `question.media` exists, render `<MediaRenderer>` above question text
+  - [ ] Media renders in container with consistent styling
+  - [ ] Error boundary around media rendering
+  - [ ] Test in all dark/light modes
+- [ ] Update `src/components/learning/Quiz.tsx`
+  - [ ] Calculate `topicPath` from route params: `${category}/${subcategory}/${topic}`
+  - [ ] Pass `topicPath` to `QuestionCard` component
+  - [ ] No other logic changes (backward compatible)
+- [ ] Update route component `src/routes/quiz.tsx`
+  - [ ] Extract `category`, `subcategory`, `topic` from route params
+  - [ ] Pass to `Quiz` component
+  - [ ] Verify params available via `useParams()` hook
+- [ ] Test with existing quizzes (without media)
+  - [ ] Should work unchanged (media field is optional)
+  - [ ] No breaking changes
+
+**Deliverables:**
+- Quiz component renders media when present
+- Backward compatible with existing quizzes (no media)
+- Topic context available for asset path resolution
+
+**Testing:**
+- [ ] Component tests for updated `QuestionCard.tsx`
+  - [ ] Renders normally when no media
+  - [ ] Renders media above question when present
+  - [ ] Media errors don't break question rendering
+- [ ] Component tests for updated `Quiz.tsx`
+  - [ ] `topicPath` calculated correctly
+  - [ ] Passed to QuestionCard properly
+- [ ] Integration test
+  - [ ] Create test quiz with media question
+  - [ ] Navigate to quiz page
+  - [ ] Media renders correctly
+  - [ ] Quiz interaction still works
+
+**Acceptance Criteria:**
+- ✅ Media renders in quizzes when present
+- ✅ Existing quizzes without media still work
+- ✅ Quiz interaction unaffected by media
+- ✅ All tests passing
+
+---
+
+### Stage 6: Create Example Clock-Based Quiz ⏳ TODO
+
+**Objective:** Build end-to-end example demonstrating clock renderer in a quiz
+
+**Tasks:**
+- [ ] Create Spanish "Time/Clock Reading" topic
+  - [ ] Location: `src/data/categories/spoken-languages/spanish/time/`
+  - [ ] Create `lesson_1.md` - introduction to telling time
+    - [ ] Cover hour and minute hands
+    - [ ] Explain time notation (HH:MM format)
+    - [ ] Include examples and tips
+  - [ ] Create `quiz.json` with 5 clock-based questions
+    - [ ] Q1: What time is shown? (clock-3-00.svg) - simple hour only
+    - [ ] Q2: What time is shown? (clock-8-30.svg) - hour + minutes
+    - [ ] Q3: What time is shown? (clock-12-15.svg) - quarter past
+    - [ ] Q4: What time is shown? (clock-10-45.svg) - quarter to
+    - [ ] Q5: What time is shown? (clock-6-20.svg) - mixed time
+  - [ ] Create `assets/` folder with clock SVGs
+    - [ ] Store SVGs at: `src/data/categories/spoken-languages/spanish/time/assets/`
+    - [ ] File names: `clock-H-MM.svg` format
+  - [ ] Add metadata.json
+- [ ] Create example clock SVGs
+  - [ ] Design simple, accessible clock faces
+  - [ ] Support both light and dark modes
+  - [ ] Include: hour hand (short), minute hand (long), center dot
+  - [ ] Use contrasting colors for readability
+  - [ ] SVGs: clock-3-00.svg, clock-8-30.svg, clock-12-15.svg, clock-10-45.svg, clock-6-20.svg
+- [ ] Test end-to-end
+  - [ ] Navigate: Category → Spanish → Time → Quiz
+  - [ ] Verify clocks load correctly in both light/dark modes
+  - [ ] Quiz interaction works with clock questions
+  - [ ] Answer validation works correctly
+
+**Deliverables:**
+- One complete example topic with 5 clock-based questions
+- Demonstrates ClockRenderer in realistic quiz scenario
+- Ready for content creators to copy pattern for other topics
+- Real clock SVGs usable across Spanish, French, German topics
+
+**Testing:**
+- [ ] Browser testing: Navigate to Spanish→Time quiz
+  - [ ] All clock SVGs load correctly
+  - [ ] Light mode: clocks visible with good contrast
+  - [ ] Dark mode: clocks visible with dark mode colors applied
+  - [ ] All quiz interactions work (select answer, submit, see results)
+- [ ] Clock rendering consistency
+  - [ ] Each clock SVG renders at same size/scale
+  - [ ] Responsive on mobile devices
+  - [ ] No console errors
+- [ ] Error handling
+  - [ ] Missing clock SVG shows error gracefully
+  - [ ] Alt text displays properly
+
+**Acceptance Criteria:**
+- ✅ Spanish Time topic works end-to-end
+- ✅ Clock SVGs render correctly in light/dark modes
+- ✅ Quiz interaction unaffected by clock rendering
+- ✅ Pattern documented for reuse
+
+---
+
+### Stage 7: Documentation & Developer Guide ⏳ TODO
+
+**Objective:** Create guides for using and extending the clock framework
+
+**Tasks:**
+- [ ] Create `docs/CLOCK_RENDERER_GUIDE.md`
+  - [ ] Overview of clock renderer and use cases
+  - [ ] How to create clock-based quizzes (quiz.json structure)
+  - [ ] Examples: Spanish Time, ready for French/German time topics
+  - [ ] How to create custom clock SVGs (design guidelines)
+  - [ ] Troubleshooting: clock not loading, wrong colors, sizing issues
+- [ ] Create `docs/MEDIA_ASSET_GUIDE.md`
+  - [ ] Asset file organization (topic/assets/ folder structure)
+  - [ ] File naming conventions for clocks (`clock-H-MM.svg`)
+  - [ ] SVG requirements: accessibility, scaling, colors
+  - [ ] File size recommendations
+  - [ ] Dark mode considerations for SVG colors
+- [ ] Create `src/services/media/README.md`
+  - [ ] API documentation for MediaRenderer
+  - [ ] How to extend registry with new media types (future)
+  - [ ] Component props and interfaces
+  - [ ] Error handling guide
+- [ ] Update main `docs/IMPLEMENTATION.md`
+  - [ ] Add Phase 9 to table of contents
+  - [ ] Link to CLOCK_RENDERER_GUIDE.md
+  - [ ] Add note about Phase 10 (audio/image) to feature roadmap
+- [ ] Add inline JSDoc comments to all public APIs
+  - [ ] `MediaRenderer` component
+  - [ ] `ClockRenderer` component
+  - [ ] `registerMediaRenderer` function
+  - [ ] All exported types
+
+**Deliverables:**
+- Clear guides for content creators using clock renderer
+- Developer documentation for extending to new media types
+- Design guidelines for clock SVG creation
+- Roadmap for Phase 10 media types
+
+**Testing:**
+- [ ] Documentation reviewed for accuracy
+- [ ] Examples in docs tested end-to-end
+- [ ] Links verify (no broken refs)
+- [ ] Code examples compile without errors
+
+**Acceptance Criteria:**
+- ✅ New content creator can create clock-based quizzes by reading docs
+- ✅ Developer knows how to add new media types (reference implementation)
+- ✅ SVG designer knows how to create accessible clock assets
+
+---
+
+### Stage 8: Polish & Testing ⏳ TODO
+
+**Objective:** Comprehensive testing for clock renderer, error handling, and performance optimization
+
+**Tasks:**
+- [ ] Comprehensive component test suite
+  - [ ] ClockRenderer: success, error, loading states
+  - [ ] MediaRenderer: clock integration with registry
+  - [ ] QuestionCard integration with clock media
+  - [ ] Quiz integration with clock-based questions
+  - [ ] Target: 20+ new tests for clock framework
+- [ ] Error handling edge cases
+  - [ ] Network timeout loading clock SVG
+  - [ ] Corrupted SVG files
+  - [ ] Invalid paths in quiz.json
+  - [ ] Missing clock metadata (time format)
+  - [ ] Browser compatibility (SVG rendering)
+- [ ] Performance optimization
+  - [ ] Lazy load clock SVGs only when visible (Intersection Observer)
+  - [ ] Cache SVG parsing results
+  - [ ] Preload next question's clock while current displays
+  - [ ] Minimize bundle size impact of framework
+- [ ] Accessibility audit
+  - [ ] Screen reader testing for clock descriptions
+  - [ ] Keyboard navigation (if any)
+  - [ ] Color contrast for clock hands and numbers
+  - [ ] Alt text completeness
+  - [ ] ARIA labels on clock containers
+- [ ] Cross-browser testing
+  - [ ] Chrome, Firefox, Safari, Edge (latest versions)
+  - [ ] Mobile browsers (iOS Safari, Chrome Mobile)
+  - [ ] Dark mode rendering across all browsers
+  - [ ] SVG compatibility across browsers
+
+**Deliverables:**
+- Comprehensive test suite (20+ tests for clock framework)
+- All edge cases handled gracefully
+- Performance optimized for quiz playback
+- Accessibility verified across devices and screen readers
+
+**Testing:**
+- [ ] Run test suite: `npm run test` - all pass
+- [ ] Build passes linting: `npm run lint` - no warnings
+- [ ] Manual browser testing: clock rendering verified on all platforms
+- [ ] Accessibility audit: WCAG 2.1 AA compliance for clock questions
+
+**Acceptance Criteria:**
+- ✅ All tests passing (20+)
+- ✅ No TypeScript errors
+- ✅ No linting errors
+- ✅ Accessibility verified
+- ✅ Performance acceptable (no jank during clock rendering)
+- ✅ Clock renders correctly across all tested browsers
+
+---
+
+### Stage 9: Build Integration & Deployment ⏳ TODO
+
+**Objective:** Ensure clock framework works in production build
+
+**Tasks:**
+- [ ] Update build configuration `vite.config.ts`
+  - [ ] Verify static assets (clock SVGs) copied to dist/
+  - [ ] Asset paths resolve correctly in production
+  - [ ] No changes needed (assets in data/ and public/ already static)
+- [ ] Verify build process
+  - [ ] `npm run build` succeeds with media validation
+  - [ ] Spanish Time topic validated
+  - [ ] All clock SVGs included in dist/
+  - [ ] Production build loads clocks correctly
+- [ ] Test production build locally
+  - [ ] `npm run preview` runs production build
+  - [ ] Navigate to Spanish → Time → Quiz
+  - [ ] Clock SVGs load and render correctly
+  - [ ] No console errors
+  - [ ] Dark mode works correctly
+- [ ] Deploy to production
+  - [ ] Push to main branch
+  - [ ] GitHub Actions build succeeds
+  - [ ] Website deployed successfully
+  - [ ] Clock-based quiz renders live
+
+**Deliverables:**
+- Production-ready clock renderer
+- Build validation works for clock media
+- Deployment process verified
+- Clock SVGs accessible in production
+
+**Testing:**
+- [ ] Local preview build: `npm run preview`
+  - [ ] Spanish Time quiz works
+  - [ ] Clocks load from correct paths
+  - [ ] Dark mode applies correctly
+  - [ ] No 404s for clock assets
+- [ ] CI/CD pipeline passes
+  - [ ] Tests pass
+  - [ ] Linting passes
+  - [ ] Build succeeds
+  - [ ] Media validation passes
+  - [ ] No deploy errors
+
+**Acceptance Criteria:**
+- ✅ Production build works end-to-end
+- ✅ Clock SVGs load correctly in production
+- ✅ No broken links or 404s
+- ✅ Performance acceptable in production
+- ✅ Dark mode works in production
+
+---
+
+## Phase 10: Additional Media Types (Audio & Images) 💡 FUTURE
+
+**Status:** Planned for future phases after Phase 9 clock implementation
+
+**Scope:**
+- AudioRenderer for pronunciation lessons across all languages
+- ImageRenderer for culture/geography topics
+- Same architecture pattern as ClockRenderer (will be much faster to implement)
+
+**Stages (will follow same structure as Phase 9):**
+1. Extend Type Definitions (add 'audio' and 'image' types to MediaType enum)
+2. AudioRenderer Implementation (native `<audio>` element with controls)
+3. ImageRenderer Implementation (responsive image viewer)
+4. Validation Updates (extend schema for audio/image metadata)
+5. Integration (QuestionCard already supports new types)
+6. Example Quizzes (Spanish Pronunciation, Spanish Culture topics)
+7. Documentation (Audio & Image guides)
+8. Testing & Polish
+9. Production Deployment
+
+**Benefits of Sequential Approach:**
+- ✅ Proven pattern from Phase 9 (Clock) reduces risk
+- ✅ Build architecture once, extend it gradually
+- ✅ Phase 9 provides reference implementation
+- ✅ Less cognitive load during implementation
+- ✅ Easier to test each media type independently
+
+## Phase 11: Future Enhancements 💡 BACKLOG
 
 - [ ] Additional LLM providers (Claude, GPT-4)
 - [ ] Batch generation (multiple lessons/quizzes at once)
@@ -3315,5 +3841,7 @@ cat src/data/categories/spoken-languages/german/metadata.json
 - [ ] Search/filter topics across all categories
 - [ ] Spaced repetition for lesson review
 - [ ] Difficulty recommendations based on performance
+- [ ] Interactive media types (video player, 3D models, draggable diagrams)
+- [ ] PDF export of lessons and results
 
 
