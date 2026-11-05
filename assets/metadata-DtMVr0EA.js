@@ -1,0 +1,1 @@
+var e=`spoken-languages`,t=`Spoken Languages`,n=`Learn various spoken languages around the world`,r=[{id:`spanish`,name:`Spanish`,description:`Learn Spanish vocabulary and phrases`,category:`spoken-languages`,version:`1.0`,createdAt:`2026-11-05`}],i={id:e,name:t,description:n,subcategories:r};export{i as default,n as description,e as id,t as name,r as subcategories};
