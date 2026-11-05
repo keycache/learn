@@ -31,7 +31,7 @@ export function DeveloperGenerator(_props: DeveloperGeneratorProps) {
 
   const tabs = [
     { id: 'settings', label: 'LLM Settings' },
-    { id: 'selection', label: 'Selection' },
+    // { id: 'selection', label: 'Selection' },
     { id: 'lessons', label: 'Lessons' },
     { id: 'quizzes', label: 'Quizzes' },
   ]
@@ -65,7 +65,10 @@ function DeveloperGeneratorContent({ activeTab, setActiveTab, tabs }: DeveloperG
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-6 border-b border-border sticky top-0 bg-themed">
+        <div
+          className="border-b border-border sticky top-0 z-50 shadow-md -mx-4 px-4 py-2"
+          style={{ backgroundColor: 'hsl(var(--background))' }}
+        >
           <div className="flex gap-2">
             {tabs.map((tab) => (
               <button
@@ -84,7 +87,7 @@ function DeveloperGeneratorContent({ activeTab, setActiveTab, tabs }: DeveloperG
         </div>
 
         {/* Tab Content */}
-        <div>
+        <div className="mt-6">
           {activeTab === 'settings' && (
             <LLMSettingsTab />
           )}

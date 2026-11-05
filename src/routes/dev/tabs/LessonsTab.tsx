@@ -316,16 +316,16 @@ export function LessonsTab(props: LessonsTabProps) {
             <div className="space-y-3">
               <div>
                 <h4 className="text-xs font-semibold mb-1">System Prompt:</h4>
-                <div className="max-h-64 overflow-y-auto">
-                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                <div className="max-h-64 overflow-y-auto border border-border rounded-md bg-background">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono p-2 m-0">
                     {selectedPrompt.systemPrompt}
                   </pre>
                 </div>
               </div>
               <div>
                 <h4 className="text-xs font-semibold mb-1">Interpolated User Prompt:</h4>
-                <div className="max-h-64 overflow-y-auto">
-                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                <div className="max-h-64 overflow-y-auto border border-border rounded-md bg-background">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono p-2 m-0">
                     {interpolatedPrompt}
                   </pre>
                 </div>

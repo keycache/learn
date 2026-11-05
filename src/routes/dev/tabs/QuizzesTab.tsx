@@ -345,7 +345,7 @@ export function QuizzesTab(props: QuizzesTabProps) {
           selectedIds={selectedLessons}
           onChange={setSelectedLessons}
           placeholder="Select lessons to include in the quiz..."
-          label="Lessons *"
+          label="Lessons"
           required
           disabled={!category || !subcategory || !topic || lessonsLoading || fsLoading}
           loading={lessonsLoading}
@@ -471,8 +471,8 @@ export function QuizzesTab(props: QuizzesTabProps) {
               <div>
                 <br />
                 <h4 className="text-xs font-semibold mb-1">System Prompt:</h4>
-                <div className="max-h-64 overflow-y-auto">
-                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                <div className="max-h-64 overflow-y-auto border border-border rounded-md bg-background">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono p-2 m-0">
                     {selectedPrompt.systemPrompt}
                   </pre>
                 </div>
@@ -480,13 +480,13 @@ export function QuizzesTab(props: QuizzesTabProps) {
               <div>
                 <br />
                 <h4 className="text-xs font-semibold mb-1">Interpolated User Prompt (with lesson content and custom instructions):</h4>
-                <div className="max-h-64 overflow-y-auto">
+                <div className="max-h-64 overflow-y-auto border border-border rounded-md bg-background">
                   {lessonContentsLoading && (
                     <div className="text-xs text-muted-foreground p-2">
                       Loading lesson content...
                     </div>
                   )}
-                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono bg-background p-2 rounded border border-border">
+                  <pre className="text-xs whitespace-pre-wrap break-words text-muted-foreground font-mono p-2 m-0">
                     {lessonContentsLoading ? 'Loading...' : interpolatedPromptWithContent}
                   </pre>
                 </div>
