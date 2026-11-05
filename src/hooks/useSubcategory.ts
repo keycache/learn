@@ -5,7 +5,7 @@ import { loadCategories } from '@/utils/dataLoader';
 
 /**
  * Custom hook to load and validate subcategory from URL params
- * Handles loading state, validation, and redirect to 404 on invalid subcategory
+ * Handles loading state, validation, and flags notFound on invalid subcategory
  */
 export function useSubcategory() {
   const { category: categoryId, subcategory: subcategoryId } = useParams<{
@@ -16,6 +16,7 @@ export function useSubcategory() {
   const [subcategory, setSubcategory] = useState<Subcategory | null>(null);
   const [categoryName, setCategoryName] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -28,7 +29,8 @@ export function useSubcategory() {
       const foundCategory = categoriesMap[categoryId];
 
       if (!foundCategory) {
-        navigate('/not-found');
+        setNotFound(true);
+        setLoading(false);
         return;
       }
 
@@ -37,11 +39,13 @@ export function useSubcategory() {
       );
 
       if (!foundSubcategory) {
-        navigate('/not-found');
+        setNotFound(true);
+        setLoading(false);
         return;
       }
 
       setSubcategory(foundSubcategory);
+      setNotFound(false);
       setCategoryName(foundCategory.name);
       setLoading(false);
     };
@@ -49,5 +53,5 @@ export function useSubcategory() {
     loadData();
   }, [categoryId, subcategoryId, navigate]);
 
-  return { subcategory, categoryName, loading };
+  return { subcategory, categoryName, loading, notFound };
 }

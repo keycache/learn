@@ -1,6 +1,9 @@
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Quiz } from '@/components/learning/Quiz';
 import { useTopic } from '@/hooks/useTopic';
+import { NotFoundRoute } from './not-found';
+
+const LEVELS = ['easy', 'medium', 'hard'] as const;
 
 /**
  * Route component for quiz
@@ -16,9 +19,11 @@ export function QuizRoute() {
   }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { topic, loading } = useTopic();
+  const { topic, loading, notFound } = useTopic();
 
-  const level = (searchParams.get('level') as 'easy' | 'medium' | 'hard') || 'easy';
+  const levelParam = searchParams.get('level') ?? 'easy';
+  const isValidLevel = (LEVELS as readonly string[]).includes(levelParam);
+  const level = levelParam as (typeof LEVELS)[number];
 
   if (loading) {
     return (
@@ -28,15 +33,11 @@ export function QuizRoute() {
     );
   }
 
-  if (!topic) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-themed">
-        <p className="text-muted-foreground">Quiz not found</p>
-      </div>
-    );
-  }
+  const questions = topic?.levels[level]?.questions || [];
 
-  const questions = topic.levels[level]?.questions || [];
+  if (notFound || !topic || !isValidLevel || questions.length === 0) {
+    return <NotFoundRoute />;
+  }
 
   return (
     <Quiz

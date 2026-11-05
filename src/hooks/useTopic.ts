@@ -5,7 +5,7 @@ import { loadTopic } from '@/utils/dataLoader';
 
 /**
  * Custom hook to load and validate topic from URL params
- * Handles loading state, validation, and redirect to 404 on invalid topic
+ * Handles loading state, validation, and flags notFound on invalid topic
  */
 export function useTopic() {
   const { category: categoryId, subcategory: subcategoryId, topic: topicId } = useParams<{
@@ -16,6 +16,7 @@ export function useTopic() {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -27,16 +28,18 @@ export function useTopic() {
       const foundTopic = await loadTopic(categoryId, subcategoryId, topicId);
 
       if (!foundTopic) {
-        navigate('/not-found');
+        setNotFound(true);
+        setLoading(false);
         return;
       }
 
       setTopic(foundTopic);
+      setNotFound(false);
       setLoading(false);
     };
 
     loadData();
   }, [categoryId, subcategoryId, topicId, navigate]);
 
-  return { topic, loading };
+  return { topic, loading, notFound };
 }

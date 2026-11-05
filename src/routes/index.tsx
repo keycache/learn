@@ -64,7 +64,13 @@ export const routes: RouteObject[] = [
   ...(import.meta.env.DEV && DevGeneratorRoute
     ? [{
         path: '_dev/generator',
-        element: withSuspense(DevGeneratorRoute),
+        element: <RootLayout />,
+        children: [
+          {
+            index: true,
+            element: withSuspense(DevGeneratorRoute),
+          },
+        ],
       }]
     : []),
   {
@@ -100,10 +106,10 @@ export const routes: RouteObject[] = [
         path: ':category/:subcategory/:topic/results',
         element: withSuspense(ResultsRoute),
       },
+      {
+        path: '*',
+        element: <NotFoundRoute />,
+      },
     ],
-  },
-  {
-    path: '*',
-    element: <NotFoundRoute />,
   },
 ];

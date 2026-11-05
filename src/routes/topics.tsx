@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { TopicGrid } from '@/components/navigation/TopicGrid';
 import { useSubcategory } from '@/hooks/useSubcategory';
+import { NotFoundRoute } from './not-found';
 
 /**
  * Route component for topic selection
@@ -14,7 +15,7 @@ export function TopicsRoute() {
     subcategory: string;
   }>();
   const navigate = useNavigate();
-  const { subcategory, categoryName, loading } = useSubcategory();
+  const { subcategory, categoryName, loading, notFound } = useSubcategory();
 
   if (loading) {
     return (
@@ -24,12 +25,8 @@ export function TopicsRoute() {
     );
   }
 
-  if (!subcategory || !categoryName) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-themed">
-        <p className="text-muted-foreground">Category or subcategory not found</p>
-      </div>
-    );
+  if (notFound || !subcategory || !categoryName) {
+    return <NotFoundRoute />;
   }
 
   return (

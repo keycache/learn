@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vitest/config'
 import { FileOperations } from './src/services/fileOperations.ts'
@@ -210,9 +211,20 @@ const devApiPlugin = {
   },
 };
 
+// GitHub Pages serves 404.html for unknown paths; reusing the SPA shell lets
+// the router render the app's own 404 page and makes deep-link refreshes work
+const spaFallbackPlugin = {
+  name: 'spa-404-fallback',
+  apply: 'build',
+  closeBundle() {
+    const outDir = path.resolve(import.meta.dirname, 'dist');
+    fs.copyFileSync(path.join(outDir, 'index.html'), path.join(outDir, '404.html'));
+  },
+};
+
 export default defineConfig({
   base: '/learn/',
-  plugins: [trailingSlashPlugin, devApiPlugin, react(), tailwindcss()],
+  plugins: [trailingSlashPlugin, devApiPlugin, spaFallbackPlugin, react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

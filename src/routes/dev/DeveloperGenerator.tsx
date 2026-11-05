@@ -66,7 +66,7 @@ function DeveloperGeneratorContent({ activeTab, setActiveTab, tabs }: DeveloperG
 
         {/* Tab Navigation */}
         <div
-          className="border-b border-border sticky top-0 z-50 shadow-md -mx-4 px-4 py-2"
+          className="border-b border-border sticky top-0 z-40 shadow-md -mx-4 px-4 py-2"
           style={{ backgroundColor: 'hsl(var(--background))' }}
         >
           <div className="flex gap-2">

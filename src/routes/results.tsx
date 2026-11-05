@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ResultsScreen } from '@/components/learning/ResultsScreen';
 import { useQuizResults } from '@/hooks/useQuizResults';
 import { useTopic } from '@/hooks/useTopic';
+import { NotFoundRoute } from './not-found';
 
 /**
  * Route component for quiz results
@@ -17,7 +18,7 @@ export function ResultsRoute() {
   }>();
   const navigate = useNavigate();
   const results = useQuizResults();
-  const { topic, loading } = useTopic();
+  const { topic, loading, notFound } = useTopic();
 
   if (loading) {
     return (
@@ -25,6 +26,10 @@ export function ResultsRoute() {
         <p className="text-muted-foreground animate-pulse-gentle">Loading results...</p>
       </div>
     );
+  }
+
+  if (notFound) {
+    return <NotFoundRoute />;
   }
 
   if (!results || !topic) {

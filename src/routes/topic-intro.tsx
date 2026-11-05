@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { TopicIntro } from '@/components/navigation/TopicIntro';
 import { useTopic } from '@/hooks/useTopic';
+import { NotFoundRoute } from './not-found';
 
 /**
  * Route component for topic intro with lessons and quiz selector
@@ -15,7 +16,7 @@ export function TopicIntroRoute() {
     topic: string;
   }>();
   const navigate = useNavigate();
-  const { topic, loading } = useTopic();
+  const { topic, loading, notFound } = useTopic();
 
   if (loading) {
     return (
@@ -25,12 +26,8 @@ export function TopicIntroRoute() {
     );
   }
 
-  if (!topic) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-themed">
-        <p className="text-muted-foreground">Topic not found</p>
-      </div>
-    );
+  if (notFound || !topic) {
+    return <NotFoundRoute />;
   }
 
   return (
