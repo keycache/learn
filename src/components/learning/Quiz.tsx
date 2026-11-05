@@ -1,7 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Question } from '../../types/learning';
 import { QuestionCard } from './QuestionCard';
 import { updateQuestionProgress, getQuestionProgress } from '../../utils/progressTracker';
+import { randomizeQuiz } from '../../utils/shuffleUtils';
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { QuizResultsContext } from '@/contexts/QuizResultsContext';
 
@@ -31,13 +33,24 @@ export function Quiz({
   onComplete,
   onBack,
 }: QuizProps) {
+  const navigate = useNavigate();
+  const [randomizedQuestions, setRandomizedQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Map<string, string[]>>(new Map());
   const [submitted, setSubmitted] = useState(false);
   const quizResultsContext = useContext(QuizResultsContext);
 
-  const currentQuestion = questions[currentIndex];
-  const totalQuestions = questions.length;
+  // Randomize questions and options on mount
+  useEffect(() => {
+    setRandomizedQuestions(randomizeQuiz(questions));
+  }, [questions]);
+
+  if (randomizedQuestions.length === 0) {
+    return <div className="text-center py-8">Loading quiz...</div>;
+  }
+
+  const currentQuestion = randomizedQuestions[currentIndex];
+  const totalQuestions = randomizedQuestions.length;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
   // Get existing progress for this question
@@ -139,36 +152,51 @@ export function Quiz({
   const selectedAnswers = userAnswers.get(currentQuestion.id) || [];
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {topic.charAt(0).toUpperCase() + topic.slice(1)}
-            </h1>
-            <p className="text-sm text-muted-foreground capitalize">
-              Level: {level} • Question {currentIndex + 1} of {totalQuestions}
-            </p>
-          </div>
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-            </button>
-          )}
-        </div>
+    <div className="min-h-screen bg-themed py-8 px-4">
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <button 
+            onClick={() => navigate(`/${category}/${subcategory}/${topic}`)}
+            className="hover:text-foreground hover:underline transition-colors font-medium"
+          >
+            Lessons
+          </button>
+          <span>/</span>
+          <span className="capitalize font-medium text-foreground">
+            {topic.charAt(0).toUpperCase() + topic.slice(1)}
+          </span>
+        </nav>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
+        {/* Header */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">
+                {topic.charAt(0).toUpperCase() + topic.slice(1)}
+              </h1>
+              <p className="text-sm text-muted-foreground capitalize mt-2">
+                Level: {level} • Question {currentIndex + 1} of {totalQuestions}
+              </p>
+            </div>
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
-      </div>
 
       {/* Question Card */}
       <div className="mb-8">
@@ -241,6 +269,7 @@ export function Quiz({
       {/* Keyboard Navigation Info */}
       <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
         💡 Select answer(s) and click "Submit Answer" to continue
+      </div>
       </div>
     </div>
   );
